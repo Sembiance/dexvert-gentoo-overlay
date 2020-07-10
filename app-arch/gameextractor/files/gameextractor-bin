@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd /opt/gameextractor || exit
+java -jar GameExtractor.jar "$@" 2> /dev/null

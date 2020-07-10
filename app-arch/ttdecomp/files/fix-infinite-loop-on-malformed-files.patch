@@ -1,0 +1,14 @@
+diff -Naur a/implode.c b/implode.c
+--- a/implode.c	2020-05-14 14:40:18.354669309 -0400
++++ b/implode.c	2020-05-14 14:42:49.801475884 -0400
+@@ -597,6 +597,10 @@
+ 					return FALSE;
+ 				}
+ 
++				// Sanity check for non-tt files that fool us into getting this far
++				if (cur_dict_size == 0 && dict_buf>copy_off)
++					return FALSE;
++
+ 				// Check whether the offset is a valid one into the dictionary
+ 				while (copy_off < dict_buf)
+ 					copy_off += cur_dict_size;

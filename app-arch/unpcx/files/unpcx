@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ "$#" -lt 2 ]; then
+    echo "Usage: unpcx <in.pcl> <outDir>"
+    exit
+fi
+
+filenameAlone=$(basename "$1")
+
+cp "$1" "$2"/"$1"
+cd "$2" || exit
+
+wine /opt/unpcx/unpcxgx.exe "$filenameAlone"
+
+rm "$filenameAlone"

@@ -1,0 +1,17 @@
+diff -Naur a/extract-adf.c b/extract-adf.c
+--- a/extract-adf.c	2020-05-13 19:33:32.857226103 -0400
++++ b/extract-adf.c	2020-05-13 19:35:20.385016734 -0400
+@@ -12,8 +12,11 @@
+ // Comment out if zlib support is not available (support for adz will not work)
+ #define	_HAVE_ZLIB
+ 
+-#include <libc.h>
+-#include <sys/_endian.h>
++#include <stdio.h>
++#include <fcntl.h>
++#include <string.h>
++#include <pthread.h>
++#include <arpa/inet.h>
+ #include <sys/stat.h>
+ #include <errno.h>
+ #include <unistd.h>

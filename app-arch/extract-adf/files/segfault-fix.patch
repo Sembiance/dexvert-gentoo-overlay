@@ -1,0 +1,13 @@
+diff -Naur a/extract-adf.c b/extract-adf.c
+--- a/extract-adf.c	2020-05-14 21:15:56.278922215 -0400
++++ b/extract-adf.c	2020-05-14 21:16:16.958892068 -0400
+@@ -2217,7 +2217,8 @@
+ 					if (!f) 
+ 						f = fopen(sector[i].fh.filename, "w"); /* doesn't exist, so create */
+ 					// Close the file again
+-					fclose(f);
++					if(f)
++						fclose(f);
+ 					// Modify the timestamp
+ 					if(bigendian)
+ 						// Set correct timestamp for directory
