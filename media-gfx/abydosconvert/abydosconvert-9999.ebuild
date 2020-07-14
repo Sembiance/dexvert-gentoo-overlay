@@ -16,10 +16,6 @@ RDEPEND=${DEPEND}
 
 RESTRICT="mirror"
 
-#src_compile() {
-#	g++ -o stackimport woba.cpp Tests.cpp picture.cpp main.cpp CStackFile.cpp CBuf.cpp byteutils.cpp -std=gnu++11
-#}
-
 src_install() {
 	dobin ${BUILD_DIR}/src/abydosconvert
 }
