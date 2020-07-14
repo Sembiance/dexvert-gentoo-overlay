@@ -1,0 +1,43 @@
+#!/bin/bash
+
+if [ "$#" -lt 3 ]; then
+    echo "Usage: undirector [pc|mac] <in.drx> <outDir>"
+    exit
+fi
+
+fileType="$1"
+inputFile="$2"
+outDir="$3"
+
+riffxtract "$fileType" "$inputFile" "$outDir"
+cd "$outDir" || exit
+
+cp ./bin/*.Lnam ./
+lnamFile=$(find ./ -maxdepth 1 -type f -iname "*.Lnam" | head -n 1)
+
+casxtract "$fileType" "." > /dev/null 2>&1
+
+mv cas/* ./
+
+rm -rf bin cas ./*/*.tmp.png ./*/*.BITD ./*/*.CASt ./*/*.snd_ ./*/*.wav ./*/*.bmp ./*/*.CLUT
+
+if [ -r "$lnamFile" ]; then
+	for f in ./*/*.Lscr; do
+		rm -f .lingo
+
+		workDir=$(dirname "$f")
+		filename=$(basename "$f")
+
+		lscr2lingo pc "$workDir" "$filename" "$lnamFile" > /dev/null 2>&1
+		lscr2lingo mac "$workDir" "$filename" "$lnamFile" > /dev/null 2>&1
+
+		if [ -r .lingo ]; then
+			mv .lingo "$workDir"/lingoScript
+			rm "$f"
+		fi
+	done
+
+	rm ./*.Lnam
+fi
+
+find . -type d -empty -delete

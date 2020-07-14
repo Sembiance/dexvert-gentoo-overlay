@@ -1,0 +1,34 @@
+diff -Naur a/CStackFile.h b/CStackFile.h
+--- a/CStackFile.h	2020-06-04 12:35:35.531003078 -0400
++++ b/CStackFile.h	2020-06-04 12:35:43.138992048 -0400
+@@ -9,7 +9,7 @@
+ 
+ // If you're not compiling for a platform where the Mac resource manager is
+ //	available, set the following to 0 to remove that code from compilation:
+-#define MAC_CODE		1
++#define MAC_CODE		0
+ 
+ // If you're compiling for 64 bit, you don't have access to QuickTime, which
+ //	we use to create AIFF files from 'snd ' resources. So turn this off.
+diff -Naur a/picture.cpp b/picture.cpp
+--- a/picture.cpp	2020-06-04 12:35:03.923048958 -0400
++++ b/picture.cpp	2020-06-04 12:35:16.323030948 -0400
+@@ -100,12 +100,12 @@
+ 
+ picture::~picture(void)
+ {
+-	if (bitmaplength) {
+-		delete [] bitmap;
+-	}
+-	if (masklength) {
+-		delete [] mask;
+-	}
++	//if (bitmaplength) {
++	//	delete [] bitmap;
++	//}
++	//if (masklength) {
++	//	delete [] mask;
++	//}
+ }
+ 
+ void picture::reinit(int w, int h, int d, bool greymask)
