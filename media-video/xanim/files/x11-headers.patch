@@ -1,0 +1,128 @@
+diff -Naur a/xa_act.c b/xa_act.c
+--- a/xa_act.c	2020-05-18 11:00:12.852142239 -0400
++++ b/xa_act.c	2020-05-18 11:00:22.829143661 -0400
+@@ -19,9 +19,9 @@
+  *	     clip masks prior to mapping.
+  */
+ #include "xanim.h"
+-#include <Intrinsic.h>
+-#include <StringDefs.h>
+-#include <Shell.h>
++#include <X11/Intrinsic.h>
++#include <X11/StringDefs.h>
++#include <X11/Shell.h>
+ #include <sys/signal.h>
+ #ifndef VMS
+ #include <sys/times.h>
+diff -Naur a/xa_audio.h b/xa_audio.h
+--- a/xa_audio.h	2020-05-18 11:00:12.853142239 -0400
++++ b/xa_audio.h	2020-05-18 11:00:22.829143661 -0400
+@@ -18,9 +18,9 @@
+ 
+ 
+ #include "xanim.h"
+-#include <Intrinsic.h>
+-#include <StringDefs.h>
+-#include <Shell.h>
++#include <X11/Intrinsic.h>
++#include <X11/StringDefs.h>
++#include <X11/Shell.h>
+ 
+ #include "xa_x11.h"
+ #include "xa_ipc.h"
+diff -Naur a/xa_ipc.c b/xa_ipc.c
+--- a/xa_ipc.c	2020-05-18 11:00:12.853142239 -0400
++++ b/xa_ipc.c	2020-05-18 11:00:22.829143661 -0400
+@@ -28,9 +28,9 @@
+ 
+ 
+ #include "xanim.h"
+-#include <Intrinsic.h>
+-#include <StringDefs.h>
+-#include <Shell.h>
++#include <X11/Intrinsic.h>
++#include <X11/StringDefs.h>
++#include <X11/Shell.h>
+ #include <sys/signal.h>
+ 
+ #ifdef XA_SOCKET
+diff -Naur a/xa_show.c b/xa_show.c
+--- a/xa_show.c	2020-05-18 11:00:12.853142239 -0400
++++ b/xa_show.c	2020-05-18 11:00:22.829143661 -0400
+@@ -24,9 +24,9 @@
+  */
+ 
+ #include "xanim.h"
+-#include <Intrinsic.h>
+-#include <StringDefs.h>
+-#include <Shell.h>
++#include <X11/Intrinsic.h>
++#include <X11/StringDefs.h>
++#include <X11/Shell.h>
+ 
+ #ifdef XSHM
+ #include <sys/ipc.h>
+diff -Naur a/xa_x11.c b/xa_x11.c
+--- a/xa_x11.c	2020-05-18 11:00:12.853142239 -0400
++++ b/xa_x11.c	2020-05-18 11:03:56.723168624 -0400
+@@ -28,10 +28,10 @@
+ 
+ 
+ #include "xanim.h"
+-#include <Intrinsic.h>
+-#include <StringDefs.h>
+-#include <Shell.h>
+-#include <Xatom.h>
++#include <X11/Intrinsic.h>
++#include <X11/StringDefs.h>
++#include <X11/Shell.h>
++#include <X11/Xatom.h>
+ 
+ #ifdef XA_ATHENA
+ #include <Xaw/Form.h>
+@@ -815,7 +815,7 @@
+   XtSetArg(arglist[n], XtNdepth, x11_depth); n++;
+   XtSetArg(arglist[n], XtNforeground, WhitePixel(theDisp,theScreen)); n++;
+   XtSetArg(arglist[n], XtNbackground, BlackPixel(theDisp,theScreen)); n++;
+-  XtSetArg(arglist[n], XtNborderColor, WhitePixel(theDisp,theScreen)); n++;
++  XtSetArg(arglist[n], XtNborderWidth, 0); n++;
+   XtSetArg(arglist[n], XtNwidth, startx); n++;
+   XtSetArg(arglist[n], XtNheight, starty); n++;
+   XtSetArg(arglist[n], XtNx, XA_MAINW_XPOS); n++;
+diff -Naur a/xanim.c b/xanim.c
+--- a/xanim.c	2020-05-18 11:00:12.853142239 -0400
++++ b/xanim.c	2020-05-18 11:00:22.829143661 -0400
+@@ -60,9 +60,9 @@
+  */
+ 
+ #include "xanim.h"
+-#include <Intrinsic.h>
+-#include <StringDefs.h>
+-#include <Shell.h>
++#include <X11/Intrinsic.h>
++#include <X11/StringDefs.h>
++#include <X11/Shell.h>
+ 
+ #include <sys/types.h>
+ #ifndef __CYGWIN32__       /* Not needed for GNU-Win32 - used for audio proc */
+diff -Naur a/xanim.h b/xanim.h
+--- a/xanim.h	2020-05-18 11:00:12.853142239 -0400
++++ b/xanim.h	2020-05-18 11:00:22.829143661 -0400
+@@ -15,7 +15,7 @@
+  * or its effect upon hardware or computer systems.
+  *
+  */
+-#include <Xos.h>
++#include <X11/Xos.h>
+ #include <stdio.h>
+ #include <sys/types.h>
+ #include <stdio.h>
+@@ -43,7 +43,7 @@
+ #include <unixio.h>
+ #endif
+ #include <stdlib.h>
+-#include <Xlib.h>
++#include <X11/Xlib.h>
+ #include "xa_config.h"
+ 
+ #ifdef XA_XTPOINTER
