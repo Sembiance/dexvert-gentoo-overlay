@@ -1,0 +1,36 @@
+diff -Naur a/Makefile b/Makefile
+--- a/Makefile	2020-05-19 21:28:23.784453968 -0400
++++ b/Makefile	2020-05-19 21:28:53.079397588 -0400
+@@ -21,7 +21,7 @@
+ #
+ 
+ rm= rm
+-CC= gccv
++CC= gcc
+ CFLAGS= -O2 -Wall -L/usr/os-lib -DDEBUG
+ 
+ .PHONY: all clean
+diff -Naur a/abasic.h b/abasic.h
+--- a/abasic.h	2020-05-19 21:28:35.240431902 -0400
++++ b/abasic.h	2020-05-19 21:28:46.400410430 -0400
+@@ -28,6 +28,7 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <stdarg.h>
++#include <string.h>
+ 
+ #ifdef __GNUC__
+ /* suggested parentheses around assignment used as truth value */
+diff -Naur a/main.c b/main.c
+--- a/main.c	2020-05-19 21:28:28.864444180 -0400
++++ b/main.c	2020-05-19 21:29:04.463375719 -0400
+@@ -408,9 +408,5 @@
+     else ++badopt; /* fmtopen() has already warned */
+   }
+ 
+-  if(fin  && fin  != stdin)    fclose(fin);
+-  if(fout && fout != stdout)   fclose(fout);
+-  if(ferr && ferr != stderr)   fclose(ferr);
+-
+   exit( badopt ? 1:0 );
+ }
