@@ -7,7 +7,7 @@ SRC_URI="https://phoenixnap.dl.sourceforge.net/project/${PN}/Game%20Extractor%20
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="amd64 x86"
+KEYWORDS="~amd64 ~x86"
 IUSE=""
 
 DEPEND=">=virtual/jdk-1.8"

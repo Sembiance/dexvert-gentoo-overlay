@@ -7,7 +7,7 @@ EGIT_REPO_URI="https://github.com/kyz/amostools.git"
 
 LICENSE="MIT"
 SLOT="0"
-KEYWORDS="~x86"
+KEYWORDS="~amd64"
 IUSE=""
 
 RESTRICT="mirror"

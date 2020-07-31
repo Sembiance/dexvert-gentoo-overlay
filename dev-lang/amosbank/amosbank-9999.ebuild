@@ -7,7 +7,7 @@ EGIT_REPO_URI="https://github.com/dschwen/amosbank.git"
 
 LICENSE="CC-BY-SA-3.0"
 SLOT="0"
-KEYWORDS="~x86"
+KEYWORDS="~amd64"
 IUSE=""
 
 RESTRICT="mirror"
