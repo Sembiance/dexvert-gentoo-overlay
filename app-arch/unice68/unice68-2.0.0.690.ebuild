@@ -13,7 +13,3 @@ DEPEND=""
 RDEPEND=${DEPEND}
 
 RESTRICT="mirror"
-
-src_install() {
-	dobin ${PN}
-}
