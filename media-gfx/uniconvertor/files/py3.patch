@@ -1,0 +1,66 @@
+diff -Naur a/src/uc2/libpango/_libpango.c b/src/uc2/libpango/_libpango.c
+--- a/src/uc2/libpango/_libpango.c	2020-10-22 11:53:19.743539249 -0400
++++ b/src/uc2/libpango/_libpango.c	2020-10-22 11:57:34.774154941 -0400
+@@ -20,9 +20,9 @@
+ #include <pango/pango.h>
+ #include <pango/pangocairo.h>
+ #include <cairo.h>
+-#include <pycairo.h>
++#include <py3cairo.h>
+ 
+-static Pycairo_CAPI_t *Pycairo_CAPI;
++//static Pycairo_CAPI_t *Pycairo_CAPI;
+ 
+ static PyObject *
+ pango_GetVersion(PyObject *self, PyObject *args) {
+diff -Naur a/subproj/build-utils/src/utils/dist.py b/subproj/build-utils/src/utils/dist.py
+--- a/subproj/build-utils/src/utils/dist.py	2020-10-22 11:33:11.384287773 -0400
++++ b/subproj/build-utils/src/utils/dist.py	2020-10-22 11:34:28.015175427 -0400
+@@ -111,6 +111,8 @@
+     """
+     release_data = read_ini_file('/etc/os-release')
+     version = release_data.get('VERSION_ID')
++    if not version:
++    	version = "1.0"
+     ini_name = release_data.get('NAME')
+     name = 'LinuxMint' if ini_name == 'Linux Mint' else ini_name
+     name = name.split()[0] if ' ' in name else name
+diff -Naur a/subproj/build-utils/src/utils/native_mods.py b/subproj/build-utils/src/utils/native_mods.py
+--- a/subproj/build-utils/src/utils/native_mods.py	2020-10-22 11:50:49.239758576 -0400
++++ b/subproj/build-utils/src/utils/native_mods.py	2020-10-22 11:51:06.886733431 -0400
+@@ -76,13 +76,13 @@
+     cairo_libs = ['cairo']
+ 
+     if os.name == 'nt':
+-        include_dirs = build.make_source_list(include_path, ['cairo', 'pycairo'])
++        include_dirs = build.make_source_list(include_path, ['cairo', 'py3cairo'])
+     elif platform.system() == 'Darwin':
+-        include_dirs = pkgconfig.get_pkg_includes(['pycairo', 'cairo'])
+-        cairo_libs = pkgconfig.get_pkg_libs(['pycairo', 'cairo'])
++        include_dirs = pkgconfig.get_pkg_includes(['py3cairo', 'cairo'])
++        cairo_libs = pkgconfig.get_pkg_libs(['py3cairo', 'cairo'])
+     elif os.name == 'posix':
+-        include_dirs = pkgconfig.get_pkg_includes(['pycairo', ])
+-        cairo_libs = pkgconfig.get_pkg_libs(['pycairo', ])
++        include_dirs = pkgconfig.get_pkg_includes(['py3cairo', ])
++        cairo_libs = pkgconfig.get_pkg_libs(['py3cairo', ])
+ 
+     cairo_module = Extension(
+         'uc2.libcairo._libcairo',
+@@ -109,12 +109,12 @@
+     include_dirs = []
+ 
+     if os.name == 'nt':
+-        include_dirs = build.make_source_list(include_path, ['cairo', 'pycairo', 'pango-1.0', 'glib-2.0'])
++        include_dirs = build.make_source_list(include_path, ['cairo', 'py3cairo', 'pango-1.0', 'glib-2.0'])
+     elif platform.system() == 'Darwin':
+-        include_dirs = pkgconfig.get_pkg_includes(['pangocairo', 'pango', 'pycairo', 'cairo'])
+-        pango_libs = pkgconfig.get_pkg_libs(['pangocairo', 'pango', 'pycairo', 'cairo'])
++        include_dirs = pkgconfig.get_pkg_includes(['pangocairo', 'pango', 'py3cairo', 'cairo'])
++        pango_libs = pkgconfig.get_pkg_libs(['pangocairo', 'pango', 'py3cairo', 'cairo'])
+     elif os.name == 'posix':
+-        include_dirs = pkgconfig.get_pkg_includes(['pangocairo', 'pycairo'])
++        include_dirs = pkgconfig.get_pkg_includes(['pangocairo', 'py3cairo'])
+         pango_libs = pkgconfig.get_pkg_libs(['pangocairo', ])
+ 
+     pango_module = Extension(

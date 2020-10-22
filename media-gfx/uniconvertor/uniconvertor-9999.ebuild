@@ -1,21 +1,19 @@
-# Copyright 1999-2020 Gentoo Authors
-# Distributed under the terms of the GNU General Public License v2
-
 EAPI=7
 
-PYTHON_COMPAT=( python2_7 )
+PYTHON_COMPAT=( python3_{6,7,8} )
 
-inherit distutils-r1 xdg-utils
+inherit distutils-r1 xdg-utils git-r3
 
 DESCRIPTION="Convert vector graphic file formats like .cdr, .svg, wmf and more."
 HOMEPAGE="https://sk1project.net/uc2/"
-SRC_URI="https://downloads.sk1project.net/uniconvertor/2.0rc4/uniconvertor-2.0rc4.tar.gz"
 
-KEYWORDS="~amd64"
+EGIT_REPO_URI="https://github.com/sk1project/uniconvertor"
+EGIT_BRANCH="py3"
+
 SLOT="0"
 LICENSE="GPL-3"
 IUSE=""
-RESTRICT="mirror test"
+RESTRICT="mirror test network-sandbox"
 
 RDEPEND="
 	sys-devel/gettext
@@ -23,16 +21,22 @@ RDEPEND="
 	media-gfx/imagemagick:=
 	media-libs/lcms:2
 	x11-libs/pango
-	dev-python/reportlab
 	dev-python/pillow[${PYTHON_USEDEP}]"
+
 DEPEND="${RDEPEND}
 	virtual/pkgconfig
 	app-text/ghostscript-gpl"
 
-S="${WORKDIR}/uniconvertor-2.0rc4"
+PATCHES=( "${FILESDIR}/py3.patch" )
 
 python_prepare_all() {
-	mv setup-uc2.py setup.py
+	mkdir subproj
+	cd subproj
+	git clone https://github.com/sk1project/build-utils
+	cd build-utils
+	git checkout py3
+	cd ../..
+	ln -s ./subproj/build-utils/src/utils utils
 
 	distutils-r1_python_prepare_all
 }

@@ -11,7 +11,7 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE=""
 
-DEPEND=">=media-gfx/abydosconvert-0.2.2"
+DEPEND=">=media-libs/abydos-0.2.3"
 RDEPEND=${DEPEND}
 
 RESTRICT="mirror"
