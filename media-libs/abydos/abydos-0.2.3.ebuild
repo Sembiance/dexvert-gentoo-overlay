@@ -9,8 +9,6 @@ SLOT="0"
 KEYWORDS="~amd64"
 IUSE="debug"
 
-#PATCHES=( "${FILESDIR}/add-list-mimetypes.patch" )
-
 DEPEND="x11-libs/cairo
 	media-libs/libnsgif
 	media-libs/tiff
@@ -22,9 +20,11 @@ DEPEND="x11-libs/cairo
 	app-text/poppler
 	media-libs/libpng
 	gnome-base/librsvg
+	media-libs/libraw
 	media-libs/libwebp
 	media-libs/libwmf
 	media-libs/gd
+	media-libs/libquicktime
 	media-libs/openexr
 	media-libs/flif
 	media-libs/libicns
