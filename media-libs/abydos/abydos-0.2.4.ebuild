@@ -29,6 +29,11 @@ DEPEND="x11-libs/cairo
 	media-libs/flif
 	media-libs/libicns
 	media-libs/libnsbmp
+	media-libs/freeimage
+	media-libs/libpgf
+	media-libs/openimageio
+	media-libs/rlottie
+	media-libs/devil
 	app-text/libspectre"
 RDEPEND=${DEPEND}
 
