@@ -26,10 +26,12 @@ src_install() {
 	fperms 0755 /opt/${PN}/casxtract
 	fperms 0755 /opt/${PN}/clut2json
 	fperms 0755 /opt/${PN}/drxtract
+	fperms 0755 /opt/${PN}/fmapxtract
 	fperms 0755 /opt/${PN}/lscr2lingo
 	fperms 0755 /opt/${PN}/riffxtract
+	fperms 0755 /opt/${PN}/rte22bmp
 	fperms 0755 /opt/${PN}/snd2wav
-	fperms 0755 /opt/${PN}/stxt2txt
+	fperms 0755 /opt/${PN}/stxt2json
 	fperms 0755 /opt/${PN}/vwlbxtract
 	fperms 0755 /opt/${PN}/vwscxtract
 
@@ -37,10 +39,12 @@ src_install() {
 	dosym /opt/${PN}/casxtract /opt/bin/casxtract
 	dosym /opt/${PN}/clut2json /opt/bin/clut2json
 	dosym /opt/${PN}/drxtract /opt/bin/drxtract
+	dosym /opt/${PN}/fmapxtract /opt/bin/fmapxtract
 	dosym /opt/${PN}/lscr2lingo /opt/bin/lscr2lingo
 	dosym /opt/${PN}/riffxtract /opt/bin/riffxtract
+	dosym /opt/${PN}/rte22bmp /opt/bin/rte22bmp
 	dosym /opt/${PN}/snd2wav /opt/bin/snd2wav
-	dosym /opt/${PN}/stxt2txt /opt/bin/stxt2txt
+	dosym /opt/${PN}/stxt2json /opt/bin/stxt2json
 	dosym /opt/${PN}/vwlbxtract /opt/bin/vwlbxtract
 	dosym /opt/${PN}/vwscxtract /opt/bin/vwscxtract
 
