@@ -2,7 +2,7 @@ EAPI=7
 
 DESCRIPTION="Tools to process the pgf files"
 HOMEPAGE="https://www.libpgf.org/"
-SRC_URI="https://downloads.sourceforge.net/project/libpgf/libpgf/${PV}-latest/libPGF-codec-and-console-src.zip -> ${P}.zip"
+SRC_URI="https://downloads.sourceforge.net/project/libpgf/libpgf/${PV}/pgf-console.zip -> ${P}.zip"
 
 LICENSE="LGPL-2.1"
 SLOT="0"
@@ -12,7 +12,7 @@ IUSE=""
 DEPEND=">=media-libs/libpgf-${PV}"
 RDEPEND=${DEPEND}
 
-S="${WORKDIR}/libPGF-codec-and-console-src/PGF/Console"
+S="${WORKDIR}/pgf"
 
 src_compile() {
     default

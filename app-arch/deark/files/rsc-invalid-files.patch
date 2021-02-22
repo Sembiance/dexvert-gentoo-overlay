@@ -1,0 +1,33 @@
+diff -Naur a/modules/rsc.c b/modules/rsc.c
+--- a/modules/rsc.c	2021-01-16 20:18:23.037188228 -0500
++++ b/modules/rsc.c	2021-01-16 20:18:27.013181991 -0500
+@@ -74,6 +74,9 @@
+ {
+ 	de_bitmap *img = NULL;
+ 
++	if(!de_good_image_dimensions_noerr(c, width, height))
++		return;
++
+ 	img = de_bitmap_create(c, width, height, 1);
+ 	do_decode_bilevel_image(c, d, img, bits_pos, rowspan);
+ 	de_bitmap_write_to_file(img, NULL, 0);
+@@ -103,6 +106,9 @@
+ 	de_bitmap *img = NULL;
+ 	de_bitmap *mask = NULL;
+ 
++	if(!de_good_image_dimensions_noerr(c, ii->width, ii->height))
++		return;
++
+ 	img = de_bitmap_create(c, ii->width, ii->height, 2);
+ 	mask = de_bitmap_create(c, ii->width, ii->height, 1);
+ 	do_decode_bilevel_image(c, d, img, fg_pos, ii->mono_rowspan);
+@@ -203,6 +209,9 @@
+ 		return;
+ 	}
+ 
++	if(!de_good_image_dimensions_noerr(c, ii->width, ii->height))
++	return;
++
+ 	img = de_bitmap_create(c, ii->width, ii->height, 4);
+ 
+ 	planespan = ii->mono_rowspan * ii->height;
