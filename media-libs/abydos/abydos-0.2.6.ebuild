@@ -22,7 +22,6 @@ DEPEND="x11-libs/cairo
 	app-text/poppler
 	media-libs/libpng
 	gnome-base/librsvg
-	media-gfx/farbfeld
 	media-libs/libraw
 	media-libs/libwebp
 	media-libs/libwmf

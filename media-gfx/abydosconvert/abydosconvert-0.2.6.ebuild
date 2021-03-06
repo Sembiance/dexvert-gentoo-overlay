@@ -11,7 +11,7 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE=""
 
-DEPEND="=media-libs/abydos-0.2.5"
+DEPEND="=media-libs/abydos-${PV}"
 RDEPEND=${DEPEND}
 
 RESTRICT="mirror"
