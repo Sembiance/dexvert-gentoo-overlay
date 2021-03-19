@@ -2,7 +2,8 @@ EAPI=7
 
 DESCRIPTION="A tool to identify and extract metadata and text from different file formats"
 HOMEPAGE="https://tika.apache.org/"
-JAR_FILE="${PN}-app-${PV}.jar"
+MY_PV=$(ver_cut 1-3)
+JAR_FILE="${PN}-app-${MY_PV}-ALPHA.jar"
 SRC_URI="http://mirrors.ibiblio.org/apache/${PN}/${JAR_FILE}"
 
 LICENSE="Apache-2.0"
