@@ -14,6 +14,7 @@ DEPEND="dev-lang/yasm
 	dev-util/cmake"
 
 RDEPEND="media-libs/libjpeg-turbo
+	media-libs/sdl-image
 	media-libs/libpng:0
 	sys-process/numactl
 	x265? ( media-libs/x265:= )"

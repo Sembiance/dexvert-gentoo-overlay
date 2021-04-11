@@ -38,6 +38,7 @@ DEPEND="x11-libs/cairo
 	media-libs/rlottie
 	media-libs/devil
 	media-libs/vips
+	media-gfx/farbfeld
 	dev-libs/efl
 	app-text/libspectre"
 RDEPEND=${DEPEND}
