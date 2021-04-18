@@ -4,14 +4,14 @@ inherit cmake-utils
 
 DESCRIPTION="Library and CLI for playback of streamed audio formats from games"
 HOMEPAGE="https://github.com/vgmstream/vgmstream/"
-SRC_URI="https://github.com/${PN}/${PN}/archive/r1050-${PV}-g70d20924.tar.gz"
+SRC_URI="https://github.com/${PN}/${PN}/archive/r1050-${PV}-g77cc431b.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE=""
 
-S="${WORKDIR}/${PN}-r1050-${PV}-g70d20924"
+S="${WORKDIR}/${PN}-r1050-${PV}-g77cc431b"
 
 RDEPEND=""
 DEPEND="${RDEPEND}"
