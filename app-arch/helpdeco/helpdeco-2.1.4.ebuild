@@ -12,6 +12,8 @@ IUSE=""
 DEPEND=""
 RDEPEND=${DEPEND}
 
+PATCHES=( "${FILESDIR}/continueOnError.patch" )
+
 src_install() {
 	dobin ${PN}
 	dobin splitmrb

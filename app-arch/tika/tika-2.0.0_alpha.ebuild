@@ -4,7 +4,7 @@ DESCRIPTION="A tool to identify and extract metadata and text from different fil
 HOMEPAGE="https://tika.apache.org/"
 MY_PV=$(ver_cut 1-3)
 JAR_FILE="${PN}-app-${MY_PV}-ALPHA.jar"
-SRC_URI="http://mirrors.ibiblio.org/apache/${PN}/${JAR_FILE}"
+SRC_URI="https://archive.apache.org/dist/${PN}/${JAR_FILE}"
 
 LICENSE="Apache-2.0"
 SLOT="0"

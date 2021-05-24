@@ -1,0 +1,29 @@
+diff -Naur a/Makefile b/Makefile
+--- a/Makefile	2021-05-19 19:37:32.898894834 -0400
++++ b/Makefile	2021-05-19 19:38:01.666202070 -0400
+@@ -19,19 +19,19 @@
+ 		CXXFLAGS +=  -DMACOSX -mmacosx-version-min=10.11
+ 		LDFLAGS +=  -mmacosx-version-min=10.11
+ 	else
+-		INSTALL_DIR=/usr/local
++		INSTALL_DIR=$(DESTDIR)
+ 		CXXFLAGS +=  -DLINUX
+ 		LDFLAGS +=  -pthread
+ 	endif
+ endif
+ 
+-all: libphosg.a jsonformat$(EXE_EXTENSION) test
++all: libphosg.a jsonformat$(EXE_EXTENSION)
+ 
+ install: libphosg.a
+-	mkdir -p $(INSTALL_DIR)/include/phosg
+-	cp libphosg.a $(INSTALL_DIR)/lib/
+-	cp -r *.hh $(INSTALL_DIR)/include/phosg/
+-	cp jsonformat $(INSTALL_DIR)/bin/
++	mkdir -p $(INSTALL_DIR)/usr/include/phosg $(INSTALL_DIR)/usr/lib $(INSTALL_DIR)/usr/bin
++	cp libphosg.a $(INSTALL_DIR)/usr/lib/
++	cp -r *.hh $(INSTALL_DIR)/usr/include/phosg/
++	cp jsonformat $(INSTALL_DIR)/usr/bin/
+ 
+ libphosg.a: $(OBJECTS)
+ 	rm -f libphosg.a

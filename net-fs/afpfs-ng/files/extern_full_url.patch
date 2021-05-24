@@ -1,0 +1,12 @@
+diff -Naur a/cmdline/cmdline_afp.h b/cmdline/cmdline_afp.h
+--- a/cmdline/cmdline_afp.h	2021-05-19 14:14:54.722127086 -0400
++++ b/cmdline/cmdline_afp.h	2021-05-19 14:15:17.088598223 -0400
+@@ -1,7 +1,7 @@
+ #ifndef CMDLINE_AFP_H_
+ #define CMDLINE_AFP_H_
+ 
+-int full_url;
++extern int full_url;
+ 
+ int com_connect(char * arg);
+ int com_dir(char * arg);
