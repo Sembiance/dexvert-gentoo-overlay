@@ -1,0 +1,2 @@
+#!/bin/bash
+mono /opt/pablodraw-console/PabloDraw.Console.exe $@

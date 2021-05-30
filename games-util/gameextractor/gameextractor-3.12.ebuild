@@ -10,7 +10,8 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE=""
 
-DEPEND=">=virtual/jdk-1.8"
+DEPEND=">=virtual/jdk-1.8
+	games-util/quickbms"
 RDEPEND=${DEPEND}
 
 S=${WORKDIR}
@@ -34,4 +35,6 @@ src_install() {
 	dosym /opt/${PN}/bin/${PN} /opt/bin/${PN}
 
 	newbin "${FILESDIR}"/${PN}-bin ${PN}
+
+	dosym /usr/bin/quickbms /opt/${PN}/'\usr\bin\quickbms'
 }
