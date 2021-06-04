@@ -1,6 +1,6 @@
 EAPI=7
 
-inherit git-r3
+inherit git-r3 autotools
 
 DESCRIPTION="Decompression routines for ancient formats"
 HOMEPAGE="https://github.com/temisu/ancient_format_decompressor"
@@ -14,8 +14,10 @@ SLOT="0"
 KEYWORDS="~amd64"
 IUSE=""
 
-RESTRICT="mirror"
+RESTRICT="mirror test"
 
-src_install() {
-	dobin ancient
+src_prepare() {
+	default
+
+	eautoreconf
 }

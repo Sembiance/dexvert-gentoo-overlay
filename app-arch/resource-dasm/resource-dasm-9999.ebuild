@@ -11,8 +11,6 @@ KEYWORDS="~amd64"
 IUSE=""
 DEPEND="dev-libs/phosg"
 
-PATCHES=( "${FILESDIR}/hypercard_dasm-fix.patch" )
-
 RESTRICT="mirror"
 
 src_install() {
