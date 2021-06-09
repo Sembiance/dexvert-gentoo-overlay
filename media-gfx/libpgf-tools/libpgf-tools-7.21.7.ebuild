@@ -2,17 +2,16 @@ EAPI=7
 
 DESCRIPTION="Tools to process the pgf files"
 HOMEPAGE="https://www.libpgf.org/"
-SRC_URI="https://downloads.sourceforge.net/project/libpgf/libpgf/${PV}/pgf-console.zip -> ${P}.zip"
-
 LICENSE="LGPL-2.1"
+SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/pgf-console-${PV}.zip"
+S="${WORKDIR}/pgf"
+
 SLOT="0"
-KEYWORDS="amd64 ~ppc x86"
-IUSE=""
+KEYWORDS="~amd64"
+RESTRICT="mirror test"
 
 DEPEND=">=media-libs/libpgf-${PV}"
 RDEPEND=${DEPEND}
-
-S="${WORKDIR}/pgf"
 
 src_compile() {
     default

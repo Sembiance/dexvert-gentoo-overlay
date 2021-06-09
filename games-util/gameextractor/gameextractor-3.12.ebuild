@@ -2,19 +2,18 @@ EAPI=7
 
 DESCRIPTION="A tool to extract files from various video game formats"
 HOMEPAGE="http://www.watto.org/game_extractor.html"
-MY_PV=$(ver_rs 1- '')
-SRC_URI="https://phoenixnap.dl.sourceforge.net/project/${PN}/Game%20Extractor%203.0x/${PV}/extract_${MY_PV}.zip"
-
 LICENSE="GPL-2"
+MY_PV=$(ver_rs 1- '')
+SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/extract_${MY_PV}.zip"
+S="${WORKDIR}"
+
 SLOT="0"
-KEYWORDS="~amd64 ~x86"
-IUSE=""
+KEYWORDS="~amd64"
+RESTRICT="mirror test"
 
 DEPEND=">=virtual/jdk-1.8
 	games-util/quickbms"
 RDEPEND=${DEPEND}
-
-S=${WORKDIR}
 
 src_prepare() {
 	cp 	"${FILESDIR}"/settings.xml "${S}"/settings/settings.xml

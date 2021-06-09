@@ -2,20 +2,14 @@ EAPI=7
 
 DESCRIPTION="Extracts .pp files compressed with PowerPacker"
 HOMEPAGE="http://aminet.net/package/util/arc/ppunpack10-mos"
-MY_PV=$(ver_rs 1- '')
-SRC_URI="http://aminet.net/util/arc/${PN}${MY_PV}-mos.lha"
-
 LICENSE="ppunpack-license"
-SLOT="0"
-KEYWORDS="~amd64 ~x86"
-IUSE=""
-
-DEPEND=""
-RDEPEND=${DEPEND}
-
-RESTRICT="mirror"
-
+MY_PV=$(ver_rs 1- '')
+SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}${MY_PV}-mos.lha"
 S="${WORKDIR}/PPUnpack${PV}/sources"
+
+SLOT="0"
+KEYWORDS="~amd64"
+RESTRICT="mirror test"
 
 src_prepare() {
 	default

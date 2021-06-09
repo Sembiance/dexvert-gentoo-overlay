@@ -1,41 +1,25 @@
-# Copyright 1999-2021 Gentoo Authors
-# Distributed under the terms of the GNU General Public License v2
-
 EAPI=7
 
 DESCRIPTION="NVIDIA container runtime library"
 HOMEPAGE="https://github.com/NVIDIA/libnvidia-container"
-
-if [[ "${PV}" == "9999" ]] ; then
-	inherit git-r3
-	EGIT_REPO_URI="https://github.com/NVIDIA/${PN}.git"
-else
-	SRC_URI="
-		https://github.com/NVIDIA/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz
-	"
-	KEYWORDS="~amd64"
-fi
-
 LICENSE="Apache-2.0"
-SLOT="0"
+SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
 
-IUSE=""
+SLOT="0"
+KEYWORDS="~amd64"
+RESTRICT="mirror test"
 
 RDEPEND="
 	net-libs/libtirpc
 	sys-libs/libcap
 	sys-libs/libseccomp
-	x11-drivers/nvidia-drivers
-"
-
+	x11-drivers/nvidia-drivers"
 DEPEND="${RDEPEND}"
-
 BDEPEND="
 	net-libs/rpcsvc-proto
 	sys-apps/lsb-release
 	sys-devel/bmake
-	virtual/pkgconfig
-"
+	virtual/pkgconfig"
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-1.1.1-add-enum-h.patch

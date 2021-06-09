@@ -60,16 +60,12 @@ SLOT="0"
 
 IUSE=""
 
-RDEPEND="
-	sys-libs/libnvidia-container
-"
-
-DEPEND="${RDEPEND}"
+DEPEND="sys-libs/libnvidia-container"
+RDEPEND="${DEPEND}"
 
 BDEPEND="
 	app-arch/unzip
-	sys-devel/make
-"
+	sys-devel/make"
 
 src_compile() {
 	emake binary

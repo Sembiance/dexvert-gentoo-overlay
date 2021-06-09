@@ -4,11 +4,13 @@ inherit meson
 
 DESCRIPTION="Image loading library"
 HOMEPAGE="http://snisurset.net/code/${PN}/"
-SRC_URI="http://snisurset.net/code/${PN}/files/${PN}-${PV}.tar.xz"
-
 LICENSE="BSD-2"
+SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.xz"
+
 SLOT="0"
 KEYWORDS="~amd64"
+RESTRICT="mirror test"
+
 IUSE="debug"
 
 DEPEND="x11-libs/cairo
@@ -40,7 +42,6 @@ DEPEND="x11-libs/cairo
 	media-libs/vips
 	media-gfx/farbfeld
 	dev-libs/efl
+	app-text/libgxps
 	app-text/libspectre"
 RDEPEND=${DEPEND}
-
-RESTRICT="mirror test"

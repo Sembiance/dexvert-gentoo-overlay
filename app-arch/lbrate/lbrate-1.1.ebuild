@@ -2,17 +2,12 @@ EAPI=7
 
 DESCRIPTION="LBR extraction program"
 HOMEPAGE="http://www.svgalib.org/rus/lbrate.html"
-SRC_URI="ftp://ftp.ibiblio.org/pub/Linux/utils/compress/lbrate-${PV}.tar.gz"
-
 LICENSE="GPL-2"
+SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
+
 SLOT="0"
-KEYWORDS="~amd64 ~x86"
-IUSE=""
-
-DEPEND=""
-RDEPEND=${DEPEND}
-
-RESTRICT="mirror"
+KEYWORDS="~amd64"
+RESTRICT="mirror test"
 
 src_install() {
 	dobin lbrate

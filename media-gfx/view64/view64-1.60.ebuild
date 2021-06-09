@@ -2,19 +2,16 @@ EAPI=7
 
 DESCRIPTION="C64 image viewer and converter"
 HOMEPAGE="http://view64.sourceforge.net/"
-SRC_URI="mirror://sourceforge/${PN}/${PV}/${PN}-${PV}-src.zip"
-
 LICENSE="GPL-2"
+SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}-src.zip"
+S="${WORKDIR}/${PN}-${PV}-src"
+
 SLOT="0"
-KEYWORDS="~amd64 ~x86"
-IUSE=""
+KEYWORDS="~amd64"
+RESTRICT="mirror test"
 
 DEPEND="x11-libs/fltk"
 RDEPEND=${DEPEND}
-
-RESTRICT="mirror"
-
-S="${WORKDIR}/${PN}-${PV}-src"
 
 src_install() {
 	dobin view64

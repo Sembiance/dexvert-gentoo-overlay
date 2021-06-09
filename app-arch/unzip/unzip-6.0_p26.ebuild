@@ -1,6 +1,3 @@
-# Copyright 1999-2020 Gentoo Authors
-# Distributed under the terms of the GNU General Public License v2
-
 EAPI=7
 
 inherit toolchain-funcs flag-o-matic
@@ -11,10 +8,10 @@ MY_P="${PN}${MY_PV}"
 
 DESCRIPTION="unzipper for pkzip-compressed files"
 HOMEPAGE="http://www.info-zip.org/"
-SRC_URI="mirror://sourceforge/infozip/${MY_P}.tar.gz
-	mirror://debian/pool/main/u/${PN}/${PN}_${PV/_p/-}.debian.tar.xz"
-
 LICENSE="Info-ZIP"
+SRC_URI="mhttps://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${MY_P}.tar.gz
+	https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}_${PV/_p/-}.debian.tar.xz"
+
 SLOT="0"
 KEYWORDS="~alpha amd64 arm arm64 hppa ia64 m68k ~mips ppc ppc64 ~riscv s390 sparc x86 ~x86-linux"
 IUSE="bzip2 natspec unicode smith"

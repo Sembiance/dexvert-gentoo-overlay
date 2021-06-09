@@ -4,11 +4,13 @@ inherit autotools
 
 DESCRIPTION="AFP filesystem clients"
 HOMEPAGE="http://sourceforge.net/projects/${PN}/"
-SRC_URI="mirror://sourceforge/${PN}/${P}.tar.bz2"
-
 LICENSE="GPL-2"
+SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.bz2"
+
 SLOT="0"
 KEYWORDS="~amd64"
+RESTRICT="mirror test"
+
 IUSE="crypt fuse readline"
 
 DOCS="ChangeLog docs/README NEWS"

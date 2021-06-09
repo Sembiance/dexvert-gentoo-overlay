@@ -1,0 +1,36 @@
+diff -Naur a/libMXF/vars.mk b/libMXF/vars.mk
+--- a/libMXF/vars.mk	2021-06-08 09:59:02.095256351 -0400
++++ b/libMXF/vars.mk	2021-06-08 10:15:26.766512917 -0400
+@@ -38,7 +38,7 @@
+ # Variables for compilation of libMXF client applications
+ CC = $(BIN_PREFIX)gcc
+ INCLUDES = -I. -I$(LIBMXF_DIR)/include
+-CFLAGS = -Wall -W -Werror -g -O2 -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE $(INCLUDES)
++CFLAGS = -Wall -W -g -O2 -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE $(INCLUDES)
+ AR = $(BIN_PREFIX)ar crv
+ 
+ # Get the OS name e.g. Linux, MINGW32_NT-5.0, Darwin, SunOS
+@@ -69,4 +69,4 @@
+ endif
+ 
+ # Default install location is /usr/local
+-MXF_INSTALL_PREFIX ?= /usr/local
++MXF_INSTALL_PREFIX ?= $(DESTDIR)/usr
+diff -Naur a/libMXF++/vars.mk b/libMXF++/vars.mk
+--- a/libMXF++/vars.mk	2021-06-08 10:04:33.703072975 -0400
++++ b/libMXF++/vars.mk	2021-06-08 10:15:39.486501568 -0400
+@@ -39,7 +39,7 @@
+ # Variables for compilation of libMXF client applications
+ CC = $(BIN_PREFIX)g++
+ INCLUDES = -I. -I$(LIBMXFPP_DIR) -I$(LIBMXF_DIR)/lib/include
+-CFLAGS = -Wall -W -Wno-unused-parameter -Werror -g -O2 -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE $(INCLUDES)
++CFLAGS = -Wall -W -Wno-unused-parameter -g -O2 -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE $(INCLUDES)
+ COMPILE = $(CC) $(CFLAGS)
+ AR = $(BIN_PREFIX)ar cr
+ 
+@@ -71,4 +71,4 @@
+ endif
+ 
+ # Default install location is /usr/local
+-INSTALL_PREFIX ?= /usr/local
++INSTALL_PREFIX ?= $(DESTDIR)/usr

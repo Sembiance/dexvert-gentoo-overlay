@@ -1,18 +1,15 @@
 EAPI=7
 
 DESCRIPTION="Command line tool convert AmigaBASIC files to ASCII"
-HOMEPAGE="http://aminet.net/package/dev/misc/${PN}-${PV}"
-SRC_URI="http://aminet.net/dev/misc/${PN}-${PV}.lha"
-
+HOMEPAGE="http://aminet.net/package/dev/misc/${P}"
 LICENSE="GPL"
-SLOT="0"
-KEYWORDS="~amd64 ~x86"
-IUSE=""
+SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.lha"
 
-DEPEND=""
-RDEPEND="${DEPEND}"
+SLOT="0"
+KEYWORDS="~amd64"
+RESTRICT="mirror test"
+
 PATCHES=( "${FILESDIR}/fix-problems.patch" )
-RESTRICT="mirror"
 
 src_install() {
 	dobin ab2ascii

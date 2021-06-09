@@ -2,18 +2,17 @@ EAPI=7
 
 DESCRIPTION="Converts PCD images into JPEG"
 HOMEPAGE="https://pcdtojpeg.sourceforge.io/Home.html"
-MY_PV="${PV//./_}"
-SRC_URI="mirror://sourceforge/${PN}/pcdtojpeg_${MY_PV}.zip"
-
 LICENSE="LGPL-2.1"
+MY_PV="${PV//./_}"
+SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}_${MY_PV}.zip"
+S="${WORKDIR}/pcdtojpeg_${MY_PV}"
+
 SLOT="0"
-KEYWORDS="amd64 ~ppc x86"
-IUSE=""
+KEYWORDS="~amd64"
+RESTRICT="mirror test"
 
 DEPEND="virtual/jpeg"
 RDEPEND=${DEPEND}
-
-S="${WORKDIR}/pcdtojpeg_${MY_PV}"
 
 src_compile() {
     default

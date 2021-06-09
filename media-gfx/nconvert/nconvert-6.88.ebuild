@@ -2,16 +2,13 @@ EAPI=7
 
 DESCRIPTION="Convert more than 500 image formats"
 HOMEPAGE="https://www.xnview.com/en/nconvert/"
-SRC_URI="https://download.xnview.com/NConvert-linux64.tgz"
-
 LICENSE="GPL-2"
+SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tgz"
+S="${WORKDIR}/NConvert"
+
 SLOT="0"
 KEYWORDS="~amd64"
-IUSE=""
-
-RESTRICT="mirror"
-
-S="${WORKDIR}/NConvert"
+RESTRICT="mirror test"
 
 src_install() {
     dobin ${PN}

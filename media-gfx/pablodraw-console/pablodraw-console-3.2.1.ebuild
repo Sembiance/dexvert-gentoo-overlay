@@ -2,20 +2,17 @@ EAPI=7
 
 DESCRIPTION="Ansi/Ascii text and RIPscrip vector graphic art converter"
 HOMEPAGE="http://picoe.ca/products/pablodraw/"
-SRC_URI="https://github.com/cwensley/pablodraw/releases/download/${PV}/PabloDraw.Console-${PV}.zip"
-
 LICENSE="MIT"
+SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+S="${WORKDIR}"
+
 SLOT="0"
-KEYWORDS="~amd64 ~x86"
-IUSE=""
+KEYWORDS="~amd64"
+RESTRICT="mirror test"
 
 DEPEND="dev-lang/mono
 	dev-dotnet/gtk-sharp"
 RDEPEND="${DEPEND}"
-
-RESTRICT="mirror test"
-
-S="${WORKDIR}"
 
 src_install() {
 	into /opt/${PN}

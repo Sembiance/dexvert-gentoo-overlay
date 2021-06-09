@@ -4,10 +4,13 @@ inherit eutils
 
 DESCRIPTION="BPG (Better Portable Graphics) is a new image format"
 HOMEPAGE="http://bellard.org/bpg/"
-SRC_URI="http://bellard.org/bpg/${PN}-${PV}.tar.gz"
 LICENSE="LGPL-2.1 BSD"
+SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
+
 SLOT="0"
-KEYWORDS="~amd64 ~x86"
+KEYWORDS="~amd64"
+RESTRICT="mirror test"
+
 IUSE="x265"
 
 DEPEND="dev-lang/yasm

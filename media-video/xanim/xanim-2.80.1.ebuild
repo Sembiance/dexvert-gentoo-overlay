@@ -2,21 +2,16 @@ EAPI=7
 
 DESCRIPTION="Supports viewing and playing various movie formats"
 HOMEPAGE="http://xanim.polter.net/"
-MY_PV=$(ver_rs 1-2 '')
-SRC_URI="http://xanim.polter.net/files/${PN}${MY_PV}.tar.gz"
-
 LICENSE="MIT"
-SLOT="0"
-KEYWORDS="~amd64 ~x86"
-IUSE=""
-
-DEPEND=""
-RDEPEND="${DEPEND}"
-
-RESTRICT="mirror test"
-PATCHES=( "${FILESDIR}/x11-headers.patch" )
-
+MY_PV=$(ver_rs 1-2 '')
+SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}${MY_PV}.tar.gz"
 S="${WORKDIR}/${PN}${MY_PV}"
+
+SLOT="0"
+KEYWORDS="~amd64"
+RESTRICT="mirror test"
+
+PATCHES=( "${FILESDIR}/x11-headers.patch" )
 
 src_configure() {
 	xmkmf

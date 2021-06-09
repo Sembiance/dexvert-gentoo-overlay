@@ -1,0 +1,4 @@
+#!/bin/bash
+
+export XDG_RUNTIME_DIR=/mnt/ram/tmp/runtime-sembiance
+/opt/qcad-professional/merge "$@"
