@@ -1,4 +1,4 @@
-EAPI="7"
+EAPI=7
 
 DESCRIPTION="App to generate BLAKE3 hashes"
 HOMEPAGE="https://github.com/BLAKE3-team/BLAKE3"
