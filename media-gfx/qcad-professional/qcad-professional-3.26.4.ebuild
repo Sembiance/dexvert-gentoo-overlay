@@ -10,6 +10,9 @@ SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
+DEPEND="dev-db/unixODBC"
+RDEPEND="${DEPEND}"
+
 src_install() {
 	into /opt/${PN}
 	insinto /opt/${PN}
