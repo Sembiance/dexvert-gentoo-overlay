@@ -1,0 +1,282 @@
+diff -Naur a/src/dosbox.cpp b/src/dosbox.cpp
+--- a/src/dosbox.cpp	2020-05-05 19:03:45.482205795 -0400
++++ b/src/dosbox.cpp	2020-05-05 19:04:11.792157608 -0400
+@@ -459,7 +459,7 @@
+ 	Pstring = Pmulti->GetSection()->Add_string("type",Property::Changeable::Always,"normal2x");
+ 
+ 	const char *scalers[] = {
+-		"none", "normal2x", "normal3x",
++		"none", "normal2x", "normal3x", "normal4x", "normal5x", "normal6x",
+ #if RENDER_USE_ADVANCED_SCALERS>2
+ 		"advmame2x", "advmame3x", "advinterp2x", "advinterp3x", "hq2x", "hq3x", "2xsai", "super2xsai", "supereagle",
+ #endif
+diff -Naur a/src/gui/render.cpp b/src/gui/render.cpp
+--- a/src/gui/render.cpp	2020-05-05 19:03:45.484205791 -0400
++++ b/src/gui/render.cpp	2020-05-05 19:05:06.664057154 -0400
+@@ -299,6 +299,12 @@
+ 			simpleBlock = &ScaleNormal2x;
+ 		else if (render.scale.size == 3)
+ 			simpleBlock = &ScaleNormal3x;
++       	else if (render.scale.size == 4)
++           simpleBlock = &ScaleNormal4x;
++       	else if (render.scale.size == 5)
++           simpleBlock = &ScaleNormal5x;
++       	else if (render.scale.size == 6)
++           simpleBlock = &ScaleNormal6x;
+ 		else
+ 			simpleBlock = &ScaleNormal1x;
+ 		/* Maybe override them */
+@@ -685,6 +691,9 @@
+ 	if (scaler == "none") { render.scale.op = scalerOpNormal;render.scale.size = 1; }
+ 	else if (scaler == "normal2x") { render.scale.op = scalerOpNormal;render.scale.size = 2; }
+ 	else if (scaler == "normal3x") { render.scale.op = scalerOpNormal;render.scale.size = 3; }
++   	else if (scaler == "normal4x") { render.scale.op = scalerOpNormal;render.scale.size = 4; }
++   	else if (scaler == "normal5x") { render.scale.op = scalerOpNormal;render.scale.size = 5; }
++   	else if (scaler == "normal6x") { render.scale.op = scalerOpNormal;render.scale.size = 6; }
+ #if RENDER_USE_ADVANCED_SCALERS>2
+ 	else if (scaler == "advmame2x") { render.scale.op = scalerOpAdvMame;render.scale.size = 2; }
+ 	else if (scaler == "advmame3x") { render.scale.op = scalerOpAdvMame;render.scale.size = 3; }
+diff -Naur a/src/gui/render_scalers.cpp b/src/gui/render_scalers.cpp
+--- a/src/gui/render_scalers.cpp	2020-05-05 19:03:45.484205791 -0400
++++ b/src/gui/render_scalers.cpp	2020-05-05 19:05:59.943959671 -0400
+@@ -257,6 +257,56 @@
+ {	Normal3x_8_8_R,		Normal3x_9_15_R ,	Normal3x_9_16_R ,	Normal3x_9_32_R }
+ }};
+ 
++ScalerSimpleBlock_t ScaleNormal4x = {
++   "Normal4x",
++   GFX_CAN_8|GFX_CAN_15|GFX_CAN_16|GFX_CAN_32,
++   4,4,{
++{  Normal4x_8_8_L,     Normal4x_8_15_L ,   Normal4x_8_16_L ,   Normal4x_8_32_L },
++{               0,     Normal4x_15_15_L,   Normal4x_15_16_L,   Normal4x_15_32_L},
++{               0,     Normal4x_16_15_L,   Normal4x_16_16_L,   Normal4x_16_32_L},
++{               0,     Normal4x_32_15_L,   Normal4x_32_16_L,   Normal4x_32_32_L},
++{  Normal4x_8_8_L,     Normal4x_9_15_L ,   Normal4x_9_16_L ,   Normal4x_9_32_L }
++},{
++{  Normal4x_8_8_R,     Normal4x_8_15_R ,   Normal4x_8_16_R ,   Normal4x_8_32_R },
++{               0,     Normal4x_15_15_R,   Normal4x_15_16_R,   Normal4x_15_32_R},
++{               0,     Normal4x_16_15_R,   Normal4x_16_16_R,   Normal4x_16_32_R},
++{               0,     Normal4x_32_15_R,   Normal4x_32_16_R,   Normal4x_32_32_R},
++{  Normal4x_8_8_R,     Normal4x_9_15_R ,   Normal4x_9_16_R ,   Normal4x_9_32_R }
++}};
++ScalerSimpleBlock_t ScaleNormal5x = {
++   "Normal5x",
++   GFX_CAN_8|GFX_CAN_15|GFX_CAN_16|GFX_CAN_32,
++   5,5,{
++{  Normal5x_8_8_L,     Normal5x_8_15_L ,   Normal5x_8_16_L ,   Normal5x_8_32_L },
++{               0,     Normal5x_15_15_L,   Normal5x_15_16_L,   Normal5x_15_32_L},
++{               0,     Normal5x_16_15_L,   Normal5x_16_16_L,   Normal5x_16_32_L},
++{               0,     Normal5x_32_15_L,   Normal5x_32_16_L,   Normal5x_32_32_L},
++{  Normal5x_8_8_L,     Normal5x_9_15_L ,   Normal5x_9_16_L ,   Normal5x_9_32_L }
++},{
++{  Normal5x_8_8_R,     Normal5x_8_15_R ,   Normal5x_8_16_R ,   Normal5x_8_32_R },
++{               0,     Normal5x_15_15_R,   Normal5x_15_16_R,   Normal5x_15_32_R},
++{               0,     Normal5x_16_15_R,   Normal5x_16_16_R,   Normal5x_16_32_R},
++{               0,     Normal5x_32_15_R,   Normal5x_32_16_R,   Normal5x_32_32_R},
++{  Normal5x_8_8_R,     Normal5x_9_15_R ,   Normal5x_9_16_R ,   Normal5x_9_32_R }
++}};
++
++ScalerSimpleBlock_t ScaleNormal6x = {
++   "Normal6x",
++   GFX_CAN_8|GFX_CAN_15|GFX_CAN_16|GFX_CAN_32,
++   6,6,{
++{  Normal6x_8_8_L,     Normal6x_8_15_L ,   Normal6x_8_16_L ,   Normal6x_8_32_L },
++{               0,     Normal6x_15_15_L,   Normal6x_15_16_L,   Normal6x_15_32_L},
++{               0,     Normal6x_16_15_L,   Normal6x_16_16_L,   Normal6x_16_32_L},
++{               0,     Normal6x_32_15_L,   Normal6x_32_16_L,   Normal6x_32_32_L},
++{  Normal6x_8_8_L,     Normal6x_9_15_L ,   Normal6x_9_16_L ,   Normal6x_9_32_L }
++},{
++{  Normal6x_8_8_R,     Normal6x_8_15_R ,   Normal6x_8_16_R ,   Normal6x_8_32_R },
++{               0,     Normal6x_15_15_R,   Normal6x_15_16_R,   Normal6x_15_32_R},
++{               0,     Normal6x_16_15_R,   Normal6x_16_16_R,   Normal6x_16_32_R},
++{               0,     Normal6x_32_15_R,   Normal6x_32_16_R,   Normal6x_32_32_R},
++{  Normal6x_8_8_R,     Normal6x_9_15_R ,   Normal6x_9_16_R ,   Normal6x_9_32_R }
++}};
++
+ #if RENDER_USE_ADVANCED_SCALERS>0
+ ScalerSimpleBlock_t ScaleTV2x = {
+ 	"TV2x",
+diff -Naur a/src/gui/render_scalers.h b/src/gui/render_scalers.h
+--- a/src/gui/render_scalers.h	2020-05-05 19:03:45.484205791 -0400
++++ b/src/gui/render_scalers.h	2020-05-05 19:06:14.127933730 -0400
+@@ -22,8 +22,8 @@
+ //#include "render.h"
+ #include "video.h"
+ 
+-#define SCALER_MAX_MUL_WIDTH  3
+-#define SCALER_MAX_MUL_HEIGHT 3
++#define SCALER_MAX_MUL_WIDTH  6
++#define SCALER_MAX_MUL_HEIGHT 6
+ 
+ #if RENDER_USE_ADVANCED_SCALERS>0
+ #define SCALER_MAXWIDTH 	1280 
+@@ -126,6 +126,9 @@
+ extern ScalerSimpleBlock_t ScaleNormalDh;
+ extern ScalerSimpleBlock_t ScaleNormal2x;
+ extern ScalerSimpleBlock_t ScaleNormal3x;
++extern ScalerSimpleBlock_t ScaleNormal4x;
++extern ScalerSimpleBlock_t ScaleNormal5x;
++extern ScalerSimpleBlock_t ScaleNormal6x;
+ #if RENDER_USE_ADVANCED_SCALERS>0
+ extern ScalerSimpleBlock_t ScaleTV2x;
+ extern ScalerSimpleBlock_t ScaleTV3x;
+diff -Naur a/src/gui/render_simple.h b/src/gui/render_simple.h
+--- a/src/gui/render_simple.h	2020-05-05 19:03:45.484205791 -0400
++++ b/src/gui/render_simple.h	2020-05-05 19:08:10.351721311 -0400
+@@ -80,6 +80,9 @@
+ #if (SCALERHEIGHT > 4) 
+ 			PTYPE *line4 = WC[3];
+ #endif
++#if (SCALERHEIGHT > 5)
++           	PTYPE *line5 = WC[4];
++#endif
+ #else
+ #if (SCALERHEIGHT > 1) 
+ 		PTYPE *line1 = (PTYPE *)(((Bit8u*)line0)+ render.scale.outPitch);
+@@ -93,6 +96,9 @@
+ #if (SCALERHEIGHT > 4) 
+ 		PTYPE *line4 = (PTYPE *)(((Bit8u*)line0)+ render.scale.outPitch * 4);
+ #endif
++#if (SCALERHEIGHT > 5)
++       	PTYPE *line5 = (PTYPE *)(((Bit8u*)line0)+ render.scale.outPitch * 5);
++#endif
+ #endif //defined(SCALERLINEAR)
+ 			hadChange = 1;
+ 			for (Bitu i = x > 32 ? 32 : x;i>0;i--,x--) {
+@@ -114,6 +120,9 @@
+ #if (SCALERHEIGHT > 4) 
+ 				line4 += SCALERWIDTH;
+ #endif
++#if (SCALERHEIGHT > 5)
++               	line5 += SCALERWIDTH;
++#endif
+ 			}
+ #if defined(SCALERLINEAR)
+ #if (SCALERHEIGHT > 1)
+@@ -129,6 +138,9 @@
+ #if (SCALERHEIGHT > 4) 
+ 			BituMove(((Bit8u*)line0)-copyLen+render.scale.outPitch*4,WC[3], copyLen );
+ #endif
++#if (SCALERHEIGHT > 5)
++           	BituMove(((Bit8u*)line0)-copyLen+render.scale.outPitch*5,WC[4], copyLen );
++#endif
+ 
+ #endif //defined(SCALERLINEAR)
+ 		}
+diff -Naur a/src/gui/render_templates.h b/src/gui/render_templates.h
+--- a/src/gui/render_templates.h	2020-05-05 19:03:45.484205791 -0400
++++ b/src/gui/render_templates.h	2020-05-05 19:09:28.335578926 -0400
+@@ -287,6 +287,113 @@
+ #undef SCALERHEIGHT
+ #undef SCALERFUNC
+ 
++#define SCALERNAME     Normal4x
++#define SCALERWIDTH        4
++#define SCALERHEIGHT   4
++#define SCALERFUNC                             \
++   line0[0] = P;                               \
++   line0[1] = P;                               \
++   line0[2] = P;                               \
++   line0[3] = P;                               \
++   line1[0] = P;                               \
++   line1[1] = P;                               \
++   line1[2] = P;                               \
++   line1[3] = P;                               \
++   line2[0] = P;                               \
++   line2[1] = P;                               \
++   line2[2] = P;                               \
++   line2[3] = P;                               \
++   line3[0] = P;                               \
++   line3[1] = P;                               \
++   line3[2] = P;                               \
++   line3[3] = P;
++#include "render_simple.h"
++#undef SCALERNAME
++#undef SCALERWIDTH
++#undef SCALERHEIGHT
++#undef SCALERFUNC
++
++#define SCALERNAME     Normal5x
++#define SCALERWIDTH        5
++#define SCALERHEIGHT   5
++#define SCALERFUNC                             \
++   line0[0] = P;                               \
++   line0[1] = P;                               \
++   line0[2] = P;                               \
++   line0[3] = P;                               \
++   line0[4] = P;                               \
++   line1[0] = P;                               \
++   line1[1] = P;                               \
++   line1[2] = P;                               \
++   line1[3] = P;                               \
++   line1[4] = P;                               \
++   line2[0] = P;                               \
++   line2[1] = P;                               \
++   line2[2] = P;                               \
++   line2[3] = P;                               \
++   line2[4] = P;                               \
++   line3[0] = P;                               \
++   line3[1] = P;                               \
++   line3[2] = P;                               \
++   line3[3] = P;                               \
++   line3[4] = P;                               \
++   line4[0] = P;                               \
++   line4[1] = P;                               \
++   line4[2] = P;                               \
++   line4[3] = P;                               \
++   line4[4] = P;
++#include "render_simple.h"
++#undef SCALERNAME
++#undef SCALERWIDTH
++#undef SCALERHEIGHT
++#undef SCALERFUNC
++
++#define SCALERNAME     Normal6x
++#define SCALERWIDTH        6
++#define SCALERHEIGHT   6
++#define SCALERFUNC                             \
++   line0[0] = P;                               \
++   line0[1] = P;                               \
++   line0[2] = P;                               \
++   line0[3] = P;                               \
++   line0[4] = P;                               \
++   line0[5] = P;                               \
++   line1[0] = P;                               \
++   line1[1] = P;                               \
++   line1[2] = P;                               \
++   line1[3] = P;                               \
++   line1[4] = P;                               \
++   line1[5] = P;                               \
++   line2[0] = P;                               \
++   line2[1] = P;                               \
++   line2[2] = P;                               \
++   line2[3] = P;                               \
++   line2[4] = P;                               \
++   line2[5] = P;                               \
++   line3[0] = P;                               \
++   line3[1] = P;                               \
++   line3[2] = P;                               \
++   line3[3] = P;                               \
++   line3[4] = P;                               \
++   line3[5] = P;                               \
++   line4[0] = P;                               \
++   line4[1] = P;                               \
++   line4[2] = P;                               \
++   line4[3] = P;                               \
++   line4[4] = P;                               \
++   line4[5] = P;                               \
++   line5[0] = P;                               \
++   line5[1] = P;                               \
++   line5[2] = P;                               \
++   line5[3] = P;                               \
++   line5[4] = P;                               \
++   line5[5] = P;
++#include "render_simple.h"
++#undef SCALERNAME
++#undef SCALERWIDTH
++#undef SCALERHEIGHT
++#undef SCALERFUNC
++
+ #define SCALERNAME		NormalDw
+ #define SCALERWIDTH		2
+ #define SCALERHEIGHT	1

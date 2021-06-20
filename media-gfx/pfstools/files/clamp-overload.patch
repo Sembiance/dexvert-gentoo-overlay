@@ -1,0 +1,21 @@
+diff -Naur a/src/fileformat/pfsinyuv.cpp b/src/fileformat/pfsinyuv.cpp
+--- a/src/fileformat/pfsinyuv.cpp	2021-06-16 14:45:38.307962964 -0400
++++ b/src/fileformat/pfsinyuv.cpp	2021-06-16 14:45:44.395955910 -0400
+@@ -44,7 +44,7 @@
+ char charsToRemove[7] = {'b', 'i', 't', 's', 'f', 'p', 's'};
+ 
+ template<typename T>
+-inline T clamp( T val, T min, T max )
++inline T localclamp( T val, T min, T max )
+ {
+   if( val < min )
+     return min;
+@@ -71,7 +71,7 @@
+     }
+     for( int x = 0; x < width; x++ ) {    
+       float v_float = (float)line_buf[x]*gain - offset;        
+-      (*dest)(x<<stride, y<<stride) = clamp( v_float, min, max );
++      (*dest)(x<<stride, y<<stride) = localclamp( v_float, min, max );
+     }
+     
+   }    

@@ -1,0 +1,41 @@
+diff -Naur a/src/dos/dos_programs.cpp b/src/dos/dos_programs.cpp
+--- a/src/dos/dos_programs.cpp	2021-06-20 16:39:18.038229284 -0400
++++ b/src/dos/dos_programs.cpp	2021-06-20 16:39:34.254226048 -0400
+@@ -34,6 +34,7 @@
+ #include "dos_inc.h"
+ #include "bios.h"
+ #include "bios_disk.h" 
++#include "hardware.h"
+ #include "setup.h"
+ #include "control.h"
+ #include "inout.h"
+@@ -558,6 +559,21 @@
+ 	*make=new MEM;
+ }
+ 
++class VIDREC : public Program {
++public:
++	void Run(void) {
++		/* Start or Stop video recording from within dosbox */
++		if(cmd->FindExist("start", false))
++			CAPTURE_VideoStart();
++		if(cmd->FindExist("stop", false))
++			CAPTURE_VideoStop();
++	}
++};
++
++static void VIDREC_ProgramStart(Program * * make) {
++	*make=new VIDREC;
++}
++
+ extern Bit32u floppytype;
+ 
+ 
+@@ -1843,6 +1859,7 @@
+ 	/*regular setup*/
+ 	PROGRAMS_MakeFile("MOUNT.COM",MOUNT_ProgramStart);
+ 	PROGRAMS_MakeFile("MEM.COM",MEM_ProgramStart);
++	PROGRAMS_MakeFile("VIDREC.COM",VIDREC_ProgramStart);
+ 	PROGRAMS_MakeFile("LOADFIX.COM",LOADFIX_ProgramStart);
+ 	PROGRAMS_MakeFile("RESCAN.COM",RESCAN_ProgramStart);
+ 	PROGRAMS_MakeFile("INTRO.COM",INTRO_ProgramStart);

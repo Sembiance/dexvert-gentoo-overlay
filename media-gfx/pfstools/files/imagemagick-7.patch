@@ -1,0 +1,36 @@
+diff -Naur a/src/fileformat/pfsinimgmagick.cpp b/src/fileformat/pfsinimgmagick.cpp
+--- a/src/fileformat/pfsinimgmagick.cpp	2021-06-16 14:37:53.051496548 -0400
++++ b/src/fileformat/pfsinimgmagick.cpp	2021-06-16 14:38:21.707471015 -0400
+@@ -114,7 +114,7 @@
+     Magick::Image imImage( ff.fileName );
+ 
+     VERBOSE_STR << "input image gamma:  " << imImage.gamma() << std::endl;
+-    bool hasAlpha = imImage.matte();
++    bool hasAlpha = imImage.alpha();
+     if( hasAlpha )
+       VERBOSE_STR << "alpha channel found" << std::endl;    
+     
+@@ -129,17 +129,17 @@
+     
+     // Copy line by line to pfs::Frame
+     int pixInd = 0;
+-    const float maxValue = (float)(1<<QuantumDepth) - 1;
++    const float maxValue = (float)(1<<MAGICKCORE_QUANTUM_DEPTH) - 1;
+     for( int r = 0; r < imImage.rows(); r++ ) {
+-      const Magick::PixelPacket *pixels =
++      const MagickCore::Quantum *pixels =
+         imImage.getConstPixels( 0, r, imImage.columns(), 1 );
+ 
+       for( int c = 0; c < imImage.columns(); c++ ) {
+-        (*X)(pixInd) = (float)pixels[c].red / maxValue;
+-        (*Y)(pixInd) = (float)pixels[c].green / maxValue;
+-        (*Z)(pixInd) = (float)pixels[c].blue / maxValue;
++        (*X)(pixInd) = (float)MagickCore::GetPixelRed(imImage.image(), pixels) / maxValue;
++        (*Y)(pixInd) = (float)MagickCore::GetPixelGreen(imImage.image(), pixels) / maxValue;
++        (*Z)(pixInd) = (float)MagickCore::GetPixelBlue(imImage.image(), pixels) / maxValue;
+         if( alpha != NULL )
+-          (*alpha)(pixInd) = (float)pixels[c].opacity / maxValue;
++          (*alpha)(pixInd) = (float)MagickCore::GetPixelAlpha(imImage.image(), pixels) / maxValue;
+         pixInd++;
+       } 
+     }    
