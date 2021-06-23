@@ -1,0 +1,64 @@
+diff -Naur a/src/hardware/hardware.cpp b/src/hardware/hardware.cpp
+--- a/src/hardware/hardware.cpp	2021-06-20 22:06:45.143106287 -0400
++++ b/src/hardware/hardware.cpp	2021-06-20 22:06:56.719097771 -0400
+@@ -755,22 +755,31 @@
+ 		case 16:format = ZMBV_FORMAT_16BPP;break;
+ 		case 32:format = ZMBV_FORMAT_32BPP;break;
+ 		default:
+-			goto skip_video;
++			LOG_MSG("CAPTURE: Video not ready to capture yet, invalid bpp format, returning...");
++			return;
+ 		}
+ 		if (!capture.video.avi_out) {
+ 			FILE *f = OpenCaptureFile("Video",".avi");
+-			if (f==NULL)
++			if (f==NULL) {
++				LOG_MSG("CAPTURE: Skipping video, failed to open capture file");
+ 				goto skip_video;
++			}
+ 			capture.video.avi_out = new AVIFILE(f, width, height, fps);
+ 			capture.video.codec = new VideoCodec();
+-			if (!capture.video.codec)
++			if (!capture.video.codec) {
++				LOG_MSG("CAPTURE: Skipping video, failed to create VideoCodec");
+ 				goto skip_video;
+-			if (!capture.video.codec->SetupCompress( (int)width, (int)height))
++			}
++			if (!capture.video.codec->SetupCompress( (int)width, (int)height)) {
++				LOG_MSG("CAPTURE: Skipping video, failed to SetupCompress");
+ 				goto skip_video;
++			}
+ 			capture.video.bufSize = capture.video.codec->NeededSize((int)width, (int)height, format);
+ 			capture.video.buf = malloc( capture.video.bufSize );
+-			if (!capture.video.buf)
++			if (!capture.video.buf) {
++				LOG_MSG("CAPTURE: Skipping video, failed to allocate video buffer");
+ 				goto skip_video;
++			}
+ 
+ 			capture.video.width = width;
+ 			capture.video.height = height;
+@@ -787,8 +796,10 @@
+ 				capture.video.gop = 0;
+ 			if (capture.video.gop==0)
+ 				codecFlags = 1;
+-			if (!capture.video.codec->PrepareCompressFrame( codecFlags, format, (char *)pal, capture.video.buf, capture.video.bufSize))
++			if (!capture.video.codec->PrepareCompressFrame( codecFlags, format, (char *)pal, capture.video.buf, capture.video.bufSize)) {
++				LOG_MSG("CAPTURE: Skipping video, failed to PrepareCompressFrame");
+ 				goto skip_video;
++			}
+ 
+ 			for (i=0;i<height;i++) {
+ 				const void *srcLine;
+@@ -828,8 +839,10 @@
+ 					capture.video.codec->CompressLines(1, &srcLine);
+ 			}
+ 			written = capture.video.codec->FinishCompressFrame();
+-			if (written < 0)
++			if (written < 0) {
++				LOG_MSG("CAPTURE: Skipping video, FinishCompressFrame failed");
+ 				goto skip_video;
++			}
+ 		}
+ 		if (capture.video.avi_out->AddVideo(capture.video.buf, written, codecFlags & 1 ? AVII_KEYFRAME : 0)) {
+ //			LOG_MSG("Frame %d video %d audio %d",capture.video.avi_out->frames, written, capture.video.audioused *4 );

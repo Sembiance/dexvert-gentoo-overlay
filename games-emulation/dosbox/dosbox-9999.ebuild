@@ -37,7 +37,7 @@ if [[ ${PV} = 9999 ]]; then
 	S=${WORKDIR}/${PN}
 fi
 
-PATCHES=( "${FILESDIR}/${PN}-0.74-gcc46.patch" "${FILESDIR}/${PN}-9999-normal4x.patch" "${FILESDIR}/${PN}-9999-noRebootDelay.patch" "${FILESDIR}/${PN}-9999-addVIDREC.patch" )
+PATCHES=( "${FILESDIR}/${PN}-0.74-gcc46.patch" "${FILESDIR}/${PN}-9999-normal4x.patch" "${FILESDIR}/${PN}-9999-noRebootDelay.patch" "${FILESDIR}/${PN}-9999-addVIDREC.patch" "${FILESDIR}/${PN}-9999-video-debug.patch" )
 
 src_prepare() {
 	use glide && eapply "${DISTDIR}"/dosbox_glide-${GLIDE_PATCH}.diff
