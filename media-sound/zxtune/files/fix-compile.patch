@@ -1,0 +1,43 @@
+diff -Naur a/src/sound/backends/Makefile b/src/sound/backends/Makefile
+--- a/src/sound/backends/Makefile	2021-06-28 14:01:10.856132111 -0400
++++ b/src/sound/backends/Makefile	2021-06-28 14:02:03.304060460 -0400
+@@ -32,7 +32,7 @@
+ $(eval $(call declare_native_backend,directsound,dsound))
+ $(eval $(call declare_native_backend,alsa,alsa))
+ $(eval $(call declare_native_backend,sdl,sdl))
+-$(eval $(call declare_native_backend,pulseaudio,paudio))
++#$(eval $(call declare_native_backend,pulseaudio,paudio))
+ $(eval $(call declare_native_backend,openal,openal))
+ 
+ ifdef support_aylpt
+diff -Naur a/src/sound/backends/backends_list.h b/src/sound/backends/backends_list.h
+--- a/src/sound/backends/backends_list.h	2021-06-28 14:01:25.056112710 -0400
++++ b/src/sound/backends/backends_list.h	2021-06-28 14:01:52.688074961 -0400
+@@ -26,14 +26,14 @@
+   void RegisterAlsaBackend(BackendsStorage& storage);
+   void RegisterSdlBackend(BackendsStorage& storage);
+   void RegisterAyLptBackend(BackendsStorage& storage);
+-  void RegisterPulseAudioBackend(BackendsStorage& storage);
++  //void RegisterPulseAudioBackend(BackendsStorage& storage);
+   void RegisterOpenAlBackend(BackendsStorage& storage);
+ 
+   inline void RegisterSystemBackends(BackendsStorage& storage)
+   {
+     RegisterOssBackend(storage);
+     RegisterAlsaBackend(storage);
+-    RegisterPulseAudioBackend(storage);
++    //RegisterPulseAudioBackend(storage);
+     RegisterDirectSoundBackend(storage);
+     RegisterWin32Backend(storage);
+     RegisterSdlBackend(storage);
+diff -Naur a/src/strings/src/encoding.cpp b/src/strings/src/encoding.cpp
+--- a/src/strings/src/encoding.cpp	2021-06-28 14:02:35.320016731 -0400
++++ b/src/strings/src/encoding.cpp	2021-06-28 14:02:24.960030880 -0400
+@@ -21,6 +21,7 @@
+ #include <algorithm>
+ #include <cassert>
+ #include <vector>
++#include <limits>
+ 
+ namespace Strings
+ {
