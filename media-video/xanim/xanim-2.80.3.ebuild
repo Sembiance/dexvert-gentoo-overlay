@@ -11,6 +11,8 @@ RESTRICT="mirror test"
 
 DEPEND="x11-libs/libSM[abi_x86_32]
 	x11-libs/libICE[abi_x86_32]
+	x11-libs/libXext[abi_x86_32]
+	virtual/jpeg[abi_x86_32]
 	x11-libs/libXt[abi_x86_32]"
 RDEPEND="${DEPEND}"
 
