@@ -1,0 +1,39 @@
+diff -Naur a/coders/ttf.c b/coders/ttf.c
+--- a/coders/ttf.c	2020-05-08 14:39:24.230677580 -0400
++++ b/coders/ttf.c	2020-05-08 14:40:19.163634526 -0400
+@@ -133,7 +133,23 @@
+     return(MagickFalse);
+   if (((int) magick[0] == 0x00) && ((int) magick[1] == 0x01) &&
+       ((int) magick[2] == 0x00) && ((int) magick[3] == 0x00) &&
+-      ((int) magick[4] == 0x00))
++      ((int) magick[4] == 0x00) &&
++	  ((int) magick[8] == 0x00) &&
++	  ((int) magick[24] == 0x00) &&
++	  ((int) magick[40] == 0x00) &&
++	  ((int) magick[56] == 0x00) &&
++	  ((int) magick[72] == 0x00) &&
++	  ((int) magick[84] == 0x00) &&
++	  ((int) magick[88] == 0x00) &&
++	  ((int) magick[100] == 0x00) &&
++	  ((int) magick[104] == 0x00) &&
++	  ((int) magick[116] == 0x00) &&
++	  ((int) magick[120] == 0x00) &&
++	  ((int) magick[132] == 0x00) &&
++	  ((int) magick[136] == 0x00) &&
++	  ((int) magick[148] == 0x00) &&
++	  ((int) magick[152] == 0x00) &&
++	  ((int) magick[168] == 0x00))
+     return(MagickTrue);
+   return(MagickFalse);
+ }
+diff -Naur a/coders/ttf.h b/coders/ttf.h
+--- a/coders/ttf.h	2020-05-08 14:39:24.229677581 -0400
++++ b/coders/ttf.h	2020-05-08 14:41:12.683584875 -0400
+@@ -17,7 +17,6 @@
+ #include "coders/coders-private.h"
+ 
+ #define MagickTTFHeaders \
+-  MagickCoderHeader("TTF", 0, "\000\001\000\000\000") \
+   MagickCoderHeader("PFA", 0, "%!PS-AdobeFont-1.0") \
+   MagickCoderHeader("PFB", 6, "%!PS-AdobeFont-1.0")
+ 

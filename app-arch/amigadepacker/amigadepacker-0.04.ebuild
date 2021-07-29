@@ -9,6 +9,8 @@ SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
+PATCHES=( "${FILESDIR}/fixes_from_libxml.patch" )
+
 src_install() {
 	dobin ${PN}
 	doman ${PN}.1

@@ -1,0 +1,12 @@
+diff -Naur a/sample/test/TestRange.cs b/sample/test/TestRange.cs
+--- a/sample/test/TestRange.cs	2021-07-11 16:06:42.128887186 -0400
++++ b/sample/test/TestRange.cs	2021-07-11 16:07:26.112849845 -0400
+@@ -9,7 +9,7 @@
+ using System;
+ 
+ using Gtk;
+-
++using Range=Gtk.Range;
+ namespace WidgetViewer {
+ 
+ 	public class TestRange

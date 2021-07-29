@@ -1,0 +1,13 @@
+diff -Naur a/src/zopflipng/lodepng/lodepng.cpp b/src/zopflipng/lodepng/lodepng.cpp
+Jan 2020: Rob manually patched this to ignore CRC errors when compressing such as retormission.com/dev/root/image/thumb/htmlIndex.png
+--- a/src/zopflipng/lodepng/lodepng.cpp	2021-01-11 13:24:19.890873116 -0500
++++ b/src/zopflipng/lodepng/lodepng.cpp	2021-01-11 13:24:34.066841344 -0500
+@@ -4979,7 +4979,7 @@
+   settings->read_text_chunks = 1;
+   settings->remember_unknown_chunks = 0;
+ #endif /*LODEPNG_COMPILE_ANCILLARY_CHUNKS*/
+-  settings->ignore_crc = 0;
++  settings->ignore_crc = 1;
+   settings->ignore_critical = 0;
+   settings->ignore_end = 0;
+   lodepng_decompress_settings_init(&settings->zlibsettings);

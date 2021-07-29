@@ -1,0 +1,12 @@
+diff -Naur a/arc.h b/arc.h
+--- a/arc.h	2020-05-09 21:07:36.734118164 -0400
++++ b/arc.h	2020-05-09 21:07:52.782107255 -0400
+@@ -79,7 +79,7 @@
+ 
+ #define ARCMARK 26		/* special archive marker        */
+ #define ARCVER 9		/* archive header version code   */
+-#define STRLEN 100		/* system standard string length */
++#define STRLEN 200		/* system standard string length */
+ #define FNLEN 13		/* file name length              */
+ #define MAXARG 400		/* maximum number of arguments   */
+ 
