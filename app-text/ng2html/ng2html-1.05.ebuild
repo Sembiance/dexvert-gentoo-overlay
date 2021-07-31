@@ -10,6 +10,8 @@ SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
+PATCHES=( "${FILESDIR}/frames_index.patch" )
+
 src_install() {
 	dobin ng2html
 	doman ng2html.1

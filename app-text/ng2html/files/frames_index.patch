@@ -1,0 +1,22 @@
+diff -Naur a/ng2html.c b/ng2html.c
+--- a/ng2html.c	2021-07-31 18:20:09.144980638 -0400
++++ b/ng2html.c	2021-07-31 18:22:19.991662888 -0400
+@@ -157,7 +157,7 @@
+ #define NG_SUFFIX ".html"           /* Suffix for the file names. */
+-#define NG_MENU   "menu" NG_SUFFIX  /* Name of the menu page. */
++#define NG_MENU   "index" NG_SUFFIX  /* Name of the menu page. */
+ #define NG_INFO   "info" NG_SUFFIX  /* Name of the info/about page. */
+-#define NG_FMENU  "fmenu" NG_SUFFIX /* Name of the frames enabled menu. */
++#define NG_FMENU  "findex" NG_SUFFIX /* Name of the frames enabled menu. */
+ 
+ /* Decrypt the NGs "encryption". */
+ 
+@@ -174,7 +174,7 @@
+ /* Variable settings that affect the look of the generated HTML. */
+ 
+ char *pszBodyString = "<BODY>";
+-int  iFrames        = FALSE;
++int  iFrames        = TRUE;
+ char *pszFrameCols  = "30%,70%";
+ 
+ /*
