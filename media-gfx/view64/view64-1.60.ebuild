@@ -1,7 +1,7 @@
 EAPI=7
 
 DESCRIPTION="C64 image viewer and converter"
-HOMEPAGE="http://view64.sourceforge.net/"
+HOMEPAGE="https://sourceforge.net/projects/view64/files/source/"
 LICENSE="GPL-2"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}-src.zip"
 S="${WORKDIR}/${PN}-${PV}-src"

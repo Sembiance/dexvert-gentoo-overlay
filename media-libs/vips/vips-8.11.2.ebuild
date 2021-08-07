@@ -1,7 +1,7 @@
 EAPI=7
 
 DESCRIPTION="VIPS Image Processing Library"
-HOMEPAGE="https://libvips.github.io/libvips/"
+HOMEPAGE="https://github.com/libvips/libvips/releases"
 LICENSE="LGPL-2.1"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
 

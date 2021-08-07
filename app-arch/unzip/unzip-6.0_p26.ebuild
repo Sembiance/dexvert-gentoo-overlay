@@ -1,5 +1,8 @@
 EAPI=7
 
+# I modified app-arch/unzip to support some old copyright encumbered code called USE_SMITH
+# The unreduce_full.c file came from: ftp://ftp.info-zip.org/pub/infozip/src/unreduce_full.zip
+
 inherit toolchain-funcs flag-o-matic
 
 MY_PV="${PV//.}"
@@ -7,7 +10,7 @@ MY_PV="${MY_PV%_p*}"
 MY_P="${PN}${MY_PV}"
 
 DESCRIPTION="unzipper for pkzip-compressed files"
-HOMEPAGE="http://www.info-zip.org/"
+HOMEPAGE="http://infozip.sourceforge.net/UnZip.html"
 LICENSE="Info-ZIP"
 SRC_URI="mhttps://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${MY_P}.tar.gz
 	https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}_${PV/_p/-}.debian.tar.xz"

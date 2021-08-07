@@ -2,7 +2,7 @@ EAPI=7
 inherit cmake-utils
 
 DESCRIPTION="ANSI and ASCII art library"
-HOMEPAGE="https://www.ansilove.org/"
+HOMEPAGE="https://github.com/ansilove/libansilove"
 LICENSE="BSD-2"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
 

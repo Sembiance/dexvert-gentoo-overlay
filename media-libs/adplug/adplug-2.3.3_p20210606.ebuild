@@ -3,7 +3,7 @@ EAPI=7
 inherit autotools
 
 DESCRIPTION="Hardware-independent AdLib sound player library"
-HOMEPAGE="http://adplug.github.io/"
+HOMEPAGE="https://github.com/adplug/adplug"
 LICENSE="LGPL-2.1"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/${PN}-master"

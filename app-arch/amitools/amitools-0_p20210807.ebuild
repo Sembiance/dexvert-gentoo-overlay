@@ -5,7 +5,7 @@ PYTHON_COMPAT=( python3_{8,9} )
 inherit distutils-r1
 
 DESCRIPTION="Tools to work with AmigaOS files"
-HOMEPAGE="http://lallafa.de/blog/amiga-projects/${PN}/"
+HOMEPAGE="https://github.com/cnvogelg/amitools"
 LICENSE="GPL-2"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/${PN}-master"

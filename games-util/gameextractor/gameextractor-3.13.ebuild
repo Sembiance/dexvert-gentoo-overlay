@@ -1,7 +1,7 @@
 EAPI=7
 
 DESCRIPTION="A tool to extract files from various video game formats"
-HOMEPAGE="http://www.watto.org/game_extractor.html"
+HOMEPAGE="https://sourceforge.net/projects/gameextractor/files/"
 LICENSE="GPL-2"
 MY_PV=$(ver_rs 1- '')
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/extract_${MY_PV}.zip"

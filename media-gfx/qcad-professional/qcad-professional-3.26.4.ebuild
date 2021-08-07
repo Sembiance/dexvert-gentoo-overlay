@@ -1,7 +1,7 @@
 EAPI=7
 
 DESCRIPTION="2D CAD program"
-HOMEPAGE="https://qcad.org/en/"
+HOMEPAGE="https://qcad.org/en/download"
 LICENSE="${PN}-LICENSE"
 SRC_URI="https://telparia.com/distfiles-restricted/dexvert/${CATEGORY}/${PN}/qcad-${PV}-pro-linux-qt5.14-x86_64.tar.gz"
 S="${WORKDIR}/qcad-${PV}-pro-linux-qt5.14-x86_64"

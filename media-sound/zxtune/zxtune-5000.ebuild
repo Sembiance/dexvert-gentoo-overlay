@@ -1,7 +1,7 @@
 EAPI=7
 
 DESCRIPTION="Chiptune converter"
-HOMEPAGE="https://github.com/vitamin-caig/zxtune"
+HOMEPAGE="https://github.com/vitamin-caig/zxtune/releases"
 LICENSE="MIT"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}-r${PV}.zip"
 S="${WORKDIR}/${PN}-r${PV}"

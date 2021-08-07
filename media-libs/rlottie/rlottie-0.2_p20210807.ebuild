@@ -3,7 +3,7 @@ EAPI=7
 inherit meson
 
 DESCRIPTION="A platform independent standalone library that plays Lottie Animations"
-HOMEPAGE="https://www.tizen.org/ https://github.com/Samsung/rlottie"
+HOMEPAGE="https://github.com/Samsung/rlottie"
 LICENSE="BSD FTL JSON MIT"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/${PN}-master"

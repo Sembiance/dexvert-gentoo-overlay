@@ -1,7 +1,7 @@
 EAPI=7
 
 DESCRIPTION="Converts miltiple different image types and various archives"
-HOMEPAGE="https://entropymine.com/${PN}/"
+HOMEPAGE="https://github.com/jsummers/deark"
 LICENSE="MIT"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/${PN}-master"

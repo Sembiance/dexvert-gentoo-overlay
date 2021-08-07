@@ -1,7 +1,7 @@
 EAPI=7
 
 DESCRIPTION="Retro Computer image converter"
-HOMEPAGE="http://recoil.sourceforge.net"
+HOMEPAGE="https://sourceforge.net/projects/recoil/files/recoil/"
 LICENSE="GPL-2"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
 

@@ -1,7 +1,7 @@
 EAPI=7
 
 DESCRIPTION="Another Slight Atari Player"
-HOMEPAGE="http://asap.sourceforge.net/"
+HOMEPAGE="https://sourceforge.net/projects/asap/files/asap/"
 LICENSE="GPL-2"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
 

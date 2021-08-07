@@ -3,7 +3,7 @@ EAPI=7
 inherit meson
 
 DESCRIPTION="Image loading library"
-HOMEPAGE="http://snisurset.net/code/${PN}/"
+HOMEPAGE="http://snisurset.net/code/abydos/"
 LICENSE="BSD-2"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.xz"
 

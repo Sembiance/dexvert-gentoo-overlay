@@ -3,7 +3,7 @@ EAPI=7
 inherit autotools
 
 DESCRIPTION="Extended Module Player CLI"
-HOMEPAGE="http://xmp.sourceforge.net/"
+HOMEPAGE="https://github.com/libxmp/xmp-cli"
 LICENSE="GPL-2"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/${PN}-cli-master"

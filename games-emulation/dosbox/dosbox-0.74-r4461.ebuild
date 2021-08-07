@@ -3,7 +3,7 @@ EAPI=7
 inherit autotools eutils flag-o-matic
 
 DESCRIPTION="DOS emulator"
-HOMEPAGE="http://dosbox.sourceforge.net/"
+HOMEPAGE="https://sourceforge.net/p/dosbox/code-0/HEAD/tree/dosbox/trunk/"
 LICENSE="GPL-2"
 # Update by choose "Download Snapshot" here: https://sourceforge.net/p/dosbox/code-0/HEAD/tree/dosbox/trunk/
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}-${PR}.zip"

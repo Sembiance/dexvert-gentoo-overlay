@@ -1,7 +1,7 @@
 EAPI=7
 
 DESCRIPTION="Command line tool convert AmigaBASIC files to ASCII"
-HOMEPAGE="http://aminet.net/package/dev/misc/${P}"
+HOMEPAGE="http://aminet.net/package/dev/misc/ab2ascii-1.3"
 LICENSE="GPL"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.lha"
 

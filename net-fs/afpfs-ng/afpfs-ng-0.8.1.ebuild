@@ -3,7 +3,7 @@ EAPI=7
 inherit autotools
 
 DESCRIPTION="AFP filesystem clients"
-HOMEPAGE="http://sourceforge.net/projects/${PN}/"
+HOMEPAGE="https://sourceforge.net/projects/afpfs-ng/files/afpfs-ng/"
 LICENSE="GPL-2"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.bz2"
 

@@ -3,7 +3,7 @@ EAPI=7
 inherit autotools
 
 DESCRIPTION="Library to load, handle and manipulate images in the PGF format"
-HOMEPAGE="https://www.libpgf.org/"
+HOMEPAGE="https://sourceforge.net/projects/libpgf/files/libpgf/"
 LICENSE="LGPL-2.1"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/${PN}"

@@ -3,7 +3,7 @@ EAPI=7
 inherit cmake-utils
 
 DESCRIPTION="SoundFont editor program"
-HOMEPAGE="https://github.com/${PN}/${PN}"
+HOMEPAGE="https://github.com/swami/swami"
 LICENSE="GPL-2"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
 

@@ -3,7 +3,7 @@ EAPI=7
 inherit cmake-utils
 
 DESCRIPTION="A set of programs for manipulating and viewing HDR images and video frames"
-HOMEPAGE="http://${PN}.sourceforge.net/"
+HOMEPAGE="https://sourceforge.net/projects/pfstools/files/pfstools/"
 LICENSE="LGPL-2.1"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tgz"
 

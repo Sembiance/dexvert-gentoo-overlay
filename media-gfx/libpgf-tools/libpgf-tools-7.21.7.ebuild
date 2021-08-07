@@ -1,7 +1,7 @@
 EAPI=7
 
 DESCRIPTION="Tools to process the pgf files"
-HOMEPAGE="https://www.libpgf.org/"
+HOMEPAGE="https://sourceforge.net/projects/libpgf/files/libpgf/"
 LICENSE="LGPL-2.1"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/pgf-console-${PV}.zip"
 S="${WORKDIR}/pgf"

@@ -1,7 +1,7 @@
 EAPI=7
 
 DESCRIPTION="The PE library used by pev"
-HOMEPAGE="https://github.com/merces/${PN}"
+HOMEPAGE="https://github.com/merces/libpe"
 LICENSE="BSD-2"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/${PN}-master"

@@ -3,7 +3,7 @@ EAPI=7
 inherit dotnet autotools
 
 DESCRIPTION="gtk bindings for mono"
-HOMEPAGE="https://www.mono-project.com/GtkSharp"
+HOMEPAGE="https://download.mono-project.com/sources/gtk-sharp212/"
 LICENSE="GPL-2"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
 
@@ -30,7 +30,7 @@ RDEPEND="
 	!dev-dotnet/atk-sharp"
 DEPEND="${RDEPEND}
 	virtual/pkgconfig
-	sys-devel/automake:1.11"
+	sys-devel/automake:1.16"
 
 PATCHES=( "${FILESDIR}/mono-ambiguous-range.patch" )
 

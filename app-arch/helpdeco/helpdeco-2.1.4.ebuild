@@ -1,7 +1,7 @@
 EAPI=7
 
 DESCRIPTION="A tool to dissect or convert WinHelp HLP files"
-HOMEPAGE="https://sourceforge.net/projects/helpdeco/"
+HOMEPAGE="https://sourceforge.net/projects/helpdeco//files/"
 LICENSE="GPL-2"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
 
