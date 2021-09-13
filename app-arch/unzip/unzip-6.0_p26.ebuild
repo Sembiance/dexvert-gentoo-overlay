@@ -33,6 +33,7 @@ src_prepare() {
 	eapply "${FILESDIR}"/${PN}-6.0-no-exec-stack.patch
 	eapply "${FILESDIR}"/${PN}-6.0-format-security.patch
 	eapply "${FILESDIR}"/${PN}-6.0-fix-false-overlap-detection-on-32bit-systems.patch
+	eapply "${FILESDIR}"/no_message_pause.patch
 	use natspec && eapply "${FILESDIR}/${PN}-6.0-natspec.patch" #275244
 	sed -i -r \
 		-e '/^CFLAGS/d' \

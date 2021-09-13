@@ -1,0 +1,12 @@
+diff -Naur a/fileio.c b/fileio.c
+--- a/fileio.c	2021-09-13 16:16:30.276882340 -0400
++++ b/fileio.c	2021-09-13 16:17:31.395450996 -0400
+@@ -2161,7 +2161,7 @@
+                     *q++ = '^';
+                     *q++ = '[';
+                 } else if (*p == 0x13) {   /* ASCII ^S (pause) */
+-                    pause = TRUE;
++                    /*pause = TRUE;*/
+                     if (p[1] == LF)        /* ASCII LF */
+                         *q++ = *++p;
+                     else if (p[1] == CR && p[2] == LF) {  /* ASCII CR LF */
