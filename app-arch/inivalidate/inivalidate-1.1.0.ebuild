@@ -9,7 +9,8 @@ SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
-DEPEND="dev-libs/libconfini"
+DEPEND="dev-libs/libconfini
+	dev-libs/jansson"
 RDEPEND=${DEPEND}
 
 src_install() {
