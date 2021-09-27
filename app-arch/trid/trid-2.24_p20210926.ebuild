@@ -6,10 +6,11 @@ LICENSE="Apache-2.0"
 
 MY_PV=$(ver_cut 1-2)
 
-# Get the following downloads from:
-# https://mark0.net/download/trid_linux_64.zip
-# https://mark0.net/download/tridscan.zip
-# https://mark0.net/download/triddefs.zip
+# Determine current version number from: https://mark0.net/soft-trid-e.html
+# Download files from:
+#  https://mark0.net/download/trid_linux_64.zip
+#  https://mark0.net/download/tridscan.zip
+#  https://mark0.net/download/triddefs.zip
 
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}-${MY_PV}.zip
 	https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/tridscan.zip

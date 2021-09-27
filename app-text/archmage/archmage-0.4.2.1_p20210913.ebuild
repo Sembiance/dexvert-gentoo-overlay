@@ -13,7 +13,7 @@ S="${WORKDIR}/${PN}-master"
 IUSE="html"
 
 DEPEND="dev-python/pychm
-	dev-python/beautifulsoup
+	dev-python/beautifulsoup4
 	dev-python/sgmllib3k
 	html? ( app-text/htmldoc )"
 RDEPEND="${DEPEND}"

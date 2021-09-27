@@ -3,7 +3,7 @@ EAPI=7
 inherit cmake-utils
 
 DESCRIPTION="ANSI and ASCII art converter"
-HOMEPAGE="https://github.com/ansilove/ansilove"
+HOMEPAGE="https://github.com/ansilove/ansilove/releases"
 LICENSE="BSD-2"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
 

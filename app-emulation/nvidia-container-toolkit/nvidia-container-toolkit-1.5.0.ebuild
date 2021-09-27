@@ -8,7 +8,7 @@ EGO_PN="github.com/NVIDIA/${PN}"
 inherit go-module
 
 DESCRIPTION="NVIDIA container runtime toolkit"
-HOMEPAGE="https://github.com/NVIDIA/nvidia-container-toolkit"
+HOMEPAGE="https://github.com/NVIDIA/nvidia-container-toolkit/releases"
 
 if [[ "${PV}" == "9999" ]] ; then
 	EGIT_REPO_URI="https://github.com/NVIDIA/${PN}.git"

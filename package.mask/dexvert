@@ -5,3 +5,6 @@ app-arch/unzip::gentoo
 games-emulation/dosbox::gentoo
 media-libs/libpgf::gentoo
 media-libs/rlottie::gentoo
+
+# TEMPORARY until gentoo fixes: https://bugs.gentoo.org/815061
+media-libs/gd::gentoo

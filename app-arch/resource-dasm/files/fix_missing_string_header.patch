@@ -1,0 +1,11 @@
+diff -Naur a/macski_decomp.cc b/macski_decomp.cc
+--- a/macski_decomp.cc	2021-09-26 15:13:17.989662288 -0400
++++ b/macski_decomp.cc	2021-09-26 15:13:54.973647859 -0400
+@@ -7,6 +7,7 @@
+ #include <phosg/Strings.hh>
+ #include <stdexcept>
+ #include <string>
++#include <cstring>
+ 
+ using namespace std;
+ 

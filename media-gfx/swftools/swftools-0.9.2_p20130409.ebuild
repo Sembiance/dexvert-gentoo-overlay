@@ -1,7 +1,7 @@
 EAPI=7
 
 DESCRIPTION="SWF Tools is a collection of SWF manipulation and generation utilities"
-HOMEPAGE="http://www.swftools.org/"
+HOMEPAGE="http://www.swftools.org/download.html"
 LICENSE="GPL-2"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz
 	https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/swftools_0.9.2+git20130725-4.1.debian.tar.xz"

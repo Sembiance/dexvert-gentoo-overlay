@@ -13,6 +13,7 @@ RESTRICT="mirror test"
 DEPEND="media-libs/openal
 	media-libs/libsdl
 	media-libs/flac
+	dev-libs/boost
 	media-video/ffmpeg
 	dev-libs/boost"
 RDEPEND="${DEPEND}"

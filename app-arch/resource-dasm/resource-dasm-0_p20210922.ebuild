@@ -13,6 +13,12 @@ RESTRICT="mirror test"
 
 DEPEND="dev-libs/phosg"
 
+PATCHES=( "${FILESDIR}/fix_missing_string_header.patch" )
+
+src_prepare() {
+	default
+}
+
 src_install() {
 	dobin resource_dasm
 	dobin hypercard_dasm
