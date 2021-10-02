@@ -14,6 +14,11 @@ RESTRICT="mirror test"
 
 DEPEND="dev-qt/qtcore
 	dev-qt/qtgui
+	kde-frameworks/extra-cmake-modules
+	kde-frameworks/kxmlgui
+	kde-frameworks/ki18n
+	kde-frameworks/kauth
+	kde-frameworks/kcrash
 	dev-qt/qtsvg"
 RDEPEND=${DEPEND}
 
