@@ -1,6 +1,28 @@
 diff -Naur a/app/drawview.cpp b/app/drawview.cpp
 --- a/app/drawview.cpp	2021-05-28 05:44:59.000000000 -0400
-+++ b/app/drawview.cpp	2021-10-02 14:36:05.769161204 -0400
++++ b/app/drawview.cpp	2021-10-02 21:44:13.446565076 -0400
+@@ -226,8 +226,8 @@
+ 	DrawDiagram *dg = new DrawDiagram(infile);
+ 	if (!dg->isValid())
+ 	{
+-		KMessageBox::sorry(this, xi18nc("@info", "Error loading drawing file<nl/><filename>%2</filename><nl/><nl/><emphasis>%1</emphasis>",
+-						dg->drawError(), infile));
++		//KMessageBox::sorry(this, xi18nc("@info", "Error loading drawing file<nl/><filename>%2</filename><nl/><nl/><emphasis>%1</emphasis>",
++		//				dg->drawError(), infile));
+ 		delete dg;
+ 		return (false);
+ 	}
+@@ -285,8 +285,8 @@
+ 
+ 	if (!mDiagram->drawError().isEmpty())
+ 	{
+-		KMessageBox::information(this, xi18nc("@info", "Problem in drawing file<nl/><filename>%2</filename><nl/><nl/><emphasis>%1</emphasis>",
+-						      mDiagram->drawError(), infile));
++		//KMessageBox::information(this, xi18nc("@info", "Problem in drawing file<nl/><filename>%2</filename><nl/><nl/><emphasis>%1</emphasis>",
++		//				      mDiagram->drawError(), infile));
+ 	}
+ 
+ 	QAction *act = actionCollection()->action("file_save");
 @@ -438,6 +438,52 @@
  					      formatName, expfile));
  }
@@ -56,7 +78,7 @@ diff -Naur a/app/drawview.cpp b/app/drawview.cpp
  //  "Settings" menu operations						//
 diff -Naur a/app/drawview.h b/app/drawview.h
 --- a/app/drawview.h	2021-05-28 05:44:59.000000000 -0400
-+++ b/app/drawview.h	2021-10-02 14:35:52.250172407 -0400
++++ b/app/drawview.h	2021-10-02 21:36:52.132939385 -0400
 @@ -69,6 +69,7 @@
  	virtual ~DrawView();
  
@@ -67,7 +89,7 @@ diff -Naur a/app/drawview.h b/app/drawview.h
  	void drawingSizeChanged();
 diff -Naur a/app/main.cpp b/app/main.cpp
 --- a/app/main.cpp	2021-05-28 05:44:59.000000000 -0400
-+++ b/app/main.cpp	2021-10-02 14:55:58.273161968 -0400
++++ b/app/main.cpp	2021-10-02 21:36:52.132939385 -0400
 @@ -84,10 +84,17 @@
  
      parser.addPositionalArgument("file", i18n("File to load"), i18n("[file...]"));
