@@ -3,7 +3,7 @@ EAPI=7
 DESCRIPTION="Command line tool to uncompress compressed CrunchMania files"
 HOMEPAGE="http://aminet.net/package/util/pack/decrunchmania-mos"
 LICENSE="MIT"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}-mos.lha"
+SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.lha"
 S="${WORKDIR}/decrunchmania"
 
 DEPEND="app-arch/lha"
