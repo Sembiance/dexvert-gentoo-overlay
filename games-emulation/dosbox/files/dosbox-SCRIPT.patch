@@ -1,0 +1,122 @@
+diff -Naur a/src/dos/dos_programs.cpp b/src/dos/dos_programs.cpp
+--- a/src/dos/dos_programs.cpp	2021-11-24 10:55:53.219999449 -0500
++++ b/src/dos/dos_programs.cpp	2021-11-24 10:57:21.184823926 -0500
+@@ -38,7 +38,9 @@
+ #include "control.h"
+ #include "inout.h"
+ #include "dma.h"
+-
++#include "keyboard.h"
++#include "timer.h"
++#include <sys/time.h>
+ 
+ #if defined(OS2)
+ #define INCL DOSFILEMGR
+@@ -558,6 +560,100 @@
+ 	*make=new MEM;
+ }
+ 
++time_t startSec=0;
++time_t lastMS=0;
++struct scriptKey { uint8_t key; time_t ms; bool down; };
++struct scriptKey ** scriptKeys;
++uint32_t scriptKeysLen=0;
++uint32_t scriptKeyMark=0;
++static void SCRIPT_TickHandler(void) {
++	struct timeval tv;
++	if(scriptKeysLen==0 || scriptKeyMark==scriptKeysLen || gettimeofday(&tv, NULL)!=0) {
++		return;
++	}
++	time_t elapsedMS = ((tv.tv_sec-startSec)*1000)+(tv.tv_usec/1000);
++
++	struct scriptKey * sk = scriptKeys[scriptKeyMark];
++	if(elapsedMS<sk->ms) {
++		return;
++	}
++
++	//printf("adding key %d with down %d\n", sk->key, sk->down);
++
++	KEYBOARD_AddKey((KBD_KEYS)sk->key, sk->down);
++	free(sk);
++	scriptKeyMark++;
++
++	if(scriptKeyMark==scriptKeysLen) {
++		TIMER_DelTickHandler(&SCRIPT_TickHandler);
++	}
++}
++
++unsigned long strchrcount(char * haystack, char needle)
++{
++    unsigned long	i=0;
++
++    if(!haystack)
++        return 0;
++
++    while(*haystack)
++    {
++     	if(*haystack==needle)
++            i++;
++
++       	haystack++;
++    }
++
++    return i;
++}
++
++class SCRIPT : public Program {
++public:
++	void Run(void) {
++		struct timeval tv;
++		if(gettimeofday(&tv, NULL)==0) {
++			startSec = tv.tv_sec;
++		}
++		time_t elapsedMS = ((tv.tv_sec-startSec)*1000)+(tv.tv_usec/1000);
++
++		// SCRIPT environment variable inf ormat  <ms>,<key>,<down>
++		// ms is how many ms from start to press the key
++		// key is a key enum number from keyboard.h
++		// down is set to 1 for key down, 0 for key up
++		char * script = getenv("SCRIPT");
++		
++		scriptKeysLen = strchrcount(script, ',')/3;
++		scriptKeys = (struct scriptKey **)malloc(sizeof(struct scriptKey)*scriptKeysLen);
++
++		char * token;
++		while((token = strsep(&script, ",")))
++		{
++			struct scriptKey * sk = (struct scriptKey *)malloc(sizeof(struct scriptKey));
++			sk->ms = atoi(token);
++
++			token = strsep(&script, ",");
++			if(!token)
++				break;
++			sk->key = atoi(token);
++
++			token = strsep(&script, ",");
++			if(!token)
++				break;
++			sk->down = atoi(token);
++			scriptKeys[scriptKeyMark] = sk;
++			scriptKeyMark++;
++		}
++
++		scriptKeyMark = 0;
++
++		TIMER_AddTickHandler(&SCRIPT_TickHandler);
++	}
++};
++
++static void SCRIPT_ProgramStart(Program * * make) {
++	*make=new SCRIPT;
++}
++
+ extern Bit32u floppytype;
+ 
+ 
+@@ -1853,5 +1949,5 @@
+ 	PROGRAMS_MakeFile("LOADROM.COM", LOADROM_ProgramStart);
+ 	PROGRAMS_MakeFile("IMGMOUNT.COM", IMGMOUNT_ProgramStart);
+ 	PROGRAMS_MakeFile("KEYB.COM", KEYB_ProgramStart);
+-
++	PROGRAMS_MakeFile("SCRIPT.COM",SCRIPT_ProgramStart);
+ }
