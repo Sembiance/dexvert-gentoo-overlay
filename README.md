@@ -1,6 +1,6 @@
 # dexvert-gentoo-overlay
 
-This is a Gentoo overlay that contains multiple programs used by my [dexvert](https://github.com/Sembiance/dexvert) program
+This is a Gentoo overlay that contains multiple programs and custom code patches used by my [dexvert](https://github.com/Sembiance/dexvert) file format conversion program
 
 ## Install
 
