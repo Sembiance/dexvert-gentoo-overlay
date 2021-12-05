@@ -1,0 +1,12 @@
+diff -Naur a/meson.build b/meson.build
+--- a/meson.build	2021-12-02 19:34:28.087308384 -0500
++++ b/meson.build	2021-12-02 19:34:42.606303914 -0500
+@@ -299,7 +299,7 @@
+   libgd_dep = dependency('gdlib')
+   if libgd_dep.found()
+     sup = []
+-    if cc.has_function('gdImageCreateFromXbm', name: 'XBM check', dependencies: libgd_dep)
++    if cc.has_function('gdImageCreateFromXbm', dependencies: libgd_dep)
+       add_project_arguments('-DLIBGD_HAS_XBM', language: ['c'])
+       sup += 'with XBM'
+     else

@@ -13,6 +13,8 @@ RESTRICT="mirror test"
 
 IUSE="debug"
 
+PATCHES=( "${FILESDIR}/meson_name.patch" )
+
 DEPEND="x11-libs/cairo
 	media-libs/libnsgif
 	media-libs/tiff

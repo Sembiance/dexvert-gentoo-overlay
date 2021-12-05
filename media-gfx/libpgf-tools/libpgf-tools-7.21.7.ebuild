@@ -10,7 +10,8 @@ SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
-DEPEND=">=media-libs/libpgf-${PV}"
+DEPEND=">=media-libs/libpgf-${PV}
+	media-libs/freeimage"
 RDEPEND=${DEPEND}
 
 src_compile() {
