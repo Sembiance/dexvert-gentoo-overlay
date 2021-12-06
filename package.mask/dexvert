@@ -3,6 +3,7 @@
 # Prefer my overlay packages instead of gentoo packages:
 media-gfx/ansilove::gentoo
 app-arch/unzip::gentoo
+media-sound/deadbeef::gentoo
 media-libs/rlottie::gentoo
 media-libs/libpgf::gentoo
 media-libs/gd::gentoo
