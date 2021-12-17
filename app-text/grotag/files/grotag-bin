@@ -1,3 +1,20 @@
 #!/bin/bash
 
-java -jar /opt/grotag/Grotag.jar "$@"
+KIDPIDS=()
+
+java -jar /opt/grotag/Grotag.jar "$@" &
+KIDPIDS+=($!)
+
+function clean_up
+{
+    for kidpid in "${KIDPIDS[@]}"; do
+        kill "$kidpid"
+    done
+
+    wait
+    exit 1
+}
+
+trap clean_up SIGINT SIGTERM
+
+wait

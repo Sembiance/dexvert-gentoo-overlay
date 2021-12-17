@@ -14,6 +14,8 @@ RESTRICT="mirror test"
 
 BDEPEND="virtual/pkgconfig"
 
+PATCHES=( "${FILESDIR}/enable_gtk.patch" )
+
 src_prepare() {
 	default
 

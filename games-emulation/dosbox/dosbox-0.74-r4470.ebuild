@@ -24,7 +24,14 @@ DEPEND="alsa? ( media-libs/alsa-lib )
 	media-libs/sdl-sound"
 RDEPEND=${DEPEND}
 
-PATCHES=( "${FILESDIR}/${PN}-SCRIPT.patch" "${FILESDIR}/${PN}-gcc46.patch" "${FILESDIR}/${PN}-normal4x.patch" "${FILESDIR}/${PN}-noRebootDelay.patch" "${FILESDIR}/${PN}-addVIDREC.patch" "${FILESDIR}/${PN}-video-debug.patch" )
+PATCHES=(
+	"${FILESDIR}/${PN}-SCRIPT.patch"
+	"${FILESDIR}/${PN}-gcc46.patch"
+	"${FILESDIR}/${PN}-normal4x.patch"
+	"${FILESDIR}/${PN}-noRebootDelay.patch"
+	"${FILESDIR}/${PN}-addVIDREC.patch"
+	"${FILESDIR}/${PN}-video-debug.patch"
+	)
 
 src_prepare() {
 	default
@@ -39,7 +46,3 @@ src_configure() {
 		$(use_enable debug) \
 		$(use_enable opengl)
 }
-
-#src_install() {
-#	default
-#}

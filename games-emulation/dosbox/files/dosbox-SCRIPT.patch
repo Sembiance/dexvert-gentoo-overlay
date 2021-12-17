@@ -1,18 +1,19 @@
 diff -Naur a/src/dos/dos_programs.cpp b/src/dos/dos_programs.cpp
---- a/src/dos/dos_programs.cpp	2021-11-24 10:55:53.219999449 -0500
-+++ b/src/dos/dos_programs.cpp	2021-11-24 10:57:21.184823926 -0500
-@@ -38,7 +38,9 @@
+--- a/src/dos/dos_programs.cpp	2021-12-10 09:25:04.072199192 -0500
++++ b/src/dos/dos_programs.cpp	2021-12-10 09:37:20.576331080 -0500
+@@ -38,7 +38,10 @@
  #include "control.h"
  #include "inout.h"
  #include "dma.h"
 -
 +#include "keyboard.h"
++#include <fcntl.h>
 +#include "timer.h"
 +#include <sys/time.h>
  
  #if defined(OS2)
  #define INCL DOSFILEMGR
-@@ -558,6 +560,100 @@
+@@ -558,6 +561,107 @@
  	*make=new MEM;
  }
  
@@ -76,7 +77,14 @@ diff -Naur a/src/dos/dos_programs.cpp b/src/dos/dos_programs.cpp
 +		// ms is how many ms from start to press the key
 +		// key is a key enum number from keyboard.h
 +		// down is set to 1 for key down, 0 for key up
-+		char * script = getenv("SCRIPT");
++		char * scriptFilePath = getenv("SCRIPT");
++
++		int fd = open(scriptFilePath, 0);
++		struct stat statData;
++		fstat(fd, &statData);
++		char * script = (char *)malloc(statData.st_size);
++		read(fd, script, statData.st_size);
++		close(fd);
 +		
 +		scriptKeysLen = strchrcount(script, ',')/3;
 +		scriptKeys = (struct scriptKey **)malloc(sizeof(struct scriptKey)*scriptKeysLen);
@@ -113,7 +121,7 @@ diff -Naur a/src/dos/dos_programs.cpp b/src/dos/dos_programs.cpp
  extern Bit32u floppytype;
  
  
-@@ -1853,5 +1949,5 @@
+@@ -1853,5 +1957,5 @@
  	PROGRAMS_MakeFile("LOADROM.COM", LOADROM_ProgramStart);
  	PROGRAMS_MakeFile("IMGMOUNT.COM", IMGMOUNT_ProgramStart);
  	PROGRAMS_MakeFile("KEYB.COM", KEYB_ProgramStart);
