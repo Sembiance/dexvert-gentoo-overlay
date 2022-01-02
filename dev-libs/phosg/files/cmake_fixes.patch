@@ -1,0 +1,30 @@
+diff -Naur a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	2022-01-01 19:04:18.932884021 -0500
++++ b/CMakeLists.txt	2022-01-01 19:04:58.796867533 -0500
+@@ -11,7 +11,7 @@
+ if (MSVC)
+     add_compile_options(/W4 /WX)
+ else()
+-    add_compile_options(-Wall -Wextra -pedantic -Werror)
++    add_compile_options(-Wall -Wextra -pedantic -Werror -Wno-strict-aliasing -Wno-unused-result -Wno-overflow)
+ endif()
+ 
+ 
+diff -Naur a/src/Vector.hh b/src/Vector.hh
+--- a/src/Vector.hh	2022-01-01 19:04:14.940885630 -0500
++++ b/src/Vector.hh	2022-01-01 19:03:49.580895674 -0500
+@@ -132,10 +132,10 @@
+     T a;
+   };
+ 
+-  Vector4<T>();
+-  Vector4<T>(T x, T y, T z, T w);
+-  Vector4<T>(const Vector2<T>& xy, T z, T w);
+-  Vector4<T>(const Vector3<T>& xyz, T w);
++  Vector4();
++  Vector4(T x, T y, T z, T w);
++  Vector4(const Vector2<T>& xy, T z, T w);
++  Vector4(const Vector3<T>& xyz, T w);
+ 
+   Vector4<T> operator-() const;
+ 

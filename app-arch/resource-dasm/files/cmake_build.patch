@@ -1,0 +1,42 @@
+diff -Naur a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	2022-01-01 19:29:02.196919666 -0500
++++ b/CMakeLists.txt	2022-01-01 19:29:31.827894405 -0500
+@@ -12,7 +12,7 @@
+ if (MSVC)
+     add_compile_options(/W4 /WX)
+ else()
+-    add_compile_options(-Wall -Wextra -Werror)
++    add_compile_options(-Wall -Wextra -Werror -Wno-strict-aliasing -Wno-unused-result -Wno-overflow -Wno-maybe-uninitialized -Wno-format -Wno-aggressive-loop-optimizations)
+ endif()
+ 
+ include_directories("/usr/local/include")
+diff -Naur a/src/hypercard_dasm.cc b/src/hypercard_dasm.cc
+--- a/src/hypercard_dasm.cc	2022-01-01 19:29:15.748908114 -0500
++++ b/src/hypercard_dasm.cc	2022-01-01 19:24:45.749129132 -0500
+@@ -1201,6 +1201,7 @@
+     size_t block_offset = r.where();
+     BlockHeader header = r.get_sw<BlockHeader>(false);
+     size_t block_end = block_offset + header.size;
++    const int& header_id(header.id);
+ 
+     if (dump_raw_blocks) {
+       string type_str = string_for_resource_type(header.type);
+@@ -1217,15 +1218,15 @@
+         stack_format = stack->format;
+         break;
+       case 0x424B4744: // BKGD
+-        backgrounds.emplace(piecewise_construct, forward_as_tuple(header.id),
++        backgrounds.emplace(piecewise_construct, forward_as_tuple(header_id),
+             forward_as_tuple(r, stack_format));
+         break;
+       case 0x43415244: // CARD
+-        cards.emplace(piecewise_construct, forward_as_tuple(header.id),
++        cards.emplace(piecewise_construct, forward_as_tuple(header_id),
+             forward_as_tuple(r, stack_format));
+         break;
+       case 0x424D4150: // BMAP
+-        bitmaps.emplace(piecewise_construct, forward_as_tuple(header.id),
++        bitmaps.emplace(piecewise_construct, forward_as_tuple(header_id),
+             forward_as_tuple(r, stack_format));
+         break;
+ 
