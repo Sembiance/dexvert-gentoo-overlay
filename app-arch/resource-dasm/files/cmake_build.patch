@@ -6,7 +6,7 @@ diff -Naur a/CMakeLists.txt b/CMakeLists.txt
      add_compile_options(/W4 /WX)
  else()
 -    add_compile_options(-Wall -Wextra -Werror)
-+    add_compile_options(-Wall -Wextra -Werror -Wno-strict-aliasing -Wno-unused-result -Wno-overflow -Wno-maybe-uninitialized -Wno-format -Wno-aggressive-loop-optimizations)
++    add_compile_options(-Wall -Wextra -Werror -Wno-maybe-uninitialized -Wno-format -Wno-aggressive-loop-optimizations)
  endif()
  
  include_directories("/usr/local/include")

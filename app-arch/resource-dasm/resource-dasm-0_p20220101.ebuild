@@ -15,11 +15,9 @@ RESTRICT="mirror test"
 
 DEPEND="dev-libs/phosg"
 
-PATCHES=( "${FILESDIR}/cmake_build.patch" )
-
 src_install() {
- 	cmake-utils_src_install
- 
+	cmake-utils_src_install
+
 	# Do not violate multilib strict
 	mv "${ED}/usr/lib" "${ED}/usr/$(get_libdir)" || die "mv failed"
 
