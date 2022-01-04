@@ -1,7 +1,7 @@
 EAPI=7
 
 DESCRIPTION="Atari ST and Amiga music player"
-HOMEPAGE="http://sc68.atari.org/"
+HOMEPAGE="https://sourceforge.net/projects/sc68/files/sc68/"
 LICENSE="GPL-3"
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
 

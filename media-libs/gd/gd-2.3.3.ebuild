@@ -1,3 +1,9 @@
+# ROBERT : We have this because we want to --enable-gd-formats
+# SEE BUG: https://bugs.gentoo.org/815061
+# At some future version of gd, it will re-enable these by default, it's already committed: https://github.com/libgd/libgd/pull/779
+# But as of the 2.3.3 release it's not on by default. Once 2.3.4 releases or later, we *should* be good to switch back to gentoo package
+# But I should double check (dexvert test image/gd)
+
 # Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 

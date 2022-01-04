@@ -14,15 +14,15 @@ CRATES="
 	crc32fast-1.2.1
 	data-url-0.1.0
 	deflate-0.9.1
-	flate2-1.0.21
+	flate2-1.0.22
 	float-cmp-0.9.0
-	fontdb-0.6.2
+	fontdb-0.7.0
 	jpeg-decoder-0.1.22
-	kurbo-0.8.0
-	libc-0.2.101
+	kurbo-0.8.1
+	libc-0.2.103
 	log-0.4.14
 	matches-0.1.9
-	memmap2-0.3.1
+	memmap2-0.5.0
 	miniz_oxide-0.4.4
 	once_cell-1.8.0
 	pico-args-0.4.2
@@ -34,7 +34,7 @@ CRATES="
 	safe_arch-0.5.2
 	simplecss-0.2.1
 	siphasher-0.3.7
-	smallvec-1.6.1
+	smallvec-1.7.0
 	svgtypes-0.8.0
 	tiny-skia-0.6.1
 	ttf-parser-0.12.3
