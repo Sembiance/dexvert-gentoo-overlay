@@ -8,5 +8,6 @@ media-libs/libpgf::gentoo
 media-libs/libmikmod::gentoo
 media-libs/gd::gentoo
 app-emulation/uade::gentoo
+app-emulation/qemu::gentoo
 games-emulation/dosbox::gentoo
 dev-python/typing-extensions::gentoo
