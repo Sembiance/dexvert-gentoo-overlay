@@ -1,0 +1,20 @@
+diff -Naur a/src/ilbmviewer/Makefile.am b/src/ilbmviewer/Makefile.am
+--- a/src/ilbmviewer/Makefile.am	2022-01-19 12:53:31.931758122 -0500
++++ b/src/ilbmviewer/Makefile.am	2022-01-19 12:54:01.890725805 -0500
+@@ -1,12 +1,12 @@
+-ilbmviewer.1: main.c
+-	$(HELP2MAN) --output=$@ --no-info --name 'View a collection of ILBM images inside an IFF file' --include=ilbmviewer.h2m --libtool ./ilbmviewer
++#ilbmviewer.1: main.c
++#	$(HELP2MAN) --output=$@ --no-info --name 'View a collection of ILBM images inside an IFF file' --include=ilbmviewer.h2m --libtool ./ilbmviewer
+ 
+ bin_PROGRAMS = ilbmviewer
+ noinst_HEADERS = viewer.h viewerdisplay.h
+-man1_MANS = ilbmviewer.1
++#man1_MANS = ilbmviewer.1
+ 
+ ilbmviewer_SOURCES = main.c viewer.c viewerdisplay.c
+ ilbmviewer_LDADD = ../SDL_ILBM/libSDL_ILBM.la $(LIBIFF_LIBS) $(LIBILBM_LIBS) $(LIBAMIVIDEO_LIBS) $(SDL2_LIBS)
+ ilbmviewer_CFLAGS = -I../SDL_ILBM $(LIBIFF_CFLAGS) $(LIBILBM_CFLAGS) $(LIBAMIVIDEO_CFLAGS) $(SDL2_CFLAGS)
+ 
+-EXTRA_DIST = ilbmviewer.1 ilbmviewer.h2m
++#EXTRA_DIST = ilbmviewer.1 ilbmviewer.h2m
