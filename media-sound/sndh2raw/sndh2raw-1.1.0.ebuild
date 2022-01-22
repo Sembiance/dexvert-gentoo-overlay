@@ -9,7 +9,8 @@ SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
-DEPEND="media-sound/sc68"
+DEPEND="media-sound/sc68
+	dev-libs/jansson"
 RDEPEND="${DEPEND}"
 
 src_install() {
