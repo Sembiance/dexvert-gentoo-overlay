@@ -1,0 +1,22 @@
+diff -Naur a/src/vinetto/thumbOLE.py b/src/vinetto/thumbOLE.py
+--- a/src/vinetto/thumbOLE.py	2022-01-31 07:58:04.274967976 -0500
++++ b/src/vinetto/thumbOLE.py	2022-01-31 07:58:51.121709059 -0500
+@@ -36,7 +36,8 @@
+ import sys
+ import os
+ import errno
+-from io import StringIO
++from io import BytesIO
++from PIL import Image
+ from struct import unpack
+ from binascii import hexlify, unhexlify
+ from pkg_resources import resource_filename
+@@ -467,7 +468,7 @@
+                                           config.THUMBS_TYPE_OLE_PIL_TYPE1_QUANTIZE + bstrStreamData[30:52] +
+                                           config.THUMBS_TYPE_OLE_PIL_TYPE1_HUFFMAN  + bstrStreamData[52:] )
+ 
+-                            image = Image.open(StringIO.StringIO(bstrImage))
++                            image = Image.open(BytesIO(bstrImage))
+                             #r, g, b, a = image.split()
+                             #image = Image.merge("RGB", (r, g, b))
+                             image = image.transpose(Image.FLIP_TOP_BOTTOM)

@@ -14,6 +14,6 @@ SLOT="0"
 KEYWORDS="amd64"
 RESTRICT="mirror test"
 
-PATCHES=( "${FILESDIR}/python3.patch" )
+#PATCHES=( "${FILESDIR}/python3.patch" )
 
 DEPEND="dev-python/pillow[${PYTHON_USEDEP}]"
