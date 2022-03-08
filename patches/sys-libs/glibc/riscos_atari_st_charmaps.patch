@@ -55,11 +55,11 @@ index 0000000000..8afd200404
 +#define HAS_HOLES	1	/* Not all 256 character are defined.  */
 +
 +#include <8bit-gap.c>
-diff --git a/iconvdata/gconv-modules-extra.conf b/iconvdata/gconv-modules-extra.conf
+diff --git a/iconvdata/gconv-modules b/iconvdata/gconv-modules
 index 82d7be577d..2778b0ff16 100644
---- a/iconvdata/gconv-modules-extra.conf
-+++ b/iconvdata/gconv-modules-extra.conf
-@@ -1459,6 +1459,14 @@ module	INTERNAL		GB18030//		GB18030		1
+--- a/iconvdata/gconv-modules
++++ b/iconvdata/gconv-modules
+@@ -1575,6 +1575,14 @@ module	INTERNAL		GB18030//		GB18030		1
  module	VISCII//		INTERNAL		VISCII		1
  module	INTERNAL		VISCII//		VISCII		1
  
