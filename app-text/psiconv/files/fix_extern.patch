@@ -1,0 +1,24 @@
+diff -Naur a/program/psiconv/psiconv.c b/program/psiconv/psiconv.c
+--- a/program/psiconv/psiconv.c	2022-04-08 08:57:25.858082578 -0400
++++ b/program/psiconv/psiconv.c	2022-04-08 08:57:55.313050850 -0400
+@@ -44,6 +44,8 @@
+ #include "psiconv.h"
+ #include "gen.h"
+ 
++psiconv_list fileformat_list;
++
+ static void print_help(void);
+ static void print_version(void);
+ static void strtoupper(char *str);
+diff -Naur a/program/psiconv/psiconv.h b/program/psiconv/psiconv.h
+--- a/program/psiconv/psiconv.h	2022-04-08 08:57:25.858082578 -0400
++++ b/program/psiconv/psiconv.h	2022-04-08 08:57:44.985061975 -0400
+@@ -52,7 +52,7 @@
+   output_function *output;
+ } *fileformat;
+ 
+-psiconv_list fileformat_list; /* of struct psiconv_fileformat */
++extern psiconv_list fileformat_list; /* of struct psiconv_fileformat */
+ 
+ 
+ #endif /* PSICONV_H */
