@@ -11,6 +11,10 @@ SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
+DEPEND="sys-fs/fuse:0
+	media-gfx/libimagequant"
+RDEPEND=${DEPEND}
+
 src_install() {
 	exeinto /opt/uniconvertor
 
