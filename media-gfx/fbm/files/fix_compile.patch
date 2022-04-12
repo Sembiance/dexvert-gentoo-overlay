@@ -1,0 +1,28 @@
+diff -Naur a/Makefile b/Makefile
+--- a/Makefile	2022-04-09 21:56:54.046061128 -0400
++++ b/Makefile	2022-04-09 21:56:34.166086616 -0400
+@@ -76,11 +76,11 @@
+ 
+ #----------------JPEG linkage----------------
+ # If you don't have the JPEG library, use these two lines
+-#JPEG=
+-#JLIB= 
++JPEG=
++JLIB= 
+ # If you have the JPEG library, use the next lines instead
+-JPEG= -DDO_JPEG -I../jpeg
+-JLIB= -L../jpeg -ljpeg
++#JPEG= -DDO_JPEG -I../jpeg
++#JLIB= -L../jpeg -ljpeg
+ 
+ #----------------Utah RLE linkage----------------
+ # If you don't have the Utah RLE library, use these two lines
+@@ -171,7 +171,7 @@
+ 
+ libfbm.a: $(LIBO)
+ 	rm -f $@
+-	ar clq $@ $(LIBO)
++	ar cq $@ $(LIBO)
+ 	ranlib $@
+ 
+ # Library routines
