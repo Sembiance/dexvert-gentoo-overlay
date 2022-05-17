@@ -1,0 +1,178 @@
+diff -Naur a/Makefile b/Makefile
+--- a/Makefile	2022-05-16 09:35:21.655583467 -0400
++++ b/Makefile	2022-05-16 10:59:46.396950544 -0400
+@@ -25,7 +25,7 @@
+ 	Makefile \
+ 	helpfile.txt NEWS README README.de ChangeLog
+ 
+-CFLAGS+=-Wall
++CFLAGS+=-Wall -g
+ 
+ build: helpdeco splitmrb zapres
+ 
+diff -Naur a/helpdec1.c b/helpdec1.c
+--- a/helpdec1.c	2022-05-16 09:35:21.655583467 -0400
++++ b/helpdec1.c	2022-05-16 10:38:04.053724315 -0400
+@@ -29,8 +29,8 @@
+     va_start(arg,format);
+     vfprintf(stderr,format,arg);
+     va_end(arg);
+-    fputs("\nPress CR to continue at your own risk, any other key to exit.\n",stderr);
+-    if(getch()!='\r') exit(1);
++    /*fputs("\nPress CR to continue at your own risk, any other key to exit.\n",stderr);
++    if(getch()!='\r') exit(1);*/
+ }
+ 
+ #ifndef HAVE_STRNCPY
+@@ -86,7 +86,7 @@
+ 
+ size_t my_fread(void *ptr,long bytes,FILE *f) /* save fread function */
+ {
+-    size_t result;
++    size_t result=0;
+ 
+     if(bytes==0) return 0;
+     if(bytes<0||bytes!=(size_t)bytes||(result=fread(ptr,1,(size_t)bytes,f))!=bytes)
+@@ -434,7 +434,7 @@
+ {
+     static unsigned char lzbuffer[0x1000];
+     int (*Emit)(MFILE *f,char c);
+-    unsigned char bits,mask;
++    unsigned char bits=0,mask;
+     int pos,len,back;
+     long n;
+ 
+@@ -660,7 +660,7 @@
+     BTREEHEADER BtreeHdr;
+     BTREENODEHEADER CurrNode;
+     long offset;
+-    char TempFile[19];
++    char TempFile[255];
+     int i,n;
+ 
+     fseek(HelpFile,0L,SEEK_SET);
+@@ -788,7 +788,7 @@
+ void ListFiles(FILE *HelpFile) /* display internal directory */
+ {
+     BUFFER buf;
+-    char FileName[20];
++    char FileName[255];
+     int j,i,n;
+ 
+     puts("FileName		  FileOffset | FileName 	       FileOffset");
+@@ -810,7 +810,7 @@
+ {
+     BOOL headerwritten;
+     char *leader;
+-    char FileName[20];
++    char FileName[255];
+     long FileLength;
+     BUFFER buf;
+     int i,n;
+@@ -964,7 +964,7 @@
+ void GroupDump(FILE *HelpFile)
+ {
+     GROUPHEADER GroupHeader;
+-    char *ptr;
++    char *ptr=NULL;
+     unsigned long i;
+ 
+     read_GROUPHEADER(&GroupHeader,HelpFile);
+diff -Naur a/helpdeco.c b/helpdeco.c
+--- a/helpdeco.c	2022-05-16 09:35:21.655583467 -0400
++++ b/helpdeco.c	2022-05-16 11:07:21.610569714 -0400
+@@ -1024,13 +1024,13 @@
+     int type;
+     unsigned int i,n,j;
+     unsigned char byType,byPacked;
+-    long l,pos,offset,nextpict,FileStart;
++    long l,pos=0,offset=0,nextpict,FileStart;
+     BITMAPFILEHEADER bmfh;
+     BITMAPINFOHEADER bmih;
+     APMFILEHEADER afh;
+     uint16_t *wp;
+-    uint16_t wMagic,mapmode,colors;
+-    uint32_t dwRawSize,dwDataSize,dwHotspotOffset,dwOffsBitmap,dwHotspotSize,dwPictureOffset,xPels,yPels;
++    uint16_t wMagic,mapmode=0,colors=0;
++    uint32_t dwRawSize=0,dwDataSize,dwHotspotOffset,dwOffsBitmap,dwHotspotSize,dwPictureOffset,xPels=0,yPels=0;
+ 
+     FileStart=f->tell(f);
+     wMagic=GetWord(f);
+@@ -1382,7 +1382,7 @@
+     BUFFER buf;
+     MFILE *mf;
+     char *leader;
+-    char FileName[20];
++    char FileName[255];
+     long FileLength;
+     int i,num,n,type;
+     long savepos;
+@@ -2037,7 +2037,7 @@
+     char *p;
+     long FontStart;
+     int i,j,k,l,len;
+-    unsigned char *family;
++    unsigned char *family=0;
+     BOOL charmap;
+     OLDFONT oldfont;
+     NEWFONT newfont;
+@@ -2050,6 +2050,8 @@
+     {
+ 	FontStart=ftell(HelpFile);
+ 	read_FONTHEADER(&FontHdr,HelpFile);
++	if(FontHdr.NumFacenames)
++	{
+ 	fontnames=FontHdr.NumFacenames;
+ 	len=(FontHdr.DescriptorsOffset-FontHdr.FacenamesOffset)/fontnames;
+        if( len > FontName_len ){
+@@ -2102,6 +2104,7 @@
+ 	    }
+ 	    fontname[i]=my_strdup(FontName);
+ 	}
++	}
+ 	if(charmap) putc('\n',hpj);
+ 	if(hpj&&FontHdr.FacenamesOffset>=16) for(j=0;j<FontHdr.NumCharmaps;j++)
+ 	{
+@@ -3177,11 +3180,11 @@
+     int16_t *iptr;
+     uint16_t x1,x2,x3;
+     int16_t y1;
+-    long l1;
++    long l1=0;
+     char *ptr;
+     char *cmd;
+     char *str;
+-    long ActualTopicOffset,MaxTopicOffset;
++    long ActualTopicOffset=0,MaxTopicOffset=0;
+     TOPICHEADER30 *TopicHdr30;
+     TOPICHEADER *TopicHdr;
+     long BogusTopicOffset;
+@@ -3857,7 +3860,7 @@
+ 
+ void GenerateContent(FILE *HelpFile,FILE *ContentFile) /* create a simple Win95 contents file */
+ {
+-    VIOLAREC *WindowRec;
++    VIOLAREC *WindowRec=NULL;
+     long FileLength,offset;
+     int n,i,j,WindowRecs;
+     BUFFER buf;
+@@ -5129,8 +5132,8 @@
+     uint16_t maprecs,m;
+     int j,window,len;
+     BOOL morekeywords;
+-    CTXOMAPREC *map;
+-    char filename[13];
++    CTXOMAPREC *map=NULL;
++    char filename[255];
+     TOPICLINK TopicLink;
+     char *LinkData1;
+     char *LinkData2;
+@@ -5761,7 +5764,7 @@
+     {
+ 	_splitpath(filename,drive,dir,name,ext);
+ 	if(ext[0]=='\0') strcpy(ext,".hlp");
+-	mvp=ext[1]=='M';
++	mvp=ext[1]=='M'||ext[1]=='m';
+ 	_makepath(HelpFileName,drive,dir,name,ext);
+ 	f=fopen(HelpFileName,"rb");
+ 	if(f)
