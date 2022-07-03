@@ -22,3 +22,6 @@ media-libs/gegl introspection lcms
 
 # Always want these features
 app-text/libmwaw tools
+
+# Breaks if enabled
+sci-libs/hdf5 -unsupported -threads

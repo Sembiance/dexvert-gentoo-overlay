@@ -601,9 +601,9 @@ diff -Naur a/fs/cifs/fs_context.h b/fs/cifs/fs_context.h
  
  	Opt_sec_err
 diff -Naur a/fs/cifs/sess.c b/fs/cifs/sess.c
---- a/fs/cifs/sess.c	2022-01-04 10:08:06.565157021 -0500
-+++ b/fs/cifs/sess.c	2022-01-04 10:27:24.809628964 -0500
-@@ -798,16 +798,30 @@
+--- a/fs/cifs/sess.c	2022-06-29 03:04:44.000000000 -0400
++++ b/fs/cifs/sess.c	2022-07-03 09:37:36.053194148 -0400
+@@ -1009,16 +1009,30 @@
  		}
  	case CIFS_NEGFLAVOR_UNENCAP:
  		switch (requested) {
@@ -635,7 +635,7 @@ diff -Naur a/fs/cifs/sess.c b/fs/cifs/sess.c
  	default:
  		return Unspecified;
  	}
-@@ -932,6 +946,230 @@
+@@ -1140,6 +1154,232 @@
  	return rc;
  }
  
@@ -868,7 +868,7 @@ diff -Naur a/fs/cifs/sess.c b/fs/cifs/sess.c
  static void
  sess_auth_ntlmv2(struct sess_data *sess_data)
  {
-@@ -1436,6 +1674,21 @@
+@@ -1661,6 +1901,21 @@
  	}
  
  	switch (type) {
