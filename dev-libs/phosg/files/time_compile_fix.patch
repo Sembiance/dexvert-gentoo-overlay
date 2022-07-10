@@ -1,0 +1,10 @@
+diff -Naur a/src/Time.cc b/src/Time.cc
+--- a/src/Time.cc	2022-07-02 01:12:34.000000000 -0400
++++ b/src/Time.cc	2022-07-03 13:16:30.099718752 -0400
+@@ -1,5 +1,6 @@
+ #include "Time.hh"
+ 
++#include <time.h>
+ #include <sys/time.h>
+ 
+ #include <stdexcept>

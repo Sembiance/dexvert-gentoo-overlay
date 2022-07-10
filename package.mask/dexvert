@@ -5,6 +5,7 @@ app-text/psiconv::gentoo
 media-gfx/ansilove::gentoo
 app-arch/unzip::gentoo
 media-libs/rlottie::gentoo
+media-libs/libxmp::gentoo
 media-libs/libpgf::gentoo
 media-libs/libmikmod::gentoo
 media-libs/gd::gentoo

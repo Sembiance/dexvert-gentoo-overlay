@@ -1,7 +1,7 @@
 EAPI=7
 
 DESCRIPTION="Command line tool to identify files"
-HOMEPAGE="https://mark0.net/forum/index.php?topic=831.56"
+HOMEPAGE="https://mark0.net/forum/index.php?topic=873.0"
 LICENSE="Apache-2.0"
 
 MY_PV=$(ver_cut 1-2)
@@ -13,7 +13,7 @@ MY_PV=$(ver_cut 1-2)
 #  https://mark0.net/download/triddefs.zip
 
 SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}-${MY_PV}.zip
-	https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/tridscan-${PV}.zip
+	https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/tridscan-${MY_PV}.zip
 	https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/triddefs-${PV}.zip"
 S=${WORKDIR}
 

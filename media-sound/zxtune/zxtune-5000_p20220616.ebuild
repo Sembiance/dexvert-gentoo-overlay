@@ -1,10 +1,11 @@
 EAPI=7
 
 DESCRIPTION="Chiptune converter"
-HOMEPAGE="https://github.com/vitamin-caig/zxtune/releases"
+HOMEPAGE="https://bitbucket.org/zxtune/zxtune/downloads/?tab=branches"
 LICENSE="MIT"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}-r${PV}.zip"
-S="${WORKDIR}/${PN}-r${PV}"
+GIT_HASH="7ee840f6bd0f"
+SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}-${PN}-${GIT_HASH}.zip"
+S="${WORKDIR}/${PN}-${PN}-${GIT_HASH}"
 
 SLOT="0"
 KEYWORDS="~amd64"
