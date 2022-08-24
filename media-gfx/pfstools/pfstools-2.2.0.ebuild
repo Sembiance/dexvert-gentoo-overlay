@@ -1,6 +1,6 @@
 EAPI=7
 
-inherit cmake-utils
+inherit cmake
 
 DESCRIPTION="A set of programs for manipulating and viewing HDR images and video frames"
 HOMEPAGE="https://sourceforge.net/projects/pfstools/files/pfstools/"
@@ -51,11 +51,11 @@ src_configure() {
 		-DWITH_TIFF=$(usex tiff)
 	)
 	
-	cmake-utils_src_configure || die
+	cmake_src_configure || die
 }
 
 src_install() {
-	cmake-utils_src_install
+	cmake_src_install
 
 
 	dobin "${FILESDIR}"/pfsconvert

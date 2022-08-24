@@ -1,6 +1,6 @@
 EAPI=7
 
-inherit cmake-utils
+inherit cmake
 
 DESCRIPTION="Nspark dearchiver for RISC OS archives"
 HOMEPAGE="https://github.com/mjwoodcock/nspark"

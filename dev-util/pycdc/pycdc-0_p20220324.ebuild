@@ -1,6 +1,6 @@
 EAPI=7
 
-inherit cmake-utils
+inherit cmake
 
 DESCRIPTION="C++ python bytecode disassembler and decompiler"
 HOMEPAGE="https://github.com/zrax/pycdc"

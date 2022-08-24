@@ -1,6 +1,6 @@
 EAPI=7
 
-inherit cmake-utils
+inherit cmake
 
 DESCRIPTION="ANSI and ASCII art converter"
 HOMEPAGE="https://github.com/ansilove/ansilove/releases"

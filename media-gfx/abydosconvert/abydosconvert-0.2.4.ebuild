@@ -1,6 +1,6 @@
 EAPI=7
 
-inherit cmake-utils
+inherit cmake
 
 DESCRIPTION="CLI tool that uses abydos lib to convert images"
 HOMEPAGE="https://github.com/Sembiance/abydosconvert"

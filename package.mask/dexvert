@@ -14,3 +14,6 @@ app-cdr/cdrdao::gentoo
 games-emulation/dosbox::gentoo
 net-ftp/uftpd::gentoo
 dev-python/typing-extensions::gentoo
+
+# Restrict certain versions
+>=media-libs/allegro-5

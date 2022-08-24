@@ -1,6 +1,6 @@
 EAPI=7
 
-inherit cmake-utils
+inherit cmake
 
 DESCRIPTION="C++ header files for common tasks, used by resource_dasm"
 HOMEPAGE="https://github.com/fuzziqersoftware/phosg"
@@ -15,7 +15,7 @@ RESTRICT="mirror test"
 #PATCHES=( "${FILESDIR}/cmake_fixes.patch" )
 
 src_install() {
- 	cmake-utils_src_install
+ 	cmake_src_install
  
 	# Do not violate multilib strict
 	mv "${ED}/usr/lib" "${ED}/usr/$(get_libdir)" || die "mv failed"

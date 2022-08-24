@@ -1,6 +1,6 @@
 EAPI=7
 
-inherit cmake-utils
+inherit cmake
 
 DESCRIPTION="App to handle Acorn/RISC OS Draw vector files"
 HOMEPAGE="https://github.com/martenjj/drawview"
