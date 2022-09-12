@@ -1,0 +1,2 @@
+# Without this, the ebuild system will 'strip' the 110MB app image to just a 192K
+media-gfx/inkscape nostrip

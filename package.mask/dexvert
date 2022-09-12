@@ -2,7 +2,9 @@
 
 # Prefer my overlay packages instead of gentoo packages:
 app-text/psiconv::gentoo
+media-gfx/inkscape::gentoo
 media-gfx/ansilove::gentoo
+media-gfx/gimp::gentoo
 app-arch/unzip::gentoo
 media-libs/rlottie::gentoo
 media-libs/libxmp::gentoo

@@ -1,2 +1,2 @@
 # We need GIMP 2.99 or later in order to have python 3 scripting support
-<=media-gfx/gimp-2.99.999::gentoo **
+<=media-gfx/gimp-2.99.999::dexvert **
