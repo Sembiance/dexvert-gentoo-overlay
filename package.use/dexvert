@@ -16,7 +16,7 @@ dev-libs/libbsd abi_x86_32
 app-crypt/libmd abi_x86_32
 
 # GIMP 2.99
-media-gfx/gimp python jpegxl -javascript -lua
+media-gfx/gimp python jpegxl -javascript -lua -heif
 media-libs/babl introspection lcms
 media-libs/gegl introspection lcms
 
