@@ -1,31 +1,28 @@
-diff --git a/iconvdata/Makefile b/iconvdata/Makefile
-index f4c089ed5d..3f773fa29b 100644
---- a/iconvdata/Makefile
-+++ b/iconvdata/Makefile
-@@ -62,7 +62,7 @@ modules	:= ISO8859-1 ISO8859-2 ISO8859-3 ISO8859-4 ISO8859-5		 \
+diff -Naur a/iconvdata/Makefile b/iconvdata/Makefile
+--- a/iconvdata/Makefile	2022-11-03 15:43:36.756588653 -0400
++++ b/iconvdata/Makefile	2022-11-03 15:46:21.884571982 -0400
+@@ -62,7 +62,7 @@
  	   IBM5347 IBM9030 IBM9066 IBM9448 IBM12712 IBM16804             \
  	   IBM1364 IBM1371 IBM1388 IBM1390 IBM1399 ISO_11548-1 MIK BRF	 \
  	   MAC-CENTRALEUROPE KOI8-RU ISO8859-9E				 \
 -	   CP770 CP771 CP772 CP773 CP774
-+	   CP770 CP771 CP772 CP773 CP774 RISCOS ATARI-ST
++	   CP770 CP771 CP772 CP773 CP774 RISCOS ATARI-ST NEXTSTEP
  
  # If lazy binding is disabled, use BIND_NOW for the gconv modules.
  ifeq ($(bind-now),yes)
-@@ -173,7 +173,8 @@ gen-8bit-gap-modules := koi8-r latin-greek latin-greek-1 ibm256 ibm273	   \
+@@ -173,7 +173,8 @@
  			mac-centraleurope koi8-ru hp-roman8 hp-roman9	   \
  			ebcdic-es ebcdic-es-a ebcdic-is-friss ebcdic-uk    \
  			iso8859-16 viscii iso8859-9e hp-turkish8	   \
 -			hp-thai8 hp-greek8 cp770 cp771 cp772 cp773 cp774
 +			hp-thai8 hp-greek8 cp770 cp771 cp772 cp773 cp774 \
-+			riscos atari-st
++			riscos atari-st nextstep
  
  
  gen-special-modules := iso8859-7jp
-diff --git a/iconvdata/atari-st.c b/iconvdata/atari-st.c
-new file mode 100644
-index 0000000000..8afd200404
---- /dev/null
-+++ b/iconvdata/atari-st.c
+diff -Naur a/iconvdata/atari-st.c b/iconvdata/atari-st.c
+--- a/iconvdata/atari-st.c	1969-12-31 19:00:00.000000000 -0500
++++ b/iconvdata/atari-st.c	2022-11-03 15:45:20.976052926 -0400
 @@ -0,0 +1,28 @@
 +/* Conversion from and to ATARI-ST.
 +   Copyright (C) 2000-2022 Free Software Foundation, Inc.
@@ -55,13 +52,12 @@ index 0000000000..8afd200404
 +#define HAS_HOLES	1	/* Not all 256 character are defined.  */
 +
 +#include <8bit-gap.c>
-diff --git a/iconvdata/gconv-modules b/iconvdata/gconv-modules
-index 82d7be577d..2778b0ff16 100644
---- a/iconvdata/gconv-modules
-+++ b/iconvdata/gconv-modules
-@@ -1575,6 +1575,14 @@ module	INTERNAL		GB18030//		GB18030		1
- module	VISCII//		INTERNAL		VISCII		1
- module	INTERNAL		VISCII//		VISCII		1
+diff -Naur a/iconvdata/gconv-modules b/iconvdata/gconv-modules
+--- a/iconvdata/gconv-modules	2022-11-03 15:43:36.761588531 -0400
++++ b/iconvdata/gconv-modules	2022-11-03 15:50:18.695820242 -0400
+@@ -114,6 +114,18 @@
+ module	UTF-7//			INTERNAL		UTF-7		1
+ module	INTERNAL		UTF-7//			UTF-7		1
  
 +#   from            to          module      cost
 +module  RISCOS//        INTERNAL        RISCOS      1
@@ -71,14 +67,171 @@ index 82d7be577d..2778b0ff16 100644
 +module  ATARI-ST//        INTERNAL        ATARI-ST      1
 +module  INTERNAL    ATARI-ST//        ATARI-ST	1
 +
++#   from            to          module      cost
++module  NEXTSTEP//        INTERNAL            NEXTSTEP          1
++module  INTERNAL    NEXTSTEP//        NEXTSTEP      1
++
  #	from			to			module		cost
- module	KOI8-T//		INTERNAL		KOI8-T		1
- module	INTERNAL		KOI8-T//		KOI8-T		1
-diff --git a/iconvdata/riscos.c b/iconvdata/riscos.c
-new file mode 100644
-index 0000000000..e82f5a2d3d
---- /dev/null
-+++ b/iconvdata/riscos.c
+ module	UTF-7-IMAP//		INTERNAL		UTF-7		1
+ module	INTERNAL		UTF-7-IMAP//		UTF-7		1
+diff -Naur a/iconvdata/gconv-modules.orig b/iconvdata/gconv-modules.orig
+--- a/iconvdata/gconv-modules.orig	1969-12-31 19:00:00.000000000 -0500
++++ b/iconvdata/gconv-modules.orig	2022-11-03 15:45:20.964053218 -0400
+@@ -0,0 +1,119 @@
++# GNU libc iconv configuration.
++# Copyright (C) 1997-2022 Free Software Foundation, Inc.
++# This file is part of the GNU C Library.
++
++# The GNU C Library is free software; you can redistribute it and/or
++# modify it under the terms of the GNU Lesser General Public
++# License as published by the Free Software Foundation; either
++# version 2.1 of the License, or (at your option) any later version.
++
++# The GNU C Library is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++# Lesser General Public License for more details.
++
++# You should have received a copy of the GNU Lesser General Public
++# License along with the GNU C Library; if not, see
++# <https://www.gnu.org/licenses/>.
++
++# All lines contain the following information:
++
++# If the lines start with `module'
++#  fromset:	either a name triple or a regular expression triple.
++#  toset:	a name triple or an expression with \N to get regular
++#		expression matching results.
++#  filename:	filename of the module implementing the transformation.
++#		If it is not absolute the path is made absolute by prepending
++#		the directory the configuration file is found in.
++#  cost:	optional cost of the transformation.  Default is 1.
++
++# If the lines start with `alias'
++#  alias:	alias name which is not really recognized.
++#  name:	the real name of the character set
++
++#	from			to			module		cost
++alias	ISO-IR-100//		ISO-8859-1//
++alias	ISO_8859-1:1987//	ISO-8859-1//
++alias	ISO_8859-1//		ISO-8859-1//
++alias	ISO8859-1//		ISO-8859-1//
++alias	ISO88591//		ISO-8859-1//
++alias	LATIN1//		ISO-8859-1//
++alias	L1//			ISO-8859-1//
++alias	IBM819//		ISO-8859-1//
++alias	CP819//			ISO-8859-1//
++alias	CSISOLATIN1//		ISO-8859-1//
++alias	8859_1//		ISO-8859-1//
++alias	OSF00010001//		ISO-8859-1//
++module	ISO-8859-1//		INTERNAL		ISO8859-1	1
++module	INTERNAL		ISO-8859-1//		ISO8859-1	1
++
++#	from			to			module		cost
++alias	ISO8859-15//		ISO-8859-15//
++alias	ISO885915//		ISO-8859-15//
++alias	ISO-IR-203//		ISO-8859-15//
++alias	ISO_8859-15//		ISO-8859-15//
++alias	LATIN-9//		ISO-8859-15//
++alias	LATIN9//		ISO-8859-15//
++alias	ISO_8859-15:1998//	ISO-8859-15//
++module	ISO-8859-15//		INTERNAL		ISO8859-15	1
++module	INTERNAL		ISO-8859-15//		ISO8859-15	1
++
++#	from			to			module		cost
++alias	MS-ANSI//		CP1252//
++alias	WINDOWS-1252//		CP1252//
++module	CP1252//		INTERNAL		CP1252		1
++module	INTERNAL		CP1252//		CP1252		1
++
++#	from			to			module		cost
++alias	ANSI_X3.110-1983//	ANSI_X3.110//
++alias	ISO-IR-99//		ANSI_X3.110//
++alias	CSA_T500-1983//		ANSI_X3.110//
++alias	CSA_T500//		ANSI_X3.110//
++alias	NAPLPS//		ANSI_X3.110//
++alias	CSISO99NAPLPS//		ANSI_X3.110//
++module	ANSI_X3.110//		INTERNAL		ANSI_X3.110	1
++module	INTERNAL		ANSI_X3.110//		ANSI_X3.110	1
++
++#	from			to			module		cost
++alias	UTF16//			UTF-16//
++module	UTF-16//		INTERNAL		UTF-16		1
++module	INTERNAL		UTF-16//		UTF-16		1
++
++#	from			to			module		cost
++alias	UTF16LE//		UTF-16LE//
++module	UTF-16LE//		INTERNAL		UTF-16		1
++module	INTERNAL		UTF-16LE//		UTF-16		1
++
++#	from			to			module		cost
++alias	UTF16BE//		UTF-16BE//
++module	UTF-16BE//		INTERNAL		UTF-16		1
++module	INTERNAL		UTF-16BE//		UTF-16		1
++
++#	from			to			module		cost
++alias	CSUNICODE//		UNICODE//
++module	UNICODE//		INTERNAL		UNICODE		1
++module	INTERNAL		UNICODE//		UNICODE		1
++
++#	from			to			module		cost
++alias	UTF32//			UTF-32//
++module	UTF-32//		INTERNAL		UTF-32		1
++module	INTERNAL		UTF-32//		UTF-32		1
++
++#	from			to			module		cost
++alias	UTF32LE//		UTF-32LE//
++module	UTF-32LE//		INTERNAL		UTF-32		1
++module	INTERNAL		UTF-32LE//		UTF-32		1
++
++#	from			to			module		cost
++alias	UTF32BE//		UTF-32BE//
++module	UTF-32BE//		INTERNAL		UTF-32		1
++module	INTERNAL		UTF-32BE//		UTF-32		1
++
++#	from			to			module		cost
++alias	UTF7//			UTF-7//
++module	UTF-7//			INTERNAL		UTF-7		1
++module	INTERNAL		UTF-7//			UTF-7		1
++
++#	from			to			module		cost
++module	UTF-7-IMAP//		INTERNAL		UTF-7		1
++module	INTERNAL		UTF-7-IMAP//		UTF-7		1
+diff -Naur a/iconvdata/nextstep.c b/iconvdata/nextstep.c
+--- a/iconvdata/nextstep.c	1969-12-31 19:00:00.000000000 -0500
++++ b/iconvdata/nextstep.c	2022-11-03 15:50:45.031181150 -0400
+@@ -0,0 +1,28 @@
++/* Conversion from and to NEXTSTEP.
++   Copyright (C) 2000-2022 Free Software Foundation, Inc.
++   This file is part of the GNU C Library.
++   Contributed by Robert Schultz <robert@cosmicrealms.com>, 2022.
++
++   The GNU C Library is free software; you can redistribute it and/or
++   modify it under the terms of the GNU Lesser General Public
++   License as published by the Free Software Foundation; either
++   version 2.1 of the License, or (at your option) any later version.
++
++   The GNU C Library is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++   Lesser General Public License for more details.
++
++   You should have received a copy of the GNU Lesser General Public
++   License along with the GNU C Library; if not, see
++   <https://www.gnu.org/licenses/>.  */
++
++#include <stdint.h>
++
++/* Specify the conversion table.  */
++#define TABLES <nextstep.h>
++
++#define CHARSET_NAME	"NEXTSTEP//"
++#define HAS_HOLES	1	/* Not all 256 character are defined.  */
++
++#include <8bit-gap.c>
+diff -Naur a/iconvdata/riscos.c b/iconvdata/riscos.c
+--- a/iconvdata/riscos.c	1969-12-31 19:00:00.000000000 -0500
++++ b/iconvdata/riscos.c	2022-11-03 15:45:20.976052926 -0400
 @@ -0,0 +1,28 @@
 +/* Conversion from and to RISCOS.
 +   Copyright (C) 2000-2022 Free Software Foundation, Inc.
@@ -108,24 +261,22 @@ index 0000000000..e82f5a2d3d
 +#define HAS_HOLES	1	/* Not all 256 character are defined.  */
 +
 +#include <8bit-gap.c>
-diff --git a/iconvdata/tst-tables.sh b/iconvdata/tst-tables.sh
-index 4207b44175..f837d48e32 100755
---- a/iconvdata/tst-tables.sh
-+++ b/iconvdata/tst-tables.sh
-@@ -207,6 +207,8 @@ cat <<EOF |
+diff -Naur a/iconvdata/tst-tables.sh b/iconvdata/tst-tables.sh
+--- a/iconvdata/tst-tables.sh	2022-11-03 15:43:36.776588166 -0400
++++ b/iconvdata/tst-tables.sh	2022-11-03 15:51:04.054719555 -0400
+@@ -207,6 +207,9 @@
    KOI8-U
    #ISIRI-3342                         This charset concept is completely broken
    VISCII
 +  RISCOS
 +  ATARI-ST
++  NEXTSTEP
    KOI8-T
    GEORGIAN-PS
    GEORGIAN-ACADEMY
-diff --git a/localedata/charmaps/ATARI-ST b/localedata/charmaps/ATARI-ST
-new file mode 100644
-index 0000000000..f303c14b49
---- /dev/null
-+++ b/localedata/charmaps/ATARI-ST
+diff -Naur a/localedata/charmaps/ATARI-ST b/localedata/charmaps/ATARI-ST
+--- a/localedata/charmaps/ATARI-ST	1969-12-31 19:00:00.000000000 -0500
++++ b/localedata/charmaps/ATARI-ST	2022-11-03 15:45:20.999052367 -0400
 @@ -0,0 +1,264 @@
 +<code_set_name> ATARI-ST
 +<comment_char> %
@@ -391,11 +542,9 @@ index 0000000000..f303c14b49
 +<U00B3>     /xfe         SUPERSCRIPT THREE
 +<U00AF>     /xff         MACRON
 +END CHARMAP
-diff --git a/localedata/charmaps/RISCOS b/localedata/charmaps/RISCOS
-new file mode 100644
-index 0000000000..c22a7ef783
---- /dev/null
-+++ b/localedata/charmaps/RISCOS
+diff -Naur a/localedata/charmaps/RISCOS b/localedata/charmaps/RISCOS
+--- a/localedata/charmaps/RISCOS	1969-12-31 19:00:00.000000000 -0500
++++ b/localedata/charmaps/RISCOS	2022-11-03 15:45:20.999052367 -0400
 @@ -0,0 +1,264 @@
 +<code_set_name> RISCOS
 +<comment_char> %
