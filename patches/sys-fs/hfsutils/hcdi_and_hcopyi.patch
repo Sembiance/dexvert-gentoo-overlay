@@ -1,0 +1,746 @@
+diff -Naur a/Makefile.in b/Makefile.in
+--- a/Makefile.in	2022-11-06 09:45:51.765792682 -0500
++++ b/Makefile.in	2022-11-06 10:04:49.518474797 -0500
+@@ -63,7 +63,7 @@
+ TARGETS =	$(CLITARGETS) $(TCLTARGETS) $(TKTARGETS)
+ 
+ CLITARGETS =	hattrib hcd hcopy hdel hdir hformat hls hmkdir hmount hpwd  \
+-		hrename hrmdir humount hvol
++		hrename hrmdir humount hvol hcdi hcopyi
+ TCLTARGETS =	hfssh hfs
+ TKTARGETS =	xhfs
+ 
+@@ -87,7 +87,8 @@
+ TKDOCS =	xhfs.1
+ 
+ CLIOBJS =	hattrib.o hcd.o hcopy.o hdel.o hformat.o hls.o hmkdir.o  \
+-		hmount.o hpwd.o hrename.o hrmdir.o humount.o hvol.o
++		hmount.o hpwd.o hrename.o hrmdir.o humount.o hvol.o hcdi.o \
++		hcopyi.o
+ UTILOBJS =	crc.o binhex.o copyin.o copyout.o charset.o  \
+ 		darray.o dlist.o dstring.o glob.o suid.o version.o
+ 
+@@ -286,7 +287,8 @@
+ hfssh.o: hfssh.c config.h tclhfs.h suid.h
+ hfsutil.o: hfsutil.c config.h libhfs/hfs.h hcwd.h hfsutil.h suid.h \
+  glob.h version.h hattrib.h hcd.h hcopy.h hdel.h hformat.h hls.h \
+- hmkdir.h hmount.h hpwd.h hrename.h hrmdir.h humount.h hvol.h
++ hmkdir.h hmount.h hpwd.h hrename.h hrmdir.h humount.h hvol.h \
++ hcdi.h hcopyi.h
+ hfswish.o: hfswish.c config.h tclhfs.h xhfs.h suid.h images.h \
+  images/macdaemon.xbm images/macdaemon_mask.xbm images/stop.xbm \
+  images/caution.xbm images/note.xbm images/floppy.xbm \
+@@ -307,6 +309,8 @@
+ hrmdir.o: hrmdir.c config.h libhfs/hfs.h hcwd.h hfsutil.h hrmdir.h
+ humount.o: humount.c config.h libhfs/hfs.h hcwd.h hfsutil.h humount.h
+ hvol.o: hvol.c config.h libhfs/hfs.h hcwd.h hfsutil.h hvol.h
++hcdi.o: hcdi.c config.h libhfs/hfs.h hcwd.h hfsutil.h hcdi.h
++hcopyi.o: hcopyi.c config.h libhfs/hfs.h hcwd.h hfsutil.h hcopyi.h
+ strdup.o: strdup.c config.h
+ strerror.o: strerror.c config.h
+ strstr.o: strstr.c config.h
+diff -Naur a/copyout.c b/copyout.c
+--- a/copyout.c	2022-11-06 09:45:51.765792682 -0500
++++ b/copyout.c	2022-11-06 13:59:19.236738977 -0500
+@@ -477,6 +477,54 @@
+   return file;
+ }
+ 
++static
++hfsfile *opensrci(hfsvol *vol, unsigned long id,
++		 const char **dsthint, const char *ext)
++{
++  hfsfile *file;
++  hfsdirent ent;
++  static char name[HFS_MAX_FLEN + 4 + 1];
++  char *ptr;
++
++  file = hfs_openi(vol, id);
++  if (file == 0)
++    {
++      ERROR(errno, hfs_error);
++      return 0;
++    }
++
++  if (hfs_fstat(file, &ent) == -1)
++    {
++      ERROR(errno, hfs_error);
++
++      hfs_close(file);
++      return 0;
++    }
++
++  strcpy(name, ent.name);
++
++  for (ptr = name; *ptr; ++ptr)
++    {
++      switch (*ptr)
++	{
++	case '/':
++	  *ptr = '-';
++	  break;
++
++	case ' ':
++	  *ptr = '_';
++	  break;
++	}
++    }
++
++  if (ext)
++    strcat(name, ext);
++
++  *dsthint = name;
++
++  return file;
++}
++
+ /*
+  * NAME:	opendst()
+  * DESCRIPTION:	open the destination file
+@@ -549,6 +597,26 @@
+   return 0;
+ }
+ 
++static
++int openfilesi(hfsvol *vol, unsigned long id, const char *dstname,
++	      const char *ext, hfsfile **ifile, int *ofile)
++{
++  const char *dsthint;
++
++  *ifile = opensrci(vol, id, &dsthint, ext);
++  if (*ifile == 0)
++    return -1;
++
++  *ofile = opendst(dstname, dsthint);
++  if (*ofile == -1)
++    {
++      hfs_close(*ifile);
++      return -1;
++    }
++
++  return 0;
++}
++
+ /*
+  * NAME:	closefiles()
+  * DESCRIPTION:	close source and destination files
+@@ -590,6 +658,21 @@
+   return result;
+ }
+ 
++int cpoi_macb(hfsvol *vol, unsigned long id, const char *dstname)
++{
++  hfsfile *ifile;
++  int ofile, result = 0;
++
++  if (openfilesi(vol, id, dstname, ".bin", &ifile, &ofile) == -1)
++    return -1;
++
++  result = do_macb(ifile, ofile);
++
++  closefiles(ifile, ofile, &result);
++
++  return result;
++}
++
+ /*
+  * NAME:	cpo->binh()
+  * DESCRIPTION:	copy an HFS file to a UNIX file using BinHex translation
+@@ -609,6 +692,21 @@
+   return result;
+ }
+ 
++int cpoi_binh(hfsvol *vol, unsigned long id, const char *dstname)
++{
++  hfsfile *ifile;
++  int ofile, result;
++
++  if (openfilesi(vol, id, dstname, ".hqx", &ifile, &ofile) == -1)
++    return -1;
++
++  result = do_binh(ifile, ofile);
++
++  closefiles(ifile, ofile, &result);
++
++  return result;
++}
++
+ /*
+  * NAME:	cpo->text()
+  * DESCRIPTION:	copy an HFS file to a UNIX file using text translation
+@@ -632,6 +730,21 @@
+   return result;
+ }
+ 
++int cpoi_text(hfsvol *vol, unsigned long id, const char *dstname)
++{
++  hfsfile *ifile;
++  int ofile, result = 0;
++
++  if (openfilesi(vol, id, dstname, 0, &ifile, &ofile) == -1)
++    return -1;
++
++  result = do_text(ifile, ofile);
++
++  closefiles(ifile, ofile, &result);
++
++  return result;
++}
++
+ /*
+  * NAME:	cpo->raw()
+  * DESCRIPTION:	copy the data fork of an HFS file to a UNIX file
+@@ -645,6 +758,21 @@
+     return -1;
+ 
+   result = do_raw(ifile, ofile);
++
++  closefiles(ifile, ofile, &result);
++
++  return result;
++}
++
++int cpoi_raw(hfsvol *vol, unsigned long id, const char *dstname)
++{
++  hfsfile *ifile;
++  int ofile, result = 0;
++
++  if (openfilesi(vol, id, dstname, 0, &ifile, &ofile) == -1)
++    return -1;
++
++  result = do_raw(ifile, ofile);
+ 
+   closefiles(ifile, ofile, &result);
+ 
+diff -Naur a/copyout.h b/copyout.h
+--- a/copyout.h	2022-11-06 09:45:51.765792682 -0500
++++ b/copyout.h	2022-11-06 10:48:26.192905336 -0500
+@@ -22,8 +22,13 @@
+ extern const char *cpo_error;
+ 
+ typedef int (*cpofunc)(hfsvol *, const char *, const char *);
++typedef int (*cpoifunc)(hfsvol *, unsigned long id, const char *);
+ 
+ int cpo_macb(hfsvol *, const char *, const char *);
++int cpoi_macb(hfsvol *, unsigned long, const char *);
+ int cpo_binh(hfsvol *, const char *, const char *);
++int cpoi_binh(hfsvol *, unsigned long, const char *);
+ int cpo_text(hfsvol *, const char *, const char *);
++int cpoi_text(hfsvol *vol, unsigned long, const char *dstname);
+ int cpo_raw(hfsvol *, const char *, const char *);
++int cpoi_raw(hfsvol *, unsigned long, const char *);
+diff -Naur a/hcdi.c b/hcdi.c
+--- a/hcdi.c	1969-12-31 19:00:00.000000000 -0500
++++ b/hcdi.c	2022-11-06 13:08:30.267045586 -0500
+@@ -0,0 +1,64 @@
++# ifdef HAVE_CONFIG_H
++#  include "config.h"
++# endif
++
++# include <stdio.h>
++# include <stdlib.h>
++# include <string.h>
++
++# include "hfs.h"
++# include "hcwd.h"
++# include "hfsutil.h"
++# include "hcdi.h"
++
++/* allows changing directories based on the disc wide unique catalog id number */
++int hcdi_main(int argc, char *argv[])
++{
++	mountent *ment;
++	hfsvol *vol;
++	unsigned long id=0;
++	char *path;
++	int fargc;
++	char **fargv = 0;
++	int result = 0;
++
++	if (argc != 2)
++	{
++		fprintf(stderr, "Usage: %s [catalog id]\n", argv0);
++		return 1;
++	}
++
++	vol = hfsutil_remount(ment = hcwd_getvol(-1), HFS_MODE_RDONLY);
++	if(vol == 0)
++		return 1;
++
++	id = atol(argv[1]);
++
++	if(hfs_setcwd(vol, id) == -1)
++	{
++		hfsutil_perror("Can't change directory");
++		result = 1;
++	}
++	else
++	{
++		path = hfsutil_getcwd(vol);
++		if(path == 0)
++		{
++			hfsutil_perror("Can't get new HFS directory path");
++			result = 1;
++		}
++
++		if(result == 0 && hcwd_setcwd(ment, path) == -1)
++		{
++			perror("Can't set new HFS directory");
++			result = 1;
++		}
++
++		if(path)
++			free(path);
++	}
++
++	hfsutil_unmount(vol, &result);
++
++  return result;
++}
+diff -Naur a/hcdi.h b/hcdi.h
+--- a/hcdi.h	1969-12-31 19:00:00.000000000 -0500
++++ b/hcdi.h	2022-11-06 09:49:34.947458590 -0500
+@@ -0,0 +1 @@
++int hcdi_main(int, char *[]);
+diff -Naur a/hcopyi.c b/hcopyi.c
+--- a/hcopyi.c	1969-12-31 19:00:00.000000000 -0500
++++ b/hcopyi.c	2022-11-06 12:48:53.671343929 -0500
+@@ -0,0 +1,198 @@
++# ifdef HAVE_CONFIG_H
++#  include "config.h"
++# endif
++
++# ifdef HAVE_UNISTD_H
++#  include <unistd.h>
++# endif
++
++# include <stdio.h>
++# include <stdlib.h>
++# include <string.h>
++# include <errno.h>
++# include <sys/stat.h>
++
++# include "hfs.h"
++# include "hcwd.h"
++# include "hfsutil.h"
++# include "hcopyi.h"
++# include "copyin.h"
++# include "copyout.h"
++
++extern int optind;
++
++/*
++ * NAME:	automode_unix()
++ * DESCRIPTION:	automatically choose copyin transfer mode for UNIX path
++ */
++static
++cpifunc automode_unix(const char *path)
++{
++  int i;
++  struct {
++    const char *ext;
++    cpifunc func;
++  } exts[] = {
++    { ".bin",  cpi_macb },
++    { ".hqx",  cpi_binh },
++
++    { ".txt",  cpi_text },
++    { ".c",    cpi_text },
++    { ".h",    cpi_text },
++    { ".html", cpi_text },
++    { ".htm",  cpi_text },
++    { ".rtf",  cpi_text },
++
++    { 0,       0        }
++  };
++
++  path += strlen(path);
++
++  for (i = 0; exts[i].ext; ++i)
++    {
++      if (strcasecmp(path - strlen(exts[i].ext), exts[i].ext) == 0)
++	return exts[i].func;
++    }
++
++  return cpi_raw;
++}
++
++/*
++ * NAME:	automode_hfs()
++ * DESCRIPTION:	automatically choose copyout transfer mode for HFS path
++ */
++static
++cpoifunc automode_hfs(hfsvol *vol, unsigned long id)
++{
++  hfsdirent ent;
++
++  if (hfs_stati(vol, id, &ent) != -1)
++    {
++      if (strcmp(ent.u.file.type, "TEXT") == 0 ||
++	  strcmp(ent.u.file.type, "ttro") == 0)
++	return cpoi_text;
++      else if (ent.u.file.rsize == 0)
++	return cpoi_raw;
++    }
++
++  return cpoi_macb;
++}
++
++/*
++ * NAME:	do_copyout()
++ * DESCRIPTION:	copy files from HFS to UNIX
++ */
++static
++int do_copyout(hfsvol *vol, int argc, char *argv[], const char *dest, int mode)
++{
++  struct stat sbuf;
++  hfsdirent ent;
++  cpoifunc copyfile;
++  int i, result = 0;
++
++  if (argc > 1 && (stat(dest, &sbuf) == -1 ||
++		   ! S_ISDIR(sbuf.st_mode)))
++    {
++      ERROR(ENOTDIR, 0);
++      hfsutil_perrorp(dest);
++
++      return 1;
++    }
++
++  switch (mode)
++    {
++    case 'm':
++      copyfile = cpoi_macb;
++      break;
++
++    case 'b':
++      copyfile = cpoi_binh;
++      break;
++
++    case 't':
++      copyfile = cpoi_text;
++      break;
++
++    case 'r':
++      copyfile = cpoi_raw;
++      break;
++    }
++
++  for (i = 0; i < argc; ++i)
++    {
++		/* assume it's a file and not a dir */
++	  if (mode == 'a')
++	    copyfile = automode_hfs(vol, atol(argv[i]));
++
++	  if (copyfile(vol, atol(argv[i]), dest) == -1)
++	    {
++	      ERROR(errno, cpo_error);
++	      hfsutil_perrorp(argv[i]);
++
++	      result = 1;
++	    }
++    }
++
++  return result;
++}
++
++static
++int usage(void)
++{
++  fprintf(stderr, "Usage: %s [-m|-b|-t|-r|-a] catalog-id [...] target-path\n",
++	  argv0);
++
++  return 1;
++}
++
++int hcopyi_main(int argc, char *argv[])
++{
++  int nargs, mode = 'a', result = 0;
++  const char *target;
++  int fargc;
++  char **fargv;
++  hfsvol *vol;
++  int (*copy)(hfsvol *, int, char *[], const char *, int);
++
++  while (1)
++    {
++      int opt;
++
++      opt = getopt(argc, argv, "mbtra");
++      if (opt == EOF)
++	break;
++
++      switch (opt)
++	{
++	case '?':
++	  return usage();
++
++	default:
++	  mode = opt;
++	}
++    }
++
++  nargs = argc - optind;
++
++  if (nargs < 2)
++    return usage();
++
++  target = argv[argc - 1];
++
++	vol = hfsutil_remount(hcwd_getvol(-1), HFS_MODE_RDONLY);
++	if (vol == 0)
++return 1;
++
++	copy  = do_copyout;
++	fargv = hfsutil_glob(vol, nargs - 1, &argv[optind], &fargc, &result);
++
++  if (result == 0)
++    result = copy(vol, fargc, fargv, target, mode);
++
++  hfsutil_unmount(vol, &result);
++
++  if (fargv && fargv != &argv[optind])
++    free(fargv);
++
++  return result;
++}
+diff -Naur a/hcopyi.h b/hcopyi.h
+--- a/hcopyi.h	1969-12-31 19:00:00.000000000 -0500
++++ b/hcopyi.h	2022-11-06 10:05:28.365544458 -0500
+@@ -0,0 +1 @@
++int hcopyi_main(int, char *[]);
+diff -Naur a/hfsutil.c b/hfsutil.c
+--- a/hfsutil.c	2022-11-06 09:45:51.766792658 -0500
++++ b/hfsutil.c	2022-11-06 10:03:56.726738800 -0500
+@@ -57,6 +57,8 @@
+ # include "hrmdir.h"
+ # include "humount.h"
+ # include "hvol.h"
++# include "hcdi.h"
++# include "hcopyi.h"
+ 
+ const char *argv0, *bargv0;
+ 
+@@ -87,6 +89,8 @@
+     { "hrmdir",  hrmdir_main  },
+     { "humount", humount_main },
+     { "hvol",    hvol_main    },
++	{ "hcdi",    hcdi_main    },
++	{ "hcopyi",  hcopyi_main  },
+     { 0,         0            }
+   };
+ 
+diff -Naur a/libhfs/hfs.c b/libhfs/hfs.c
+--- a/libhfs/hfs.c	2022-11-06 09:45:51.767792634 -0500
++++ b/libhfs/hfs.c	2022-11-06 15:12:22.939953442 -0500
+@@ -768,6 +768,47 @@
+   return 0;
+ }
+ 
++hfsfile *hfs_openi(hfsvol *vol, unsigned long id)
++{
++  hfsfile *file = 0;
++
++  if (getvol(&vol) == -1)
++    goto fail;
++
++  file = ALLOC(hfsfile, 1);
++  if (file == 0)
++    ERROR(ENOMEM, 0);
++
++	//printf("hfs_openi %d\n", id);
++  if (v_resolvei(&vol, id, &file->cat, &file->parid, file->name) <= 0)
++    goto fail;
++
++	//printf("hfs_openi file->cat.cdrType %d\n", file->cat.cdrType);
++  if (file->cat.cdrType != cdrFilRec)
++    ERROR(EISDIR, 0);
++
++  /* package file handle for user */
++
++  file->vol   = vol;
++  file->flags = 0;
++
++  f_selectfork(file, fkData);
++
++  file->prev = 0;
++  file->next = vol->files;
++
++  if (vol->files)
++    vol->files->prev = file;
++
++  vol->files = file;
++
++  return file;
++
++fail:
++  FREE(file);
++  return 0;
++}
++
+ /*
+  * NAME:	hfs->setfork()
+  * DESCRIPTION:	select file fork for I/O operations
+@@ -1038,6 +1079,24 @@
+     goto fail;
+ 
+   r_unpackdirent(parid, name, &data, ent);
++
++  return 0;
++
++fail:
++  return -1;
++}
++
++int hfs_stati(hfsvol *vol, unsigned long id, hfsdirent *ent)
++{
++  CatDataRec data;
++  unsigned long parid;
++  char name[HFS_MAX_FLEN + 1];
++
++  if (getvol(&vol) == -1 ||
++      v_resolvei(&vol, id, &data, &parid, name) <= 0)
++    goto fail;
++
++  r_unpackdirent(parid, name, &data, ent);
+ 
+   return 0;
+ 
+diff -Naur a/libhfs/hfs.h b/libhfs/hfs.h
+--- a/libhfs/hfs.h	2022-11-06 09:45:51.767792634 -0500
++++ b/libhfs/hfs.h	2022-11-06 12:48:21.800110082 -0500
+@@ -153,6 +153,7 @@
+ 
+ hfsfile *hfs_create(hfsvol *, const char *, const char *, const char *);
+ hfsfile *hfs_open(hfsvol *, const char *);
++hfsfile *hfs_openi(hfsvol *, unsigned long);
+ int hfs_setfork(hfsfile *, int);
+ int hfs_getfork(hfsfile *);
+ unsigned long hfs_read(hfsfile *, void *, unsigned long);
+@@ -162,6 +163,7 @@
+ int hfs_close(hfsfile *);
+ 
+ int hfs_stat(hfsvol *, const char *, hfsdirent *);
++int hfs_stati(hfsvol *, unsigned long, hfsdirent *);
+ int hfs_fstat(hfsfile *, hfsdirent *);
+ int hfs_setattr(hfsvol *, const char *, const hfsdirent *);
+ int hfs_fsetattr(hfsfile *, const hfsdirent *);
+diff -Naur a/libhfs/volume.c b/libhfs/volume.c
+--- a/libhfs/volume.c	2022-11-06 09:45:51.767792634 -0500
++++ b/libhfs/volume.c	2022-11-06 15:12:27.483845155 -0500
+@@ -25,6 +25,7 @@
+ 
+ # include <stdlib.h>
+ # include <string.h>
++# include <stdio.h>
+ # include <time.h>
+ # include <errno.h>
+ 
+@@ -497,6 +498,8 @@
+   if (np == 0)
+     np = &n;
+ 
++	//printf("v_catsearch in parid %lu  name %s  cname %s\n", parid, name, cname);
++
+   r_makecatkey(&key, parid, name);
+   r_packcatkey(&key, pkey, 0);
+ 
+@@ -515,6 +518,8 @@
+   if (data)
+     r_unpackcatdata(HFS_RECDATA(ptr), data);
+ 
++	//printf("v_catsearch out np->nnum %lu  data->cdrType %d\n", n.nnum, data->cdrType);
++
+   return 1;
+ }
+ 
+@@ -753,6 +758,27 @@
+   return -1;
+ }
+ 
++void debugCatDataRec(const char * prefix, CatDataRec * data)
++{
++	switch(data->cdrType)
++	{
++		case cdrDirRec:
++			printf("%s: CatDataRec type %d (cdrDirRec) dir.dirDirID %lu\n", prefix, data->cdrType, data->u.dir.dirDirID);
++			break;
++		case cdrFilRec:
++			printf("%s: CatDataRec type %d (cdrFilRec)\n", prefix, data->cdrType);
++			break;
++		case cdrThdRec:
++			printf("%s: CatDataRec type %d (dir thread) dthd.theParID %lu  dthd.thdCName %s\n", prefix, data->cdrType, data->u.dthd.thdParID, data->u.dthd.thdCName);
++			break;
++		case cdrFThdRec:
++			printf("%s: CatDataRec type %d (file thread) fthd.fthdParID %lu  fthd.fthdCName %s\n", prefix, data->cdrType, data->u.fthd.fthdParID, data->u.fthd.fthdCName);
++			break;
++		default:
++			printf("%s: Unknown CatDataRec type: %d\n", prefix, data->cdrType);
++	}
++}
++
+ /*
+  * NAME:	vol->resolve()
+  * DESCRIPTION:	translate a pathname; return catalog information
+@@ -906,6 +932,50 @@
+     }
+ 
+ done:
++	//debugCatDataRec("v_resolve done", data);
++  return found;
++
++fail:
++  return -1;
++}
++
++int v_resolvei(hfsvol **vol, unsigned long id,
++	      CatDataRec *data, long *parid, char *fname)
++{
++	int found=0;
++	CatDataRec rec;
++	CatKeyRec key;
++	node np;
++	hfsdirent ent;
++	hfsdir *dir = 0;
++	byte pkey[HFS_CATKEYLEN];
++
++	if (data == 0)
++		data = &rec;
++
++	dir = ALLOC(hfsdir, 1);
++	if (dir == 0)
++		ERROR(ENOMEM, 0);
++	dir->vol = *vol;
++	dir->dirid = (*vol)->cwd;
++    dir->vptr  = 0;
++	r_makecatkey(&key, dir->dirid, "");
++	r_packcatkey(&key, pkey, 0);
++	if (bt_search(&(*vol)->cat, pkey, &dir->n) <= 0)
++		goto fail;
++	
++	while (hfs_readdir(dir, &ent) != -1)
++	{
++		if(ent.cnid!=id)
++			continue;
++		
++		found = v_catsearch(*vol, (*vol)->cwd, ent.name, data, fname, &np);
++		if (found == -1)
++			goto fail;
++	}
++
++done:
++	//printf("v_resolvei done: id %lu found %d cdrType %d  file id %lu\n", id, found, data->cdrType, data->u.fil.filFlNum);
+   return found;
+ 
+ fail:
+diff -Naur a/libhfs/volume.h b/libhfs/volume.h
+--- a/libhfs/volume.h	2022-11-06 09:45:51.767792634 -0500
++++ b/libhfs/volume.h	2022-11-06 14:41:54.328532403 -0500
+@@ -55,6 +55,7 @@
+ int v_freeblocks(hfsvol *, const ExtDescriptor *);
+ 
+ int v_resolve(hfsvol **, const char *, CatDataRec *, long *, char *, node *);
++int v_resolvei(hfsvol **, unsigned long, CatDataRec *, long *, char *);
+ 
+ int v_adjvalence(hfsvol *, unsigned long, int, int);
+ int v_mkdir(hfsvol *, unsigned long, const char *);
