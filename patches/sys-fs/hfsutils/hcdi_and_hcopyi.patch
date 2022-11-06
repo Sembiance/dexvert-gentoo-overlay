@@ -1,12 +1,12 @@
 diff -Naur a/Makefile.in b/Makefile.in
 --- a/Makefile.in	2022-11-06 09:45:51.765792682 -0500
-+++ b/Makefile.in	2022-11-06 10:04:49.518474797 -0500
++++ b/Makefile.in	2022-11-06 17:19:01.101043035 -0500
 @@ -63,7 +63,7 @@
  TARGETS =	$(CLITARGETS) $(TCLTARGETS) $(TKTARGETS)
  
  CLITARGETS =	hattrib hcd hcopy hdel hdir hformat hls hmkdir hmount hpwd  \
 -		hrename hrmdir humount hvol
-+		hrename hrmdir humount hvol hcdi hcopyi
++		hrename hrmdir humount hvol hcdi hcopyi hpwdi
  TCLTARGETS =	hfssh hfs
  TKTARGETS =	xhfs
  
@@ -16,7 +16,7 @@ diff -Naur a/Makefile.in b/Makefile.in
  CLIOBJS =	hattrib.o hcd.o hcopy.o hdel.o hformat.o hls.o hmkdir.o  \
 -		hmount.o hpwd.o hrename.o hrmdir.o humount.o hvol.o
 +		hmount.o hpwd.o hrename.o hrmdir.o humount.o hvol.o hcdi.o \
-+		hcopyi.o
++		hcopyi.o hpwdi.o
  UTILOBJS =	crc.o binhex.o copyin.o copyout.o charset.o  \
  		darray.o dlist.o dstring.o glob.o suid.o version.o
  
@@ -26,16 +26,17 @@ diff -Naur a/Makefile.in b/Makefile.in
   glob.h version.h hattrib.h hcd.h hcopy.h hdel.h hformat.h hls.h \
 - hmkdir.h hmount.h hpwd.h hrename.h hrmdir.h humount.h hvol.h
 + hmkdir.h hmount.h hpwd.h hrename.h hrmdir.h humount.h hvol.h \
-+ hcdi.h hcopyi.h
++ hcdi.h hcopyi.h hpwdi.h
  hfswish.o: hfswish.c config.h tclhfs.h xhfs.h suid.h images.h \
   images/macdaemon.xbm images/macdaemon_mask.xbm images/stop.xbm \
   images/caution.xbm images/note.xbm images/floppy.xbm \
-@@ -307,6 +309,8 @@
+@@ -307,6 +309,9 @@
  hrmdir.o: hrmdir.c config.h libhfs/hfs.h hcwd.h hfsutil.h hrmdir.h
  humount.o: humount.c config.h libhfs/hfs.h hcwd.h hfsutil.h humount.h
  hvol.o: hvol.c config.h libhfs/hfs.h hcwd.h hfsutil.h hvol.h
 +hcdi.o: hcdi.c config.h libhfs/hfs.h hcwd.h hfsutil.h hcdi.h
 +hcopyi.o: hcopyi.c config.h libhfs/hfs.h hcwd.h hfsutil.h hcopyi.h
++hpwdi.o: hpwdi.c config.h libhfs/hfs.h hcwd.h hfsutil.h hpwdi.h
  strdup.o: strdup.c config.h
  strerror.o: strerror.c config.h
  strstr.o: strstr.c config.h
@@ -511,25 +512,66 @@ diff -Naur a/hcopyi.h b/hcopyi.h
 +int hcopyi_main(int, char *[]);
 diff -Naur a/hfsutil.c b/hfsutil.c
 --- a/hfsutil.c	2022-11-06 09:45:51.766792658 -0500
-+++ b/hfsutil.c	2022-11-06 10:03:56.726738800 -0500
-@@ -57,6 +57,8 @@
++++ b/hfsutil.c	2022-11-06 17:16:02.096306616 -0500
+@@ -57,6 +57,9 @@
  # include "hrmdir.h"
  # include "humount.h"
  # include "hvol.h"
 +# include "hcdi.h"
 +# include "hcopyi.h"
++# include "hpwdi.h"
  
  const char *argv0, *bargv0;
  
-@@ -87,6 +89,8 @@
+@@ -87,6 +90,9 @@
      { "hrmdir",  hrmdir_main  },
      { "humount", humount_main },
      { "hvol",    hvol_main    },
 +	{ "hcdi",    hcdi_main    },
 +	{ "hcopyi",  hcopyi_main  },
++	{ "hpwdi",   hpwdi_main  },
      { 0,         0            }
    };
  
+diff -Naur a/hfsutil.h b/hfsutil.h
+--- a/hfsutil.h	2022-11-06 09:45:51.766792658 -0500
++++ b/hfsutil.h	2022-11-06 17:16:11.521082257 -0500
+@@ -37,3 +37,4 @@
+ 
+ int hfsutil_samepath(const char *, const char *);
+ char *hfsutil_abspath(const char *);
++
+diff -Naur a/hpwdi.c b/hpwdi.c
+--- a/hpwdi.c	1969-12-31 19:00:00.000000000 -0500
++++ b/hpwdi.c	2022-11-06 17:17:21.040427050 -0500
+@@ -0,0 +1,22 @@
++# ifdef HAVE_CONFIG_H
++#  include "config.h"
++# endif
++
++# include <stdio.h>
++
++# include "hfs.h"
++# include "hcwd.h"
++# include "hfsutil.h"
++# include "hpwdi.h"
++
++int hpwdi_main(int argc, char *argv[])
++{
++  hfsvol *vol;
++	vol = hfsutil_remount(hcwd_getvol(-1), HFS_MODE_RDONLY);
++	if (vol == 0)
++		return 1;
++	
++	printf("%lu\n", hfs_getcwd(vol));
++
++	return 0;
++}
+diff -Naur a/hpwdi.h b/hpwdi.h
+--- a/hpwdi.h	1969-12-31 19:00:00.000000000 -0500
++++ b/hpwdi.h	2022-11-06 17:01:53.414226481 -0500
+@@ -0,0 +1 @@
++int hpwdi_main(int, char *[]);
 diff -Naur a/libhfs/hfs.c b/libhfs/hfs.c
 --- a/libhfs/hfs.c	2022-11-06 09:45:51.767792634 -0500
 +++ b/libhfs/hfs.c	2022-11-06 15:12:22.939953442 -0500
@@ -608,7 +650,7 @@ diff -Naur a/libhfs/hfs.c b/libhfs/hfs.c
  
 diff -Naur a/libhfs/hfs.h b/libhfs/hfs.h
 --- a/libhfs/hfs.h	2022-11-06 09:45:51.767792634 -0500
-+++ b/libhfs/hfs.h	2022-11-06 12:48:21.800110082 -0500
++++ b/libhfs/hfs.h	2022-11-06 17:16:54.498059059 -0500
 @@ -153,6 +153,7 @@
  
  hfsfile *hfs_create(hfsvol *, const char *, const char *, const char *);
@@ -627,7 +669,7 @@ diff -Naur a/libhfs/hfs.h b/libhfs/hfs.h
  int hfs_fsetattr(hfsfile *, const hfsdirent *);
 diff -Naur a/libhfs/volume.c b/libhfs/volume.c
 --- a/libhfs/volume.c	2022-11-06 09:45:51.767792634 -0500
-+++ b/libhfs/volume.c	2022-11-06 15:12:27.483845155 -0500
++++ b/libhfs/volume.c	2022-11-06 17:17:10.672673929 -0500
 @@ -25,6 +25,7 @@
  
  # include <stdlib.h>
@@ -735,7 +777,7 @@ diff -Naur a/libhfs/volume.c b/libhfs/volume.c
  fail:
 diff -Naur a/libhfs/volume.h b/libhfs/volume.h
 --- a/libhfs/volume.h	2022-11-06 09:45:51.767792634 -0500
-+++ b/libhfs/volume.h	2022-11-06 14:41:54.328532403 -0500
++++ b/libhfs/volume.h	2022-11-06 17:17:17.184518869 -0500
 @@ -55,6 +55,7 @@
  int v_freeblocks(hfsvol *, const ExtDescriptor *);
  
