@@ -1,7 +1,8 @@
-EAPI=7
+# this dexvert version exists because I think something needs this with ptyhon 7 support?
+EAPI=8
 
-PYTHON_COMPAT=( python3_{7..10} )
-DISTUTILS_USE_SETUPTOOLS=pyproject.toml
+DISTUTILS_USE_PEP517=flit
+PYTHON_COMPAT=( python3_{7..11} pypy3 )
 
 inherit distutils-r1
 

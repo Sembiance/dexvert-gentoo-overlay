@@ -3,7 +3,7 @@ EAPI=7
 DESCRIPTION="A secure JavaScript and TypeScript runtime."
 HOMEPAGE="https://github.com/denoland/deno/releases"
 LICENSE="MIT"
-SRC_URI="https://telparia.com/distfiles/compendium/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 
 S="${WORKDIR}"
 

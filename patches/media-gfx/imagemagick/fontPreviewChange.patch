@@ -1,0 +1,55 @@
+--- a/coders/ttf.c	2022-11-23 15:34:47.436691526 -0500
++++ b/coders/ttf.c	2022-11-23 16:38:51.622646485 -0500
+@@ -175,7 +175,7 @@
+     Text[] =
+       "abcdefghijklmnopqrstuvwxyz\n"
+       "ABCDEFGHIJKLMNOPQRSTUVWXYZ\n"
+-      "0123456789.:,;(*!?}^)#${%^&-+@\n";
++	  "0123456789`~!@#$%^&*()-_+=>,<.[]{}|\x22:;/?\n";
+ 
+   const TypeInfo
+     *type_info;
+@@ -213,8 +213,8 @@
+     (void) LogMagickEvent(TraceEvent,GetMagickModule(),"%s",
+       image_info->filename);
+   image=AcquireImage(image_info,exception);
+-  image->columns=800;
+-  image->rows=480;
++  image->columns=1200;
++  image->rows=460;
+   type_info=GetTypeInfo(image_info->filename,exception);
+   if ((type_info != (const TypeInfo *) NULL) &&
+       (type_info->glyphs != (char *) NULL))
+@@ -260,7 +260,7 @@
+     " viewbox 0 0 %.20g %.20g\n",(double) image->columns,(double) image->rows);
+   ConcatenateString(&draw_info->primitive,buffer);
+   ConcatenateString(&draw_info->primitive," font-size 18\n");
+-  (void) FormatLocaleString(buffer,MagickPathExtent," text 10,%.20g '",
++  (void) FormatLocaleString(buffer,MagickPathExtent," text 0,%.20g '",
+     (double) y);
+   ConcatenateString(&draw_info->primitive,buffer);
+   text=EscapeString(Text,'"');
+@@ -268,19 +268,19 @@
+   text=DestroyString(text);
+   (void) FormatLocaleString(buffer,MagickPathExtent,"'\n");
+   ConcatenateString(&draw_info->primitive,buffer);
+-  y+=20*(ssize_t) MultilineCensus((char *) Text)+20;
++  y+=15*(ssize_t) MultilineCensus((char *) Text);
+   for (i=12; i <= 72; i+=6)
+   {
+     y+=i+12;
+     ConcatenateString(&draw_info->primitive," font-size 18\n");
+     (void) FormatLocaleString(buffer,MagickPathExtent,
+-      " text 10,%.20g '%.20g'\n",(double) y,(double) i);
++      " text 0,%.20g '%.20g'\n",(double) y,(double) i);
+     ConcatenateString(&draw_info->primitive,buffer);
+     (void) FormatLocaleString(buffer,MagickPathExtent," font-size %.20g\n",
+       (double) i);
+     ConcatenateString(&draw_info->primitive,buffer);
+-    (void) FormatLocaleString(buffer,MagickPathExtent," text 50,%.20g "
+-      "'That which does not destroy me, only makes me stronger.'\n",(double) y);
++    (void) FormatLocaleString(buffer,MagickPathExtent," text 40,%.20g "
++      "'The quick brown fox jumps over the lazy dog.'\n",(double) y);
+     ConcatenateString(&draw_info->primitive,buffer);
+     if (i >= 24)
+       i+=6;
