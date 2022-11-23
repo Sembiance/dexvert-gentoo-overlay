@@ -4,6 +4,7 @@
 app-text/psiconv::gentoo
 media-gfx/inkscape::gentoo
 media-gfx/ansilove::gentoo
+media-gfx/oxipng::gentoo
 media-gfx/gimp::gentoo
 app-arch/unzip::gentoo
 media-libs/rlottie::gentoo

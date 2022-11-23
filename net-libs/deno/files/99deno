@@ -1,0 +1,4 @@
+DENO_DIR="/mnt/compendium/.deno"
+PATH='/mnt/compendium/.deno/bin'
+ROOTPATH='/mnt/compendium/.deno/bin'
+DENO_NO_UPDATE_CHECK='1'
