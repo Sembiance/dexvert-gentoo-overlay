@@ -25,7 +25,7 @@
    ConcatenateString(&draw_info->primitive,buffer);
    ConcatenateString(&draw_info->primitive," font-size 18\n");
 -  (void) FormatLocaleString(buffer,MagickPathExtent," text 10,%.20g '",
-+  (void) FormatLocaleString(buffer,MagickPathExtent," text 0,%.20g '",
++  (void) FormatLocaleString(buffer,MagickPathExtent," text 5,%.20g '",
      (double) y);
    ConcatenateString(&draw_info->primitive,buffer);
    text=EscapeString(Text,'"');
@@ -41,14 +41,14 @@
      ConcatenateString(&draw_info->primitive," font-size 18\n");
      (void) FormatLocaleString(buffer,MagickPathExtent,
 -      " text 10,%.20g '%.20g'\n",(double) y,(double) i);
-+      " text 0,%.20g '%.20g'\n",(double) y,(double) i);
++      " text 5,%.20g '%.20g'\n",(double) y,(double) i);
      ConcatenateString(&draw_info->primitive,buffer);
      (void) FormatLocaleString(buffer,MagickPathExtent," font-size %.20g\n",
        (double) i);
      ConcatenateString(&draw_info->primitive,buffer);
 -    (void) FormatLocaleString(buffer,MagickPathExtent," text 50,%.20g "
 -      "'That which does not destroy me, only makes me stronger.'\n",(double) y);
-+    (void) FormatLocaleString(buffer,MagickPathExtent," text 40,%.20g "
++    (void) FormatLocaleString(buffer,MagickPathExtent," text 45,%.20g "
 +      "'The quick brown fox jumps over the lazy dog.'\n",(double) y);
      ConcatenateString(&draw_info->primitive,buffer);
      if (i >= 24)
