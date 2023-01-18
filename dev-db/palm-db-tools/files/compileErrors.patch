@@ -1,0 +1,95 @@
+diff -Naur a/libflatfile/MobileDB.cpp b/libflatfile/MobileDB.cpp
+--- a/libflatfile/MobileDB.cpp	2003-06-19 19:37:46.000000000 -0400
++++ b/libflatfile/MobileDB.cpp	2023-01-18 16:35:46.309980428 -0500
+@@ -221,7 +221,7 @@
+         if (field + 1 > fields.size()) fields.resize(field + 1);
+ 
+         // Now search for the end of the current field.
+-        pi_char_t* q = reinterpret_cast<pi_char_t*>
++        const pi_char_t* q = reinterpret_cast<const pi_char_t*>
+             (memchr(p, 0, rec.end() - p));
+         if (!q)
+             throw PalmLib::error("field terminiator is missing");
+diff -Naur a/libpalm/Block.h b/libpalm/Block.h
+--- a/libpalm/Block.h	2003-06-19 19:37:47.000000000 -0400
++++ b/libpalm/Block.h	2023-01-18 16:35:05.910961310 -0500
+@@ -13,6 +13,7 @@
+ 
+ #include <algorithm>
+ #include <iterator>
++#include <cstddef>
+ 
+ #include "palmtypes.h"
+ 
+diff -Naur a/libsupport/csvfile.cpp b/libsupport/csvfile.cpp
+--- a/libsupport/csvfile.cpp	2003-06-19 19:37:47.000000000 -0400
++++ b/libsupport/csvfile.cpp	2023-01-18 16:35:27.127446197 -0500
+@@ -6,6 +6,7 @@
+ #include <string>
+ #include <stdexcept>
+ #include <utility>
++#include <cstring>
+ 
+ #include "libpalm/File.h"
+ #include "libflatfile/Database.h"
+
+diff -Naur a/libflatfile/DB.cpp b/libflatfile/DB.cpp
+--- a/libflatfile/DB.cpp	2003-06-19 19:37:46.000000000 -0400
++++ b/libflatfile/DB.cpp	2023-01-18 16:40:10.336566319 -0500
+@@ -221,7 +221,7 @@
+             throw PalmLib::error("list view is corrupt");
+ 
+         // Determine the length of the name string.
+-        pi_char_t* null_ptr = reinterpret_cast<pi_char_t*>
++        const pi_char_t* null_ptr = reinterpret_cast<const pi_char_t*>
+             (memchr(chunk.data() + 4, 0, 32));
+         if (null_ptr)
+             lv.name = std::string((char *) (chunk.data() + 4),
+diff -Naur a/libflatfile/JFile3.cpp b/libflatfile/JFile3.cpp
+--- a/libflatfile/JFile3.cpp	2003-06-19 19:37:46.000000000 -0400
++++ b/libflatfile/JFile3.cpp	2023-01-18 16:40:00.961794161 -0500
+@@ -454,7 +454,7 @@
+ void PalmLib::FlatFile::JFile3::JFileAppInfoType::unpack(const PalmLib::Block& block)
+ {
+     unsigned i;
+-    pi_char_t* null_ptr;
++    const pi_char_t* null_ptr;
+ 
+     // Ensure that we have enough space to extract information from.
+     if (block.size() < ( (20 * (20+1)) + 20*2 + 2 + 2 + 20*2 + 2
+@@ -467,7 +467,7 @@
+     // Extract the field names.
+     for (i = 0; i < 20; ++i) {
+         /* Find the trailing null byte and extract the string. */
+-        null_ptr = reinterpret_cast<pi_char_t*> (memchr(p, 0, 21));
++        null_ptr = reinterpret_cast<const pi_char_t*> (memchr(p, 0, 21));
+         if (null_ptr)
+             fieldNames[i] = std::string((char *) p, null_ptr - p);
+         else
+@@ -518,7 +518,7 @@
+     p += sizeof(pi_uint16_t);
+ 
+     // Extract the string used last by Find.
+-    null_ptr = reinterpret_cast<pi_char_t*> (memchr(p, 0, 16));
++    null_ptr = reinterpret_cast<const pi_char_t*> (memchr(p, 0, 16));
+     if (null_ptr)
+         findString = std::string((char *) p, null_ptr - p);
+     else
+@@ -526,7 +526,7 @@
+     p += 16;
+ 
+     // Extract the string used last by Filter.
+-    null_ptr = reinterpret_cast<pi_char_t*> (memchr(p, 0, 16));
++    null_ptr = reinterpret_cast<const pi_char_t*> (memchr(p, 0, 16));
+     if (null_ptr)
+         filterString = std::string((char *) p, null_ptr - p);
+     else
+@@ -542,7 +542,7 @@
+     p += sizeof(pi_uint16_t);
+ 
+     // Extract the password (if any).
+-    null_ptr = reinterpret_cast<pi_char_t*> (memchr(p, 0, 12));
++    null_ptr = reinterpret_cast<const pi_char_t*> (memchr(p, 0, 12));
+     if (null_ptr)
+         password = std::string((char *) p, null_ptr - p);
+     else
