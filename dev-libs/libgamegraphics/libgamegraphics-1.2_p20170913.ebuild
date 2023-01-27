@@ -16,6 +16,7 @@ DEPEND="dev-cpp/pngpp
 	dev-libs/boost
 	media-libs/libpng
 	app-text/xmlto
+	dev-libs/libgamearchive
 	dev-libs/libgamecommon"
 RDEPEND=${DEPEND}
 
