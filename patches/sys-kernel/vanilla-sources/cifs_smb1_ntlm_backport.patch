@@ -1,5 +1,7 @@
 # This patch is the reversal of: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=76a3c92ec9e0668e4cd0e9ff1782eb68f61a179c
-# This is probably the better way to backport, but it's not ready yet: https://sourceforge.net/p/linux-cifsd/mailman/message/37391155/
+# Whenever this patch is updated for newer kernels, it will be posted to:
+# https://bugzilla.kernel.org/show_bug.cgi?id=215375
+# https://bugs.gentoo.org/821895
 diff -Naur a/fs/cifs/Kconfig b/fs/cifs/Kconfig
 --- a/fs/cifs/Kconfig	2022-01-04 10:08:06.565157021 -0500
 +++ b/fs/cifs/Kconfig	2022-01-04 10:09:16.715075368 -0500
