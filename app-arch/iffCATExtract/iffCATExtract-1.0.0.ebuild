@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Extracts sub files from IFF CAT files"
 HOMEPAGE="https://github.com/Sembiance/iffCATExtract/releases"

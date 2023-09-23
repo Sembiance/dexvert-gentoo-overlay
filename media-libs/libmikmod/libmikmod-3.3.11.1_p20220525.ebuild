@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 inherit autotools
 
 DESCRIPTION="A library to play a wide range of module formats"

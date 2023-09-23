@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="C64 image viewer and converter"
 HOMEPAGE="https://sourceforge.net/projects/view64/files/source/"

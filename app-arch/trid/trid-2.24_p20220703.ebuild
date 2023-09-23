@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Command line tool to identify files"
 HOMEPAGE="https://mark0.net/forum/index.php?topic=873.0"

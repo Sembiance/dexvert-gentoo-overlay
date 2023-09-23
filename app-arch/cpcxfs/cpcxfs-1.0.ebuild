@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Command line tool work with CPC disk files"
 HOMEPAGE="http://www.cpcwiki.eu/forum/applications/cpcxfs/"

@@ -1,0 +1,37 @@
+diff -Naur a/plugins/webp/meson.build b/plugins/webp/meson.build
+--- a/plugins/webp/meson.build	2020-12-21 23:16:42.000000000 -0500
++++ b/plugins/webp/meson.build	2023-09-22 22:08:35.820546884 -0400
+@@ -2,6 +2,7 @@
+               ['webp.c'],
+               include_directories: ['../../src'],
+               name_prefix: '',
+-              dependencies: [cairo_dep, libwebp_dep, nil_dep],
++              dependencies: [cairo_dep, nil_dep],
++              link_args: ['-lwebp', '-lwebpdemux', '-lwebpmux'],
+               install_dir: plugindir,
+               install: true)
+diff -Naur a/src/meson.build b/src/meson.build
+--- a/src/meson.build	2021-09-24 23:35:54.000000000 -0400
++++ b/src/meson.build	2023-09-22 22:08:24.924406094 -0400
+@@ -11,9 +11,12 @@
+ 
+ opt_dep = []
+ opt_src = []
++opt_link = []
+ if libwebpenc_dep.found()
+-  opt_dep += libwebpenc_dep
+   opt_src += 'abydos-webp.c'
++  opt_link += '-lwebp'
++  opt_link += '-lwebpdemux'
++  opt_link += '-lwebpmux'
+ endif
+ abydos_lib = library('abydos'+apiversion,
+                      ['abydos.c',
+@@ -24,6 +27,7 @@
+                       opt_src],
+                      version: meson.project_version(),
+                      dependencies: [cairo_dep, libdl_dep, libm_dep, opt_dep],
++                     link_args: opt_link,
+                      install: true)
+ abydos_dep = declare_dependency(link_with: abydos_lib,
+                                 include_directories: '.')

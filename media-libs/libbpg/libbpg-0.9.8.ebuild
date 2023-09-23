@@ -1,6 +1,4 @@
-EAPI=7
-
-inherit eutils
+EAPI=8
 
 DESCRIPTION="BPG (Better Portable Graphics) is a new image format"
 HOMEPAGE="http://bellard.org/bpg/"

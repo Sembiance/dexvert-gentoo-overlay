@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="CLI tool that converts a Universal Hint System UHS file into HTML files"
 HOMEPAGE="http://www.emulinks.de/software.html"

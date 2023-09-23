@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Tools to manipulate Atari ATR disk images"
 HOMEPAGE="https://github.com/jhallen/atari-tools"

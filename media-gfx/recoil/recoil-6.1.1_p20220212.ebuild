@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Retro Computer image converter"
 HOMEPAGE="https://sourceforge.net/projects/recoil/files/recoil/"

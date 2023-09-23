@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="A tool to extract files from various video game formats"
 HOMEPAGE="https://sourceforge.net/projects/gameextractor/files/"

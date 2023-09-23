@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="WMF to SVG Converting Tool & Library for Java"
 HOMEPAGE="https://github.com/hidekatsu-izuno/wmf2svg"

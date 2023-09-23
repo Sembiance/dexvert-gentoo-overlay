@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Tools to extract ADF files"
 HOMEPAGE="https://github.com/mist64/extract-adf"

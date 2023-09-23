@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="CLI tool that converts a MOD to a WAV using libmikmod"
 HOMEPAGE="https://github.com/Sembiance/mikmod2wav"

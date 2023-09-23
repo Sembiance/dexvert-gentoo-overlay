@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Convert vector graphic file formats like .cdr, .svg, wmf and more."
 HOMEPAGE="https://sk1project.net/uc2/"

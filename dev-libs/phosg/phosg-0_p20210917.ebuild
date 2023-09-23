@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="C++ header files for common tasks, used by resource_dasm"
 HOMEPAGE="https://github.com/fuzziqersoftware/phosg"

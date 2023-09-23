@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Fuzzy pixmap manipulation"
 HOMEPAGE="http://fileformats.archiveteam.org/wiki/FBM_image"

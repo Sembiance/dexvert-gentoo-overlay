@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Apple II ProDOS disk imaging utility"
 HOMEPAGE="https://github.com/mach-kernel/cadius"

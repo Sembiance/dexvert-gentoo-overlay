@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="LBR extraction program"
 HOMEPAGE="http://www.svgalib.org/rus/lbrate.html"

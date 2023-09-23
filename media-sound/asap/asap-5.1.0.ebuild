@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Another Slight Atari Player"
 HOMEPAGE="https://sourceforge.net/projects/asap/files/asap/"

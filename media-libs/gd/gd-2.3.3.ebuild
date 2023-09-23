@@ -7,12 +7,12 @@
 # Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=7
+EAPI=8
 
 inherit autotools flag-o-matic multilib-minimal
 
 DESCRIPTION="Graphics library for fast image creation"
-HOMEPAGE="https://libgd.org/ https://www.boutell.com/gd/"
+HOMEPAGE="https://libgd.github.io/"
 SRC_URI="https://github.com/libgd/libgd/releases/download/${P}/lib${P}.tar.xz"
 S="${WORKDIR}/lib${P}"
 

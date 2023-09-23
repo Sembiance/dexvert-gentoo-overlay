@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="A library to find similar pictures"
 HOMEPAGE="http://www.pureftpd.org/project/libpuzzle"

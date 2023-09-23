@@ -1,0 +1,11 @@
+diff -Naur a/perform.c b/perform.c
+--- a/perform.c	2023-05-22 14:37:17.418112025 -0400
++++ b/perform.c	2023-05-22 14:37:26.130101942 -0400
+@@ -1541,7 +1541,6 @@
+         // X = public or private    Y = decrypt or encrypt
+         #define QUICKBMS_OPENSSL_RSA(X, Y) \
+             if(!rsa_ctx->openssl_rsa || RSA_##X##_##Y (datalen, data, data, rsa_ctx->openssl_rsa, RSA_PKCS1_PADDING) < 0) \
+-            if(!rsa_ctx->openssl_rsa || RSA_##X##_##Y (datalen, data, data, rsa_ctx->openssl_rsa, RSA_SSLV23_PADDING) < 0) \
+             if(!rsa_ctx->openssl_rsa || RSA_##X##_##Y (datalen, data, data, rsa_ctx->openssl_rsa, RSA_NO_PADDING) < 0) \
+             if(!rsa_ctx->openssl_rsa || RSA_##X##_##Y (datalen, data, data, rsa_ctx->openssl_rsa, RSA_PKCS1_OAEP_PADDING) < 0) \
+             if(!rsa_ctx->openssl_rsa || RSA_##X##_##Y (datalen, data, data, rsa_ctx->openssl_rsa, RSA_X931_PADDING) < 0) \

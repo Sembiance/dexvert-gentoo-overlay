@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 inherit cmake
 
@@ -12,10 +12,12 @@ SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
+PATCHES=( "${FILESDIR}/stdint.patch" )
+
 src_install() {
  	cmake_src_install
  
 	# Do not violate multilib strict
 	mv "${ED}/usr/lib" "${ED}/usr/$(get_libdir)" || die "mv failed"
-	sed -i 's/lib\/libphosg/lib64\/libphosg/g' ${ED}/usr/lib64/phosg-gentoo.cmake
+	sed -i 's/usr\/lib/usr\/lib64/g' ${ED}/usr/lib64/phosg.cmake
 }

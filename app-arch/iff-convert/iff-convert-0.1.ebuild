@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="A simple converter for IFF files"
 HOMEPAGE="http://www.boomerangsworld.de/cms/tools/iff-convert.html"

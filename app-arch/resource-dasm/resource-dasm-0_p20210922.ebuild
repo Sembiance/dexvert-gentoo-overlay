@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Various tools to extract data from MacOS resource forks"
 MY_PN="resource_dasm"

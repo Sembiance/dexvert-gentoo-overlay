@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Tool to merge multiple bin/cue tracks into one."
 HOMEPAGE="https://github.com/putnam/binmerge"

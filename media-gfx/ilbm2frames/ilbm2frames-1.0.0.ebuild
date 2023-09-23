@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="CLI tool that uses extract frames from IFF ILBM color cycling file"
 HOMEPAGE="https://github.com/Sembiance/ilbm2frames"

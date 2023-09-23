@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Converts PCD images into JPEG"
 HOMEPAGE="https://sourceforge.net/projects/pcdtojpeg/files/pcdtojpeg/"

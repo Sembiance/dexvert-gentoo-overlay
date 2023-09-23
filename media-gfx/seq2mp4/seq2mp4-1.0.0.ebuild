@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="CLI tool that can convert Cyber Paint SEQ to MP4"
 HOMEPAGE="https://github.com/Sembiance/seq2mp4"

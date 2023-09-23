@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Conversion utilities for the PalmOS flat-file database programs"
 HOMEPAGE="https://sourceforge.net/projects/palm-db-tools/files/palm-db-tools/"

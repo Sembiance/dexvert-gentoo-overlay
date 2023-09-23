@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="A collection of tools for manipulating bencoded data."
 HOMEPAGE="https://gitlab.com/heikkiorsila/bencodetools"

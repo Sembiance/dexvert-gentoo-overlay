@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Various tools to extract data from Macromedia Director files"
 HOMEPAGE="https://github.com/System25/drxtract"

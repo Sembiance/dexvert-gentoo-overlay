@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="signature-based file format identification"
 HOMEPAGE="https://github.com/richardlehane/siegfried/releases"

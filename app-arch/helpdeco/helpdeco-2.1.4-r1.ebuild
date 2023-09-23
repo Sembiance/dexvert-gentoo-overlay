@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="A tool to dissect or convert WinHelp HLP files"
 HOMEPAGE="https://sourceforge.net/projects/helpdeco//files/"

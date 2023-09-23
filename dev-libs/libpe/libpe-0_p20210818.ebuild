@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="The PE library used by pev"
 HOMEPAGE="https://github.com/merces/libpe"

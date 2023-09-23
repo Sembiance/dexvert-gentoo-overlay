@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="A secure JavaScript and TypeScript runtime."
 HOMEPAGE="https://github.com/denoland/deno/releases"

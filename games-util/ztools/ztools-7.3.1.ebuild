@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="CLI tools to manipulate Z-Machine files"
 HOMEPAGE="https://www.inform-fiction.org/zmachine/ztools.html"

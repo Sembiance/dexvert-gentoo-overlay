@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="A tool to list filenames within a .DS_Store file"
 HOMEPAGE="https://github.com/gehaxelt/Python-dsstore"

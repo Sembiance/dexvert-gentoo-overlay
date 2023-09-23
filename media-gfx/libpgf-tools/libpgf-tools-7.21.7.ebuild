@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Tools to process the pgf files"
 HOMEPAGE="https://sourceforge.net/projects/libpgf/files/libpgf/"

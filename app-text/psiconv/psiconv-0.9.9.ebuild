@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="An interpreter for Psion 5(MX) file formats"
 HOMEPAGE="https://frodo.looijaard.name/project/psiconv"

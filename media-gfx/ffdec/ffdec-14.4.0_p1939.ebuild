@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="JPEXS Free Flash Decompiler"
 HOMEPAGE="https://github.com/jindrapetrik/jpexs-decompiler/releases"

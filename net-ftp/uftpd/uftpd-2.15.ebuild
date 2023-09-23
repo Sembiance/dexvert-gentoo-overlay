@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="The no nonsense TFTP/FTP server"
 HOMEPAGE="https://github.com/troglobit/uftpd/releases"

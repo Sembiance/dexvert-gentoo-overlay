@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Tools to read Dragon32 VDK disk image files"
 HOMEPAGE="https://github.com/pulkomandy/ddosutils"

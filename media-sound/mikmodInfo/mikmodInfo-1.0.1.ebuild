@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="CLI tool that uses libmikmod to get and print MOD info"
 HOMEPAGE="https://github.com/Sembiance/mikmodInfo"

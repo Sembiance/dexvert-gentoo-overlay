@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="CLI tool that converts a REKO cardset to a PNG"
 HOMEPAGE="https://github.com/Sembiance/reko2png"

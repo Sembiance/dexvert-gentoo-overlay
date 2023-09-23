@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Convert more than 500 image formats"
 HOMEPAGE="https://www.xnview.com/en/nconvert/#downloads"

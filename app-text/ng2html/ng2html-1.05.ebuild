@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="A tool to convert Norton Guide documents to HTML"
 HOMEPAGE="http://www.davep.org/norton-guides/"

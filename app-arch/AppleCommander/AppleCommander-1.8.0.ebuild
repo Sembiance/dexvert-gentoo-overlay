@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="AppleCommander is a tool that manipulates Apple ][ disk images"
 HOMEPAGE="https://github.com/AppleCommander/AppleCommander/releases"

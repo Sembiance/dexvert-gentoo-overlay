@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Converts an X cursor into PNG images"
 HOMEPAGE="https://github.com/eworm-de/xcur2png"

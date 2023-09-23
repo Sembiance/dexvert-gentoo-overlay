@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Atari ST and Amiga music player"
 HOMEPAGE="https://sourceforge.net/p/sc68/code/HEAD/tree/"

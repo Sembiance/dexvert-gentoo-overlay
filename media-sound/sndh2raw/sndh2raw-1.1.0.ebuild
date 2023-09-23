@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="CLI tool that converts a SC68 or SNDH file to RAW PCM files using sc68"
 HOMEPAGE="https://github.com/Sembiance/sndh2raw"

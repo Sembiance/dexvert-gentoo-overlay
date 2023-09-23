@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="CLI tool that extracts data from HyperCard stacks"
 HOMEPAGE="https://github.com/uliwitness/stackimport/"

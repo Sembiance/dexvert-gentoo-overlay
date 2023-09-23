@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Ansi/Ascii text and RIPscrip vector graphic art converter"
 HOMEPAGE="https://github.com/cwensley/pablodraw/releases"

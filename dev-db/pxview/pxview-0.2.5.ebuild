@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Library to read and write Paradox DB files"
 HOMEPAGE="https://sourceforge.net/projects/pxlib/files/pxview/"

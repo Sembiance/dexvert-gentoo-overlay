@@ -1,6 +1,6 @@
-EAPI=7
+EAPI=8
 
-inherit autotools eutils flag-o-matic
+inherit autotools flag-o-matic
 
 DESCRIPTION="DOS emulator"
 HOMEPAGE="https://sourceforge.net/p/dosbox/code-0/HEAD/tree/dosbox/trunk/"

@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="2D CAD program"
 HOMEPAGE="https://qcad.org/en/download"

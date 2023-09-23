@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="SWF Tools is a collection of SWF manipulation and generation utilities"
 HOMEPAGE="http://www.swftools.org/download.html"

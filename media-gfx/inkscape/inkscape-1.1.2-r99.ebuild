@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 # NOTE: We don't rename it inkscape-appimage or install /opt/bin/myinkscape because some packages require inkscape
 # Latest 1.2 inkscape requires clicking a dialog to do certain command line conversions: https://gitlab.com/inkscape/inkscape/-/issues/3524

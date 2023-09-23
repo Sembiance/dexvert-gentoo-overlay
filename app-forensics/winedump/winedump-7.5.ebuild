@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="CLI tool from wine that can dump info about an exe or dll"
 HOMEPAGE="https://www.winehq.org/"

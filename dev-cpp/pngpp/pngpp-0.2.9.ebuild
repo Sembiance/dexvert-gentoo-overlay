@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="A simple but powerful C++ interface to libpng"
 HOMEPAGE="http://www.nongnu.org/pngpp/"

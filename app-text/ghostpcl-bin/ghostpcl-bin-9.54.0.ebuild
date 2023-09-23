@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Ghostscript processing tools"
 HOMEPAGE="https://ghostscript.com/releases/gpcldnld.html"

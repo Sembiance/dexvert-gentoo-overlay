@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Decompresses Softdisk Compressed files"
 HOMEPAGE="https://git.fsfe.org/art1pirat/ctxer"

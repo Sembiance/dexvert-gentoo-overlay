@@ -2,20 +2,17 @@
 
 # Prefer my overlay packages instead of gentoo packages:
 app-text/psiconv::gentoo
-media-gfx/inkscape::gentoo
 media-gfx/ansilove::gentoo
-media-gfx/gimp::gentoo
 app-arch/unzip::gentoo
 media-libs/rlottie::gentoo
 media-libs/libxmp::gentoo
-media-libs/libpgf::gentoo
+media-libs/vips::gentoo
 media-libs/libmikmod::gentoo
 media-libs/gd::gentoo
 app-emulation/uade::gentoo
 app-cdr/cdrdao::gentoo
 games-emulation/dosbox::gentoo
 net-ftp/uftpd::gentoo
-dev-python/typing-extensions::gentoo
 
 # Restrict certain versions
 >=media-libs/allegro-5

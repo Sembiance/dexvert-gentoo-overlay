@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Ć Translator"
 HOMEPAGE="https://github.com/pfusik/cito"

@@ -1,6 +1,6 @@
-EAPI=7
+EAPI=8
 
-inherit dotnet autotools
+inherit autotools
 
 DESCRIPTION="gtk bindings for mono"
 HOMEPAGE="https://download.mono-project.com/sources/gtk-sharp212/"

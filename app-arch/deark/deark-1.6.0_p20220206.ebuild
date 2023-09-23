@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Converts miltiple different image types and various archives"
 HOMEPAGE="https://github.com/jsummers/deark"

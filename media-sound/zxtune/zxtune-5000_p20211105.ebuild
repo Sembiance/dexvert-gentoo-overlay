@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Chiptune converter"
 HOMEPAGE="https://bitbucket.org/zxtune/zxtune/downloads/?tab=branches"

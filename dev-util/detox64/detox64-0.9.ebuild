@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Decompile C64 BASIC files"
 HOMEPAGE="https://github.com/vroby65/detox64"

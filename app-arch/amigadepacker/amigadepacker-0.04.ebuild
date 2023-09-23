@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Extracts .xpk and other amiga compressed files"
 HOMEPAGE="https://github.com/Sembiance/amigadepacker"

@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="CLI playback of game audio"
 HOMEPAGE="https://github.com/vgmstream/vgmstream/releases"

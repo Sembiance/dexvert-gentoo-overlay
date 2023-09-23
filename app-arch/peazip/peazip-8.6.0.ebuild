@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Free Zip / Unzip software and Rar file extractor."
 HOMEPAGE="https://github.com/peazip/PeaZip/releases"

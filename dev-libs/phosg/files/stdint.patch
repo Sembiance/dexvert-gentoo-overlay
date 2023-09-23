@@ -1,0 +1,11 @@
+diff -Naur a/src/Hash.hh b/src/Hash.hh
+--- a/src/Hash.hh	2023-09-22 19:27:48.449342599 -0400
++++ b/src/Hash.hh	2023-09-22 19:28:00.751490598 -0400
+@@ -1,6 +1,7 @@
+ #pragma once
+ 
+ #include <string>
++#include <stdint.h>
+ 
+ #define fnv1a32_start 0x811C9DC5
+ 

@@ -1,0 +1,21 @@
+diff -Naur a/plugins/grok/grok.c b/plugins/grok/grok.c
+--- a/plugins/grok/grok.c	2023-01-18 11:20:55.000000000 -0500
++++ b/plugins/grok/grok.c	2023-09-22 22:32:03.810473584 -0400
+@@ -369,7 +369,7 @@
+ 
+     memset(&stream_params,0,sizeof(stream_params));
+     stream_params.buf = (uint8_t*)data;
+-    stream_params.len = len;
++    stream_params.buf_len = len;
+ 
+     codec = grk_decompress_init(&stream_params, &param.core);
+     if(!codec){
+@@ -427,7 +427,7 @@
+         .create_from_data = _grok_create_from_data,
+         .get_image_surface = _grok_get_image_surface
+     };
+-    grk_initialize(NULL, 0);
++    grk_initialize(NULL, 1, 0);
+     grk_set_msg_handlers(_on_info, NULL, _on_warning, NULL, _on_error, NULL);
+     return &p;
+ }

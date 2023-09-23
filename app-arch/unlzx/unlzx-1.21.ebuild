@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Command line tool to uncompress compressed LZX files"
 HOMEPAGE="http://xavprods.free.fr/lzx/"

@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Supports viewing and playing various movie formats"
 HOMEPAGE="http://xanim.polter.net/"

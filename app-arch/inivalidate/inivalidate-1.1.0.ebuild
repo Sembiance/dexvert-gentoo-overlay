@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="CLI app that uses libconfini to validate that an INI file is valid"
 LICENSE="MIT"

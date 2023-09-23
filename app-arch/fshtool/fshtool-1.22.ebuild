@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Command line tool to uncompress FSH archives"
 HOMEPAGE="http://www.math.polytechnique.fr/cmat/auroux/nfs/"

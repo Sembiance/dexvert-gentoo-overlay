@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="A tool to view and convert Amigaguide documents"
 HOMEPAGE="https://sourceforge.net/projects/grotag/files/grotag/"

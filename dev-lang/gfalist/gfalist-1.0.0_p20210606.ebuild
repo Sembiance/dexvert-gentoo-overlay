@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Tool to convert or extract data in certain AMOS banks"
 HOMEPAGE="https://github.com/Sembiance/gfalist"

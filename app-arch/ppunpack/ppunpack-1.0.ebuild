@@ -1,10 +1,10 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Extracts .pp files compressed with PowerPacker"
 HOMEPAGE="http://aminet.net/package/util/arc/ppunpack10-mos"
 LICENSE="ppunpack-license"
 MY_PV=$(ver_rs 1- '')
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}${MY_PV}-mos.lha"
+SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}${MY_PV}-mos.tar.bz2"
 S="${WORKDIR}/PPUnpack${PV}/sources"
 
 SLOT="0"

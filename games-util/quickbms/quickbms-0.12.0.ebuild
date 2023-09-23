@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Files extractor and reimporter, archives and file formats parser"
 HOMEPAGE="https://aluigi.altervista.org/quickbms.htm"
@@ -15,7 +15,7 @@ DEPEND="app-arch/bzip2
 	sys-libs/zlib"
 RDEPEND="app-arch/unzip"
 
-PATCHES=( "${FILESDIR}/fixMakefile.patch" "${FILESDIR}/fixKrakenCPP.patch" )
+PATCHES=( "${FILESDIR}/fixMakefile.patch" "${FILESDIR}/fixOpenSSL.patch" )
 
 src_install() {
 	dobin ${PN}

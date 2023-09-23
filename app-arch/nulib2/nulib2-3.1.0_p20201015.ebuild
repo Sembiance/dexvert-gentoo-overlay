@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="NufxLib and NuLib2, Apple II file archive utilities"
 HOMEPAGE="https://github.com/fadden/nulib2"

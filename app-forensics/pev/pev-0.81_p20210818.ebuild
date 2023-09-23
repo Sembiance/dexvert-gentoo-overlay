@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Command line tool to investigate PE binaries"
 HOMEPAGE="https://github.com/merces/pev"

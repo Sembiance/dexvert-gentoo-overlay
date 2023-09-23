@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="CLI tool that extracts installshield .z files"
 HOMEPAGE="https://github.com/OmniBlade/isextract"

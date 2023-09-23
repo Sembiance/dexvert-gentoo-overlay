@@ -1,0 +1,23 @@
+diff -Naur a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	2023-09-22 20:25:50.820658111 -0400
++++ b/CMakeLists.txt	2023-09-22 20:26:26.583530614 -0400
+@@ -14,7 +14,7 @@
+ if (MSVC)
+   add_compile_options(/W4 /WX)
+ else()
+-  add_compile_options(-Wall -Wextra -Werror -Wno-strict-aliasing -O2)
++  add_compile_options(-Wall -Wextra -Werror -Wno-strict-aliasing -Wno-dangling-reference -Wno-sign-compare -Wno-redundant-move -O2)
+ endif()
+ 
+ set(LOCAL_INCLUDE_DIR "/usr/local/include")
+diff -Naur a/src/TextCodecs.hh b/src/TextCodecs.hh
+--- a/src/TextCodecs.hh	2023-09-22 20:26:03.972230613 -0400
++++ b/src/TextCodecs.hh	2023-09-22 20:26:37.612042114 -0400
+@@ -1,6 +1,7 @@
+ #pragma once
+ 
+ #include <string>
++#include <cstdint>
+ 
+ using namespace std;
+ 

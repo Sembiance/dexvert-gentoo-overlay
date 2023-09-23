@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 # I modified app-arch/unzip to support some old copyright encumbered code called USE_SMITH
 # The unreduce_full.c file came from: ftp://ftp.info-zip.org/pub/infozip/src/unreduce_full.zip

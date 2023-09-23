@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="NVIDIA container runtime library"
 HOMEPAGE="https://github.com/NVIDIA/libnvidia-container"

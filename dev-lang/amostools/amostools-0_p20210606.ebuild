@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Tools to work with AMOS programs"
 LICENSE="MIT"

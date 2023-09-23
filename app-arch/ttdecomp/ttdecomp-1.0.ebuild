@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="Extracts TTComp compressed archive data"
 HOMEPAGE="http://www.exelana.com/techie/c/ttdecomp.html"

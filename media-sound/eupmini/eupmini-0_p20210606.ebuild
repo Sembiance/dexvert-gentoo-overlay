@@ -1,4 +1,4 @@
-EAPI=7
+EAPI=8
 
 DESCRIPTION="CLI tool that can play FM Towns Euphony EUP files"
 HOMEPAGE="https://github.com/gzaffin/eupmini"
