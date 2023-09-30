@@ -1,0 +1,11 @@
+diff -Naur a/eupplayer.hpp b/eupplayer.hpp
+--- a/eupplayer.hpp	2023-09-27 15:04:51.406908476 -0400
++++ b/eupplayer.hpp	2023-09-27 15:05:03.743064486 -0400
+@@ -19,6 +19,7 @@
+ #endif // __GNUC__
+ #include <sys/types.h>
+ #include <iostream>
++#include <stdint.h>
+ 
+ class PolyphonicAudioDevice {
+     struct timeval _timeStep;

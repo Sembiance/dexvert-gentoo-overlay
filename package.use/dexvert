@@ -3,5 +3,8 @@ media-gfx/gimp python jpegxl -javascript -lua -heif
 media-libs/babl introspection lcms
 media-libs/gegl introspection lcms
 
+# gmic requires older GIMP
+media-gfx/gmic -gimp
+
 # Breaks if enabled
 sci-libs/hdf5 -unsupported -threads

@@ -7,10 +7,11 @@ app-arch/unzip::gentoo
 media-libs/rlottie::gentoo
 media-libs/libxmp::gentoo
 media-libs/vips::gentoo
+media-libs/libquicktime::gentoo
 media-libs/libmikmod::gentoo
 media-libs/gd::gentoo
 app-emulation/uade::gentoo
-app-cdr/cdrdao::gentoo
+app-emulation/86Box::gentoo
 games-emulation/dosbox::gentoo
 net-ftp/uftpd::gentoo
 

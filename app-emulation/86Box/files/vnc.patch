@@ -1,0 +1,15 @@
+diff -Naur a/src/vnc.c b/src/vnc.c
+--- a/src/vnc.c	2023-09-25 14:28:12.275000181 -0400
++++ b/src/vnc.c	2023-09-25 14:42:47.572898614 -0400
+@@ -73,6 +73,11 @@
+     vnc_kbinput(down ? 1 : 0, (int) k);
+ }
+ 
++void
++vnc_mouse_poll(void)
++{
++}
++
+ static void
+ vnc_ptrevent(int but, int x, int y, rfbClientPtr cl)
+ {

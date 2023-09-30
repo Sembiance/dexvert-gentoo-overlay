@@ -1,0 +1,5 @@
+# fontforge when built with woff2 useflag fails to compile
+# Seems it thinks we are to compile support with clang but invokes gcc
+# So we just tell it here to use clang.
+# likely due to this bug: https://bugs.python.org/issue30915
+media-gfx/fontforge compiler-clang
