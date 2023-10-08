@@ -1,0 +1,2 @@
+# This version segfaults on everything, so mask it
+=media-sound/eupmini-0_p20230903

@@ -1,0 +1,2 @@
+# These are need for PyTorch to install:
+sci-libs/caffe2 opencv
