@@ -14,4 +14,5 @@ PATCHES=( "${FILESDIR}/stdint.patch" )
 
 src_install() {
 	dobin eupplay
+	doman eupplay.1
 }
