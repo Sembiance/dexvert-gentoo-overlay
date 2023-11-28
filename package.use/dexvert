@@ -8,3 +8,6 @@ media-gfx/gmic -gimp
 
 # Breaks if enabled
 sci-libs/hdf5 -unsupported -threads
+
+# Always want
+media-libs/libzmf tools

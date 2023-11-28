@@ -2,6 +2,7 @@
 
 # Prefer my overlay packages instead of gentoo packages:
 app-text/psiconv::gentoo
+media-gfx/pablodraw::gentoo
 media-gfx/ansilove::gentoo
 app-arch/unzip::gentoo
 media-libs/netpbm::gentoo
@@ -14,6 +15,7 @@ media-libs/gd::gentoo
 app-emulation/uade::gentoo
 app-emulation/86Box::gentoo
 games-emulation/dosbox::gentoo
+sys-fs/dmg2img::gentoo
 net-ftp/uftpd::gentoo
 
 # Restrict certain versions

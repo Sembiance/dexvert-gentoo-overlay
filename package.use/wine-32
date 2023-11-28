@@ -5,7 +5,8 @@ app-emulation/wine-vanilla abi_x86_32
 app-emulation/wine-gecko abi_x86_32
 x11-drivers/nvidia-drivers abi_x86_32
 
-# To generate the list below run emerge as: emerge -p wine-vanilla 2>&1 | grep abi_x86_32
+# To generate the list below, enusre this file is NOT in package.use then run:
+#    emerge -p wine-vanilla 2>&1 | grep abi_x86_32
 # Stick this in VSCode and run search replace regex with:
 #    Find: >=([^/]+\/.+)-\d[^ ]+ abi_x86_32
 # Replace: $1 abi_x86_32
@@ -66,3 +67,15 @@ dev-libs/libxml2 abi_x86_32
 media-libs/glu abi_x86_32
 virtual/libcrypt abi_x86_32
 sys-libs/libxcrypt abi_x86_32
+sys-apps/util-linux abi_x86_32
+x11-libs/libX11 abi_x86_32
+x11-libs/libXext abi_x86_32
+x11-libs/libxcb abi_x86_32
+x11-libs/libXau abi_x86_32
+x11-libs/libXdmcp abi_x86_32
+virtual/libintl abi_x86_32
+x11-libs/libSM abi_x86_32
+x11-libs/libICE abi_x86_32
+x11-libs/libXt abi_x86_32
+virtual/jpeg abi_x86_32
+media-libs/libjpeg-turbo abi_x86_32
