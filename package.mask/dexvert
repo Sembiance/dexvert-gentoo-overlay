@@ -15,7 +15,6 @@ media-libs/gd::gentoo
 app-emulation/uade::gentoo
 app-emulation/86Box::gentoo
 games-emulation/dosbox::gentoo
-sys-fs/dmg2img::gentoo
 net-ftp/uftpd::gentoo
 
 # Restrict certain versions

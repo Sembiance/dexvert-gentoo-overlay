@@ -11,6 +11,7 @@ KEYWORDS="~amd64"
 RESTRICT="mirror test network-sandbox"
 
 DEPEND="dev-lang/mono
+	dev-dotnet/dotnet-sdk-bin
 	dev-dotnet/gtk-sharp"
 RDEPEND="${DEPEND}"
 
@@ -23,8 +24,7 @@ src_install() {
 	into /opt/${PN}
     insinto /opt/${PN}
 
-	dotNetVersion=$(dotnet --version | cut -d'.' -f1-2)
-	doins artifacts/bin/PabloDraw/Release/net${dotNetVersion}/linux-x64/*
+	doins artifacts/bin/PabloDraw/Release/net*/linux-x64/*
 
 	fperms 0755 /opt/${PN}/PabloDraw
 	dosym /opt/${PN}/PabloDraw /opt/bin/PabloDraw
