@@ -1,3 +1,5 @@
 #!/bin/bash
 
-java -jar /opt/AppleCommander/ac.jar "$@"
+# Choose latest java-vm to run it with
+OPENJDK=$(eselect java-vm list | cut -d' ' -f 6 | awk 'NF' | sort -t '-' -k3,3nr | head -n 1)
+/opt/"$OPENJDK"/bin/java -jar /opt/AppleCommander/ac.jar "$@"

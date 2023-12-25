@@ -2,7 +2,9 @@
 
 KIDPIDS=()
 
-java -jar /opt/grotag/Grotag.jar "$@" &
+# Choose oldest java-vm to run it with
+OPENJDK=$(eselect java-vm list | cut -d' ' -f 6 | awk 'NF' | sort -t '-' -k3,3n | head -n 1)
+/opt/"$OPENJDK"/bin/java -jar /opt/grotag/Grotag.jar "$@" &
 KIDPIDS+=($!)
 
 function clean_up
