@@ -12,8 +12,8 @@ MY_P="${PN}${MY_PV}"
 DESCRIPTION="unzipper for pkzip-compressed files"
 HOMEPAGE="http://infozip.sourceforge.net/UnZip.html"
 LICENSE="Info-ZIP"
-SRC_URI="mhttps://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${MY_P}.tar.gz
-	https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}_${PV/_p/-}.debian.tar.xz"
+SRC_URI="mhttps://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${MY_P}.tar.gz
+	https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}_${PV/_p/-}.debian.tar.xz"
 
 SLOT="0"
 KEYWORDS="~alpha amd64 arm arm64 hppa ia64 m68k ~mips ppc ppc64 ~riscv s390 sparc x86 ~x86-linux"

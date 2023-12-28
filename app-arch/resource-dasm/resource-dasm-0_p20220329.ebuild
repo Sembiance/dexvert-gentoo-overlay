@@ -5,7 +5,7 @@ inherit cmake
 DESCRIPTION="Various tools to extract data from MacOS resource forks"
 HOMEPAGE="https://github.com/fuzziqersoftware/resource_dasm"
 LICENSE="MIT"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/resource_dasm-master"
 
 SLOT="0"

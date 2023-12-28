@@ -4,7 +4,7 @@ DESCRIPTION="Converts PCD images into JPEG"
 HOMEPAGE="https://sourceforge.net/projects/pcdtojpeg/files/pcdtojpeg/"
 LICENSE="LGPL-2.1"
 MY_PV="${PV//./_}"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}_${MY_PV}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}_${MY_PV}.zip"
 S="${WORKDIR}/pcdtojpeg_${MY_PV}"
 
 SLOT="0"

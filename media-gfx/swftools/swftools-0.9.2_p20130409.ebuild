@@ -3,8 +3,8 @@ EAPI=8
 DESCRIPTION="SWF Tools is a collection of SWF manipulation and generation utilities"
 HOMEPAGE="http://www.swftools.org/download.html"
 LICENSE="GPL-2"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz
-	https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/swftools_0.9.2+git20130725-4.1.debian.tar.xz"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz
+	https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/swftools_0.9.2+git20130725-4.1.debian.tar.xz"
 
 SLOT="0"
 KEYWORDS="~amd64"

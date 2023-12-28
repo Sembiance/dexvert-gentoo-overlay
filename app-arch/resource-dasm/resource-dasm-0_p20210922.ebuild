@@ -4,7 +4,7 @@ DESCRIPTION="Various tools to extract data from MacOS resource forks"
 MY_PN="resource_dasm"
 HOMEPAGE="https://github.com/fuzziqersoftware/resource_dasm"
 LICENSE="MIT"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${MY_PN}-${PV}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${MY_PN}-${PV}.zip"
 S="${WORKDIR}/${MY_PN}-master"
 
 SLOT="0"

@@ -3,7 +3,7 @@ EAPI=8
 DESCRIPTION="Unix Amiga Delitracker Emulator - plays old Amiga tunes through UAE emulation"
 HOMEPAGE="https://gitlab.com/uade-music-player/uade"
 LICENSE="GPL-2+ LGPL-2+"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/${PN}-master"
 
 SLOT="0"

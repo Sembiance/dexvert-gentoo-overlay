@@ -5,7 +5,7 @@ inherit autotools
 DESCRIPTION="A library and viewer for handling ILBM images in SDL applications"
 HOMEPAGE="https://github.com/svanderburg/SDL_ILBM"
 LICENSE="MIT"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/SDL_ILBM-master"
 
 SLOT="0"

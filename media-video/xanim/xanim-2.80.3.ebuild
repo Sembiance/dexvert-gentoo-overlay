@@ -3,7 +3,7 @@ EAPI=8
 DESCRIPTION="Supports viewing and playing various movie formats"
 HOMEPAGE="http://xanim.polter.net/"
 LICENSE="MIT"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 
 SLOT="0"
 KEYWORDS="~amd64"

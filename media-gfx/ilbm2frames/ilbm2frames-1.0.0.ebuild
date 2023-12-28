@@ -3,7 +3,7 @@ EAPI=8
 DESCRIPTION="CLI tool that uses extract frames from IFF ILBM color cycling file"
 HOMEPAGE="https://github.com/Sembiance/ilbm2frames"
 LICENSE="MIT"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 
 SLOT="0"
 KEYWORDS="~amd64"

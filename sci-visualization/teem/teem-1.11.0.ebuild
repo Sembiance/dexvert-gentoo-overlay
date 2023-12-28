@@ -5,7 +5,7 @@ inherit cmake
 DESCRIPTION="A coordinated group of libraries for representing, processing, and visualizing scientific raster data."
 HOMEPAGE="https://teem.sourceforge.net/"
 LICENSE="${PN}-LICENSE"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}-src.tar.gz"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}-src.tar.gz"
 S="${WORKDIR}/${P}-src"
 
 SLOT="0"

@@ -4,7 +4,7 @@ DESCRIPTION="CLI tools to manipulate Z-Machine files"
 HOMEPAGE="https://www.inform-fiction.org/zmachine/ztools.html"
 LICENSE="CC-BY-SA-4.0"
 MY_PV="${PV//./}"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}${MY_PV}.tar.gz"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}${MY_PV}.tar.gz"
 S="${WORKDIR}"
 
 SLOT="0"

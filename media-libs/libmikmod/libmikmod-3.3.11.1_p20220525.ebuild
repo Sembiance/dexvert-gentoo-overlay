@@ -4,7 +4,7 @@ inherit autotools
 DESCRIPTION="A library to play a wide range of module formats"
 HOMEPAGE="https://sourceforge.net/p/mikmod/mikmod/ci/master/tree/"
 LICENSE="LGPL-2+ LGPL-2.1"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/${PN}"
 
 SLOT="0"

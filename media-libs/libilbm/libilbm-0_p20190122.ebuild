@@ -5,7 +5,7 @@ inherit autotools
 DESCRIPTION="Parser library for the ILBM: IFF Interleaved BitMap format"
 HOMEPAGE="https://github.com/svanderburg/libilbm"
 LICENSE="MIT"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/${PN}-master"
 
 SLOT="0"

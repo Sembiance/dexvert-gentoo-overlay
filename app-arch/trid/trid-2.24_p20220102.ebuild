@@ -12,9 +12,9 @@ MY_PV=$(ver_cut 1-2)
 #  https://mark0.net/download/tridscan.zip
 #  https://mark0.net/download/triddefs.zip
 
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}-${MY_PV}.zip
-	https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/tridscan-${PV}.zip
-	https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/triddefs-${PV}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}-${MY_PV}.zip
+	https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/tridscan-${PV}.zip
+	https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/triddefs-${PV}.zip"
 S=${WORKDIR}
 
 SLOT="0"

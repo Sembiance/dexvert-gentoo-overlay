@@ -4,7 +4,7 @@ DESCRIPTION="Chiptune converter"
 HOMEPAGE="https://bitbucket.org/zxtune/zxtune/downloads/?tab=branches"
 LICENSE="MIT"
 GIT_HASH="0cc4569cf704"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}-${PN}-${GIT_HASH}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}-${PN}-${GIT_HASH}.zip"
 S="${WORKDIR}/${PN}-${PN}-${GIT_HASH}"
 
 SLOT="0"

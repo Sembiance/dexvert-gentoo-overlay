@@ -3,7 +3,7 @@ EAPI=8
 DESCRIPTION="BPG (Better Portable Graphics) is a new image format"
 HOMEPAGE="http://bellard.org/bpg/"
 LICENSE="LGPL-2.1 BSD"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar"
 
 SLOT="0"
 KEYWORDS="~amd64"

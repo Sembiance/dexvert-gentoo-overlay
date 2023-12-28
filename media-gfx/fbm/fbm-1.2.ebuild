@@ -4,7 +4,7 @@ DESCRIPTION="Fuzzy pixmap manipulation"
 HOMEPAGE="http://fileformats.archiveteam.org/wiki/FBM_image"
 LICENSE="GPL-2"
 
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
 S="${WORKDIR}"
 
 SLOT="0"

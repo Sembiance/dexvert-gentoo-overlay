@@ -3,7 +3,7 @@ EAPI=8
 DESCRIPTION="JPEXS Free Flash Decompiler"
 HOMEPAGE="https://github.com/jindrapetrik/jpexs-decompiler/releases"
 LICENSE="GPL-3"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}_${PV}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}_${PV}.zip"
 S="${WORKDIR}"
 
 SLOT="0"

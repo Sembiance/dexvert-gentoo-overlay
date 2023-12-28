@@ -5,7 +5,7 @@ inherit cmake
 DESCRIPTION="App to handle Acorn/RISC OS Draw vector files"
 HOMEPAGE="https://github.com/martenjj/drawview"
 LICENSE="GPL2"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/${PN}-frameworks5"
 
 SLOT="0"

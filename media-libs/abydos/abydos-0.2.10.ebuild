@@ -5,7 +5,7 @@ inherit meson
 DESCRIPTION="Image loading library"
 HOMEPAGE="http://snisurset.net/code/abydos/"
 LICENSE="BSD-2"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.xz"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.xz"
 
 SLOT="0"
 KEYWORDS="~amd64"

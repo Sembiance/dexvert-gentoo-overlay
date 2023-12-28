@@ -3,7 +3,7 @@ EAPI=8
 DESCRIPTION="Decompiler for Macromedia Shockwave/Macromedia Director/Adobe Shockwave/Adobe Director"
 HOMEPAGE="https://github.com/ProjectorRays/ProjectorRays"
 LICENSE="MPL-2.0"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/${PN}-master"
 
 SLOT="0"

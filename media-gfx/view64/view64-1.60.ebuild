@@ -3,7 +3,7 @@ EAPI=8
 DESCRIPTION="C64 image viewer and converter"
 HOMEPAGE="https://sourceforge.net/projects/view64/files/source/"
 LICENSE="GPL-2"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}-src.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}-src.zip"
 S="${WORKDIR}/${PN}-${PV}-src"
 
 SLOT="0"

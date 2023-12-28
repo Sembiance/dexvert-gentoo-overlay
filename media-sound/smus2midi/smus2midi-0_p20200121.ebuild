@@ -3,7 +3,7 @@ EAPI=8
 DESCRIPTION="CLI tool that converts SMUS files to MIDI"
 HOMEPAGE="https://github.com/AugusteBonnin/smus2midi"
 LICENSE="GPL-3"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}"
 
 SLOT="0"

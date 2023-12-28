@@ -3,7 +3,7 @@ EAPI=8
 DESCRIPTION="A tool to view and convert Amigaguide documents"
 HOMEPAGE="https://sourceforge.net/projects/grotag/files/grotag/"
 LICENSE="GPL-3"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}"
 
 SLOT="0"

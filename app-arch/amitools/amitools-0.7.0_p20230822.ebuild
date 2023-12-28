@@ -7,7 +7,7 @@ inherit distutils-r1
 DESCRIPTION="Tools to work with AmigaOS files"
 HOMEPAGE="https://github.com/cnvogelg/amitools"
 LICENSE="GPL-2"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
 S="${WORKDIR}/${PN}"
 
 DEPEND="dev-python/wheel"

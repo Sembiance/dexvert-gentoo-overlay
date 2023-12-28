@@ -3,7 +3,7 @@ EAPI=8
 DESCRIPTION="A collection of tools for manipulating bencoded data."
 HOMEPAGE="https://gitlab.com/heikkiorsila/bencodetools"
 LICENSE="${PN}-LICENSE"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/${PN}-master"
 
 SLOT="0"

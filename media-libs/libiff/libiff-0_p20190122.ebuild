@@ -5,7 +5,7 @@ inherit autotools
 DESCRIPTION="Portable, extensible parser for the Interchange File Format (IFF)"
 HOMEPAGE="https://github.com/svanderburg/libiff"
 LICENSE="MIT"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/${PN}-master"
 
 SLOT="0"

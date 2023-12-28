@@ -5,7 +5,7 @@ inherit meson
 DESCRIPTION="A platform independent standalone library that plays Lottie Animations"
 HOMEPAGE="https://github.com/Samsung/rlottie"
 LICENSE="BSD FTL JSON MIT"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/${PN}-master"
 
 SLOT="0"

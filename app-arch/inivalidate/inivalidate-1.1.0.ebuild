@@ -3,7 +3,7 @@ EAPI=8
 DESCRIPTION="CLI app that uses libconfini to validate that an INI file is valid"
 LICENSE="MIT"
 HOMEPAGE="https://github.com/Sembiance/inivalidate"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 
 SLOT="0"
 KEYWORDS="~amd64"

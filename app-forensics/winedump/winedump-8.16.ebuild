@@ -3,7 +3,7 @@ EAPI=8
 DESCRIPTION="CLI tool from wine that can dump info about an exe or dll"
 HOMEPAGE="https://www.winehq.org/"
 LICENSE="LGPL-2.1"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/wine-${PV}.tar.xz"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/wine-${PV}.tar.xz"
 S="${WORKDIR}/wine-${PV}"
 
 SLOT="0"

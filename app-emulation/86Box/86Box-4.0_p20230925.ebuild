@@ -6,8 +6,8 @@ DESCRIPTION="Emulator of x86-based machines based on PCem"
 HOMEPAGE="https://github.com/86Box/86Box"
 LICENSE="GPL-2+"
 MY_PV=$(ver_cut 1-2)
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip
-	https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/roms-${MY_PV}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip
+	https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/roms-${MY_PV}.zip"
 # Get ROMS from: https://github.com/86Box/roms/releases
 
 S="${WORKDIR}/${PN}-master"

@@ -5,7 +5,7 @@ inherit cmake
 DESCRIPTION="A player library for MSX music formats."
 HOMEPAGE="https://github.com/digital-sound-antiques/libkss"
 LICENSE="${PN}-LICENSE"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/${PN}"
 
 SLOT="0"

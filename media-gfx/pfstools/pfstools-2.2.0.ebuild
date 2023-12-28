@@ -5,7 +5,7 @@ inherit cmake
 DESCRIPTION="A set of programs for manipulating and viewing HDR images and video frames"
 HOMEPAGE="https://sourceforge.net/projects/pfstools/files/pfstools/"
 LICENSE="LGPL-2.1"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tgz"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tgz"
 
 SLOT="0"
 KEYWORDS="~amd64"

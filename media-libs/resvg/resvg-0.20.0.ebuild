@@ -52,7 +52,7 @@ inherit cargo
 DESCRIPTION="An SVG rendering library."
 HOMEPAGE="https://github.com/RazrFalcon/resvg/releases"
 LICENSE="0BSD Apache-2.0 BSD BSD-2 MIT MPL-2.0 ZLIB"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz
 	$(cargo_crate_uris)"
 
 SLOT="0"

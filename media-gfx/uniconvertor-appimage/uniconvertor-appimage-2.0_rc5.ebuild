@@ -5,7 +5,7 @@ HOMEPAGE="https://sk1project.net/uc2/"
 LICENSE="MIT"
 
 APPIMAGE_FILENAME="${P}.AppImage"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${APPIMAGE_FILENAME}"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${APPIMAGE_FILENAME}"
 S="${WORKDIR}"
 
 SLOT="0"

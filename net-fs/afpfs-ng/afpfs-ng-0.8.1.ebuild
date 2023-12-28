@@ -5,7 +5,7 @@ inherit autotools
 DESCRIPTION="AFP filesystem clients"
 HOMEPAGE="https://sourceforge.net/projects/afpfs-ng/files/afpfs-ng/"
 LICENSE="GPL-2"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.bz2"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.bz2"
 
 SLOT="0"
 KEYWORDS="~amd64"

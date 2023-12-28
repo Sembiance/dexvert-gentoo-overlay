@@ -4,7 +4,7 @@ DESCRIPTION="JPEXS Free Flash Decompiler"
 HOMEPAGE="https://github.com/jindrapetrik/jpexs-decompiler/releases"
 LICENSE="GPL-3"
 MY_PV=${PV/_p/_nightly}
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}_${MY_PV}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}_${MY_PV}.zip"
 S="${WORKDIR}"
 
 SLOT="0"

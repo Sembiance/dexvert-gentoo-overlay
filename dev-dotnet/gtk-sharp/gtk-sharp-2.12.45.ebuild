@@ -5,7 +5,7 @@ inherit autotools
 DESCRIPTION="gtk bindings for mono"
 HOMEPAGE="https://download.mono-project.com/sources/gtk-sharp212/"
 LICENSE="GPL-2"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
 
 SLOT="2"
 KEYWORDS="~amd64 ~ppc ~x86"

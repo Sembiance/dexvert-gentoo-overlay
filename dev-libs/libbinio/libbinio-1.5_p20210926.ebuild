@@ -5,7 +5,7 @@ inherit autotools
 DESCRIPTION="Platform-independent way to access binary data streams in C++"
 HOMEPAGE="https://github.com/adplug/libbinio"
 LICENSE="LGPL-2.1"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/${PN}-master"
 
 SLOT="0"

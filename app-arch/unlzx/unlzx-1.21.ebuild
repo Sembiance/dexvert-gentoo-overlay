@@ -3,7 +3,7 @@ EAPI=8
 DESCRIPTION="Command line tool to uncompress compressed LZX files"
 HOMEPAGE="http://xavprods.free.fr/lzx/"
 LICENSE="MIT"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}.c.gz"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}.c.gz"
 S="${WORKDIR}"
 
 SLOT="0"

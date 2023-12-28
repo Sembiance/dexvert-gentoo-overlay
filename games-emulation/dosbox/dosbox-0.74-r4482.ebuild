@@ -6,7 +6,7 @@ DESCRIPTION="DOS emulator"
 HOMEPAGE="https://sourceforge.net/p/dosbox/code-0/HEAD/tree/dosbox/trunk/"
 LICENSE="GPL-2"
 # Update by choose "Download Snapshot" here: https://sourceforge.net/p/dosbox/code-0/HEAD/tree/dosbox/trunk/
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}-${PR}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}-${PR}.zip"
 S="${WORKDIR}/${PN}-code-0-${PR}-dosbox-trunk"
 
 SLOT="0"

@@ -5,7 +5,7 @@ inherit autotools
 DESCRIPTION="A set of fast command-line tools for manipulationg Gimp's file format XCF."
 HOMEPAGE="http://henning.makholm.net/xcftools/"
 LICENSE="GPL-2.0"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
 
 SLOT="0"
 KEYWORDS="~amd64"

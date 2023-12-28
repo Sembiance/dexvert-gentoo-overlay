@@ -4,7 +4,7 @@ DESCRIPTION="Free Zip / Unzip software and Rar file extractor."
 HOMEPAGE="https://github.com/peazip/PeaZip/releases"
 LICENSE="LGPL-3.0"
 MY_P="${PN}_portable-${PV}.LINUX.GTK2.x86_64"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${MY_P}.tar.gz"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${MY_P}.tar.gz"
 S="${WORKDIR}/${MY_P}"
 
 SLOT="0"

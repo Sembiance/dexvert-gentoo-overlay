@@ -3,8 +3,8 @@ EAPI=8
 DESCRIPTION="CLI tool that extracts data from HyperCard stacks"
 HOMEPAGE="https://github.com/uliwitness/stackimport/"
 LICENSE="stackimport-license"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip
-	https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/snd2wav-${PV}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip
+	https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/snd2wav-${PV}.zip"
 S="${WORKDIR}/${PN}-master"
 
 SLOT="0"

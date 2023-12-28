@@ -7,7 +7,7 @@ inherit distutils-r1
 DESCRIPTION="arCHMage converts CHM files to HTML, plain text and PDF."
 HOMEPAGE="https://github.com/dottedmag/archmage"
 LICENSE="GPL-2"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/${PN}-master"
 
 IUSE="html"

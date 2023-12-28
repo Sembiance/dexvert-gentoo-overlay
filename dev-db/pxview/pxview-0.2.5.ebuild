@@ -3,7 +3,7 @@ EAPI=8
 DESCRIPTION="Library to read and write Paradox DB files"
 HOMEPAGE="https://sourceforge.net/projects/pxlib/files/pxview/"
 LICENSE="GPL-2"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}_${PV}.orig.tar.gz"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}_${PV}.orig.tar.gz"
 
 SLOT="0"
 KEYWORDS="~amd64"

@@ -3,7 +3,7 @@ EAPI=8
 DESCRIPTION="Tool to convert or extract data in certain AMOS banks"
 HOMEPAGE="https://github.com/Sembiance/gfalist"
 LICENSE="GPL-2"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 MY_PV=$(ver_cut 1-3)
 S="${WORKDIR}/${PN}-${MY_PV}"
 

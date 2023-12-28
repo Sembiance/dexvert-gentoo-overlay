@@ -7,8 +7,8 @@ LICENSE="Apache-2.0"
 MY_PN="siegfried"
 MY_PV="${PV//./-}"
 
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${MY_PN}_${MY_PV}_linux64.zip
-	https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/data_${MY_PV}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${MY_PN}_${MY_PV}_linux64.zip
+	https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/data_${MY_PV}.zip"
 S=${WORKDIR}
 
 SLOT="0"

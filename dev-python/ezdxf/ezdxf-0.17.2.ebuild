@@ -7,7 +7,7 @@ inherit distutils-r1
 DESCRIPTION="A library to create and modify DXF drawings"
 HOMEPAGE="https://pypi.org/project/ezdxf/#files"
 LICENSE="MIT"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 
 SLOT="0"
 KEYWORDS="~amd64"

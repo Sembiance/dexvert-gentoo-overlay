@@ -5,7 +5,7 @@ inherit autotools
 DESCRIPTION="Extended Module Player CLI"
 HOMEPAGE="https://github.com/libxmp/xmp-cli"
 LICENSE="GPL-2"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/${PN}-cli-master"
 
 SLOT="0"

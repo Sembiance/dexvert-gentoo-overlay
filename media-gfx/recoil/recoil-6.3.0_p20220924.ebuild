@@ -3,7 +3,7 @@ EAPI=8
 DESCRIPTION="Retro Computer image converter"
 HOMEPAGE="https://sourceforge.net/p/recoil/code/ci/master/tree/"
 LICENSE="GPL-2"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/recoil-code-bdd02174502b6c92b7cd183805202c36b9d2d63d"
 
 SLOT="0"

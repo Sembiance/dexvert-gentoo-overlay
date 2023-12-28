@@ -4,7 +4,7 @@ DESCRIPTION="A simple but powerful C++ interface to libpng"
 HOMEPAGE="http://www.nongnu.org/pngpp/"
 LICENSE="BSD"
 MY_P=${P/pp/++}
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${MY_P}.tar.gz"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${MY_P}.tar.gz"
 S="${WORKDIR}/${MY_P}"
 
 SLOT="0"

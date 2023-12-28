@@ -4,7 +4,7 @@ DESCRIPTION="A secure JavaScript and TypeScript runtime."
 HOMEPAGE="https://github.com/denoland/deno/releases"
 LICENSE="MIT"
 # Download the file: deno-x86_64-unknown-linux-gnu.zip and rename
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 
 S="${WORKDIR}"
 

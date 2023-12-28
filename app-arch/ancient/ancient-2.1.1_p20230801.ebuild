@@ -5,7 +5,7 @@ inherit autotools
 DESCRIPTION="Decompression routines for ancient formats"
 HOMEPAGE="https://github.com/temisu/ancient"
 LICENSE="BSD-2"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/${PN}-master"
 
 SLOT="0"

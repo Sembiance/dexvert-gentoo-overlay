@@ -3,7 +3,7 @@ EAPI=8
 DESCRIPTION="Ansi/Ascii text and RIPscrip vector graphic art converter"
 HOMEPAGE="https://github.com/cwensley/pablodraw/releases"
 LICENSE="MIT"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/${PN}-main"
 
 SLOT="0"

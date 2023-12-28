@@ -3,7 +3,7 @@ EAPI=8
 DESCRIPTION="A tool to list filenames within a .DS_Store file"
 HOMEPAGE="https://github.com/gehaxelt/Python-dsstore"
 LICENSE="MIT"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
 S="${WORKDIR}"
 
 SLOT="0"

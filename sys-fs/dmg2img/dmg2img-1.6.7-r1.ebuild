@@ -5,7 +5,7 @@ inherit toolchain-funcs
 DESCRIPTION="Converts Apple DMG files to standard HFS+ images"
 HOMEPAGE="http://vu1tur.eu.org/tools"
 LICENSE="GPL-2"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
 
 SLOT="0"
 KEYWORDS="~amd64 ~ppc ~ppc64 ~x86"

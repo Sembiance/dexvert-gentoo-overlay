@@ -4,7 +4,7 @@ DESCRIPTION="App to generate BLAKE3 hashes"
 HOMEPAGE="https://github.com/BLAKE3-team/BLAKE3/releases"
 LICENSE="MIT"
 BIN_FILENAME="b3sum-${PV}_linux_x64_bin"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${BIN_FILENAME}"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${BIN_FILENAME}"
 S="${WORKDIR}"
 
 SLOT="0"

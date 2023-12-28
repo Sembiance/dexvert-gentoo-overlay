@@ -3,7 +3,7 @@ EAPI=8
 DESCRIPTION="Tools to process the pgf files"
 HOMEPAGE="https://sourceforge.net/projects/libpgf/files/libpgf/"
 LICENSE="LGPL-2.1"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/pgf-console-${PV}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/pgf-console-${PV}.zip"
 S="${WORKDIR}/pgf"
 
 SLOT="0"

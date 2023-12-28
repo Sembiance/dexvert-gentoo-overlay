@@ -3,7 +3,7 @@ EAPI=8
 DESCRIPTION="Decompresses Softdisk Compressed files"
 HOMEPAGE="https://git.fsfe.org/art1pirat/ctxer"
 LICENSE="GPL-3"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}"
 
 SLOT="0"

@@ -5,7 +5,7 @@ inherit toolchain-funcs multilib-minimal
 DESCRIPTION="Free lossless image format library"
 HOMEPAGE="https://github.com/FLIF-hub/FLIF"
 LICENSE="LGPL-3+ Apache-2.0 sdl? ( CC0-1.0 )"
-SRC_URI="https://telparia.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
 S="${WORKDIR}/FLIF-master"
 
 SLOT="0"
