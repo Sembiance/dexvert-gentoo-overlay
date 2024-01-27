@@ -1,6 +1,4 @@
 #!/bin/bash
 
 cd /opt/gameextractor || exit
-# Choose oldest java-vm to run it with
-OPENJDK=$(eselect java-vm list | cut -d' ' -f 6 | awk 'NF' | sort -t '-' -k3,3n | head -n 1)
-/opt/"$OPENJDK"/bin/java -jar GameExtractor.jar "$@" 2> /dev/null
+GENTOO_VM=openjdk-bin-8 java -jar GameExtractor.jar "$@" 2> /dev/null
