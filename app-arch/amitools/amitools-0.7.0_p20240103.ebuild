@@ -10,7 +10,8 @@ LICENSE="GPL-2"
 SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
 S="${WORKDIR}/${PN}"
 
-DEPEND="dev-python/wheel"
+DEPEND="dev-python/wheel
+	dev-python/machine68k"
 RDEPEND="${DEPEND}"
 
 SLOT="0"
