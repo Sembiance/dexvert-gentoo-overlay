@@ -9,9 +9,11 @@ media-libs/netpbm::gentoo
 media-libs/rlottie::gentoo
 media-libs/libxmp::gentoo
 media-libs/vips::gentoo
+media-libs/libnsbmp::gentoo
 media-libs/libquicktime::gentoo
 media-libs/libmikmod::gentoo
 media-libs/gd::gentoo
+media-libs/libnsgif::gentoo
 app-emulation/uade::gentoo
 app-emulation/86Box::gentoo
 games-emulation/dosbox::gentoo
