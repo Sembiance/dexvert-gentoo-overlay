@@ -9,6 +9,13 @@ media-gfx/gmic -gimp
 # Breaks if enabled
 sci-libs/hdf5 -unsupported -threads
 
+# blender 4.0 requires these
+media-libs/freetype brotli
+app-arch/brotli abi_x86_32
+
+# blender 4.0 ideal use tags, conversion only
+media-gfx/blender collada -bullet -fluid -cycles -embree -nanovdb -potrace -color-management -oidn -openpgl -opensubdiv -openmp -openvdb -pdf -sndfile
+
 # Always want
 media-libs/libzmf tools
 media-libs/openimageio dicom
