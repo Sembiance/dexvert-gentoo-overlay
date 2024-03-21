@@ -16,6 +16,13 @@ app-arch/brotli abi_x86_32
 # blender 4.0 ideal use tags, conversion only
 media-gfx/blender collada -bullet -fluid -cycles -embree -nanovdb -potrace -color-management -oidn -openpgl -opensubdiv -openmp -openvdb -pdf -sndfile
 
+# freecad features I don't need and other useflags it requires
+#media-gfx/freecad -fem -inspection -openscad -part-design -points -raytracing -robot -show -techdraw -path
+#sci-libs/opencascade json vtk
+#sci-libs/cgnslib hdf5
+#dev-python/pyside2 webengine webchannel qml positioning quick
+#dev-qt/qtquickcontrols2 widgets
+
 # Always want
 media-libs/libzmf tools
 media-libs/openimageio dicom
