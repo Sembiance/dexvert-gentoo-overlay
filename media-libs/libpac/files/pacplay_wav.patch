@@ -1,0 +1,40 @@
+diff -Naur a/src/pacplay/pacplay.1 b/src/pacplay/pacplay.1
+--- a/src/pacplay/pacplay.1	2008-08-26 14:13:19.000000000 -0400
++++ b/src/pacplay/pacplay.1	2024-04-07 22:08:07.183178404 -0400
+@@ -2,12 +2,11 @@
+ .SH NAME
+ pacplay \- play SBStudio PAC music modules
+ .SH SYNOPSIS
+-\fBpacplay\fP [ options ] \fIfilename\fP [ - ]
++\fBpacplay\fP [ options ] \fIfilename\fP \fIout.wav\fP
+ .SH DESCRIPTION
+ \fBpacplay\fP plays SBStudio PAC music modules.  pacplay will use the default
+-libao device for audio output unless a - character appears after
+-\fIfilename\fP, in which case it will write raw audio data to stdout (unless
+-it's a tty).
++libao device for audio output unless a second argument is passed as
++\fIout.wav\fP, in which case it will write WAV audio data to that file path
+ .SS Options
+ .TP
+ \fB-r \fIrate\fP
+diff -Naur a/src/pacplay/pacplay.c b/src/pacplay/pacplay.c
+--- a/src/pacplay/pacplay.c	2008-08-26 14:13:19.000000000 -0400
++++ b/src/pacplay/pacplay.c	2024-04-07 21:55:36.604835886 -0400
+@@ -107,7 +107,7 @@
+    /* Check and initialize audio output destination. */
+    if (argv[1] == NULL || *argv[1] != '-') {
+       ao_initialize ();
+-      ao_id = ao_default_driver_id ();
++      ao_id = ao_driver_id ("wav");
+       if (ao_id == -1) {
+          fprintf (stderr, "pacplay: could not find usable output device\n");
+          exit (EXIT_FAILURE);
+@@ -116,7 +116,7 @@
+       ao_fmt.rate = out_rate;
+       ao_fmt.channels = out_channels;
+       ao_fmt.byte_format = AO_FMT_LITTLE; /* XXX make libpac handle _NATIVE */
+-      ao_dev = ao_open_live (ao_id, &ao_fmt, NULL);
++      ao_dev = ao_open_file(ao_id, argv[1], 1, &ao_fmt, NULL);
+       if (ao_dev == NULL) {
+          fprintf (stderr, "pacplay: failed to open output device\n");
+          ao_shutdown ();

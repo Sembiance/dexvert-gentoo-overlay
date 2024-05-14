@@ -30,7 +30,7 @@ RDEPEND="
 	!dev-dotnet/atk-sharp"
 DEPEND="${RDEPEND}
 	virtual/pkgconfig
-	sys-devel/automake:1.16"
+	dev-build/automake:1.16"
 
 PATCHES=( "${FILESDIR}/mono-ambiguous-range.patch" )
 

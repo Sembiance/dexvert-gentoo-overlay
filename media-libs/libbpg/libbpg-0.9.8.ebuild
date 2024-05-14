@@ -12,7 +12,7 @@ RESTRICT="mirror test"
 IUSE="x265"
 
 DEPEND="dev-lang/yasm
-	dev-util/cmake"
+	dev-build/cmake"
 
 RDEPEND="media-libs/libjpeg-turbo
 	media-libs/sdl-image

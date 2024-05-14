@@ -1,0 +1,3 @@
+#!/bin/bash
+
+/opt/kdm2it/kdm2it -w /opt/kdm2it/waves.kwv $@
