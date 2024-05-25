@@ -1,0 +1,12 @@
+diff '--color=auto' -Naur a/make/compilers/gcc.mak b/make/compilers/gcc.mak
+--- a/make/compilers/gcc.mak	2024-05-24 23:58:44.692422360 -0400
++++ b/make/compilers/gcc.mak	2024-05-25 00:00:08.165656823 -0400
+@@ -52,7 +52,7 @@
+ CCFLAGS = -g $(CXX_MODE_FLAGS) $(cxx_flags) $($(platform).cxx.flags) $($(platform).$(arch).cxx.flags) \
+ 	$(addprefix -D,$(DEFINES)) \
+ 	-funsigned-char -fno-strict-aliasing -fvisibility=hidden \
+-	-W -Wall -Wextra -pipe \
++	-W -Wall -Wextra -pipe -Wno-incompatible-pointer-types \
+ 	$(addprefix -I,$(INCLUDES_DIRS)) $(addprefix -include ,$(INCLUDES_FILES))
+ 
+ CXXFLAGS = $(CCFLAGS) -std=c++17 -fvisibility-inlines-hidden
