@@ -21,7 +21,7 @@ src_configure() {
 src_compile() {
 	cd src
 	echo "#define VERSION 0.25" > config.h
-    gcc -o pxview -lpx -lm main.c
+    gcc -o pxview $CFLAGS -lpx -lm main.c
 }
 
 src_install() {

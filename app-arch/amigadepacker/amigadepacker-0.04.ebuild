@@ -11,6 +11,11 @@ RESTRICT="mirror test"
 
 PATCHES=( "${FILESDIR}/fixes_from_libxml.patch" )
 
+src_prepare() {
+	default
+	sed -i 's/^CFLAGS = /CFLAGS += /' Makefile.in
+}
+
 src_install() {
 	dobin ${PN}
 	doman ${PN}.1

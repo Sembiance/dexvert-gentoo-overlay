@@ -13,6 +13,11 @@ RESTRICT="mirror test"
 
 PATCHES=( "${FILESDIR}/fix_compile.patch" )
 
+src_prepare() {
+    default
+    sed -i 's/^DBG\s*=\s/DBG = -std=gnu89 /' Makefile
+}
+
 src_install() {
 	dobin clr2gray
 	doman clr2gray.1

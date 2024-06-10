@@ -10,6 +10,11 @@ SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
+src_prepare() {
+    default
+    sed -i 's/^CFLAGS\s*=\s/CFLAGS += /' Makefile
+}
+
 src_install() {
     dobin msa
 }

@@ -11,6 +11,11 @@ RESTRICT="mirror test"
 
 S="${WORKDIR}"
 
+src_prepare() {
+    default
+    sed -i 's/^CFLAGS\s*=\s-std=c99/CFLAGS += /' Makefile
+}
+
 src_install() {
 	dobin td02imd
 }

@@ -11,7 +11,7 @@ KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
 src_compile() {
-	gcc -o unlzx unlzx.c
+	gcc -o unlzx $CFLAGS unlzx.c
 }
 
 src_install() {

@@ -10,7 +10,7 @@ KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
 src_compile() {
-	gcc -o fshtool fshtool.c
+	gcc -o fshtool $CFLAGS fshtool.c
 }
 
 src_install() {

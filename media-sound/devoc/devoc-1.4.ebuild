@@ -11,6 +11,11 @@ RESTRICT="mirror test"
 
 S="${WORKDIR}/$PN"
 
+src_prepare() {
+    default
+    sed -i 's/^CFLAGS\s*=\s/CFLAGS += /' Makefile
+}
+
 src_install() {
 	dobin devoc
 }

@@ -16,6 +16,11 @@ DEPEND="x11-libs/libSM[abi_x86_32]
 	x11-libs/libXt[abi_x86_32]"
 RDEPEND="${DEPEND}"
 
+src_prepare() {
+    default
+    sed -i 's/^CFLAGS\s*=\s/CFLAGS += /' Makefile
+}
+
 src_compile() {
 	cd quicktime4linux
 	emake

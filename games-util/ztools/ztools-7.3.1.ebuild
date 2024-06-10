@@ -11,6 +11,11 @@ SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
+src_prepare() {
+    default
+    sed -i 's/^CFLAGS\s*=\s/CFLAGS += /' makefile
+}
+
 src_install() {
 	dobin txd
 	doman txd.1

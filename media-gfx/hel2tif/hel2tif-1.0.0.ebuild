@@ -11,7 +11,7 @@ RESTRICT="mirror test"
 
 src_compile() {
 	pwd
-	gcc -o hel2tif hel2tif.c htmain.c
+	gcc -o hel2tif -Wno-implicit-int hel2tif.c htmain.c
 }
 
 src_install() {

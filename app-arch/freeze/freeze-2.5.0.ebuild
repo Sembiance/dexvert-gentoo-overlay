@@ -11,6 +11,11 @@ RESTRICT="mirror test"
 
 PATCHES=( "${FILESDIR}/fix_compile_bug.patch" )
 
+src_prepare() {
+	default
+	sed -i 's/^CFLAGS\s*=\s/CFLAGS += /' Makefile.in
+}
+
 src_install() {
 	dobin freeze
 	doman freeze.1
