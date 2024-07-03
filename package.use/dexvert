@@ -16,6 +16,10 @@ app-arch/brotli abi_x86_32
 # blender 4.0 ideal use tags, conversion only
 media-gfx/blender collada -bullet -fluid -cycles -embree -nanovdb -potrace -color-management -oidn -openpgl -opensubdiv -openmp -openvdb -pdf -sndfile
 
+# blender needs python 3.11
+media-gfx/blender python_single_target_python3_11
+*/* PYTHON_TARGETS: python3_11
+
 # Detect-It-Easy needs these
 dev-qt/qtscript scripttools
 
