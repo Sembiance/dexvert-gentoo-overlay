@@ -21,11 +21,3 @@ net-ftp/uftpd::gentoo
 
 # Restrict certain versions
 >=media-libs/allegro-5
-
-# Many of my customized format import scripts only work with blender 4.0.x
-# Some day maybe I'll update the scripts to work with later versions, or maybe not
->=media-gfx/blender-4.1.0
-
-# Later versions of Aaru require .NET 8.0.300 and gentoo only has 8.0.105 as of June 23, 2024
-# See: https://github.com/aaru-dps/Aaru/issues/845
->app-arch/Aaru-6.0.0_p20240102
