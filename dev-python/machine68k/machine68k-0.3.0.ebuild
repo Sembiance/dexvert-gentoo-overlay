@@ -13,4 +13,4 @@ SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
-DEPEND="<=dev-python/setuptools-72.1.999[${PYTHON_USEDEP}]"
+DEPEND="dev-python/setuptools[${PYTHON_USEDEP}]"

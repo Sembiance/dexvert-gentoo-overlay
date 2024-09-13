@@ -10,7 +10,6 @@ KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
 src_compile() {
-	pwd
 	gcc -o hel2tif -Wno-implicit-int hel2tif.c htmain.c
 }
 
