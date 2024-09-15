@@ -1,0 +1,10 @@
+diff '--color=auto' -Naur a/src/dec/jpeg2000.c b/src/dec/jpeg2000.c
+--- a/src/dec/jpeg2000.c	2024-09-15 09:55:57.339120338 -0400
++++ b/src/dec/jpeg2000.c	2024-09-15 09:56:40.626827443 -0400
+@@ -1,5 +1,5 @@
+ // SPDX-License-Identifier: 0BSD
+-#include <openjpeg-2.1/openjpeg.h>
++#include <openjpeg-2.5/openjpeg.h>
+ 
+ #include "misc/bit.h"
+ #include "misc/common.h"

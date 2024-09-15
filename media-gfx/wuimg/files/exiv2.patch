@@ -1,0 +1,12 @@
+diff '--color=auto' -Naur a/src/metadata.cpp b/src/metadata.cpp
+--- a/src/metadata.cpp	2024-09-15 10:03:35.705608952 -0400
++++ b/src/metadata.cpp	2024-09-15 10:04:08.938151991 -0400
+@@ -35,7 +35,7 @@
+ 			case Exiv2::TypeId::signedByte:
+ 			case Exiv2::TypeId::signedShort:
+ 			case Exiv2::TypeId::signedLong:
+-				tree_bud_leaf_d(branch, tag.c_str(), meta->toLong());
++				tree_bud_leaf_d(branch, tag.c_str(), meta->toInt64());
+ 				return;
+ 			case Exiv2::TypeId::tiffFloat:
+ 			case Exiv2::TypeId::tiffDouble:
