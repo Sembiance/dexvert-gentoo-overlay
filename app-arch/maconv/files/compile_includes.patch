@@ -1,0 +1,53 @@
+From 4b92f756c4a86b28af0e49096ddacd425c308244 Mon Sep 17 00:00:00 2001
+From: kitty-panics <e222d29f@outlook.com>
+Date: Mon, 29 Jan 2024 21:23:31 -0500
+Subject: [PATCH] Fix compilation errors.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- error: field ‘filename’ has incomplete type ‘std::string’ {aka ‘std::__cxx11::basic_string<char>’}
+- error: ‘uint8_t’ has not been declared
+- error: aggregate ‘std::array<char, 128> buffer’ has incomplete type and cannot be defined
+---
+ src/formats/file_signature.cc | 1 +
+ src/fs/file.h                 | 1 +
+ src/fs/file_writer.h          | 1 +
+ 3 files changed, 3 insertions(+)
+
+diff --git a/src/formats/file_signature.cc b/src/formats/file_signature.cc
+index a888864..ed4f1e1 100644
+--- a/src/formats/file_signature.cc
++++ b/src/formats/file_signature.cc
+@@ -20,6 +20,7 @@ this program.  If not, see <https://www.gnu.org/licenses/>.
+ 
+ #include "formats/file_signature.h"
+ 
++#include <array>
+ #include <memory>
+ 
+ namespace maconv {
+diff --git a/src/fs/file.h b/src/fs/file.h
+index 2a81389..ef8dd0b 100644
+--- a/src/fs/file.h
++++ b/src/fs/file.h
+@@ -20,6 +20,7 @@ this program.  If not, see <https://www.gnu.org/licenses/>.
+ 
+ #pragma once
+ 
++#include <string>
+ #include <memory>
+ #include <vector>
+ #include <time.h>
+diff --git a/src/fs/file_writer.h b/src/fs/file_writer.h
+index c9efd4b..2838104 100644
+--- a/src/fs/file_writer.h
++++ b/src/fs/file_writer.h
+@@ -20,6 +20,7 @@ this program.  If not, see <https://www.gnu.org/licenses/>.
+ 
+ #pragma once
+ 
++#include <cstdint>
+ #include <ostream>
+ #include <string>
+ 
