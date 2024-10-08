@@ -11,7 +11,7 @@ KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
 DEPEND="${CP_DEPEND}
-	dev-java/ant-core:0
+	dev-java/ant:0
 	>=virtual/jdk-1.8:*"
 
 src_compile() {

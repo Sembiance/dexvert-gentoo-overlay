@@ -77,3 +77,32 @@ media-libs/libpng abi_x86_32
 x11-libs/cairo abi_x86_32
 x11-libs/libpciaccess abi_x86_32
 x11-libs/pixman abi_x86_32
+
+# And more (2024-09-24):
+dev-lang/rust abi_x86_32
+dev-libs/fribidi abi_x86_32
+gnome-base/librsvg abi_x86_32
+media-libs/dav1d abi_x86_32
+media-libs/game-music-emu abi_x86_32
+media-libs/jbigkit abi_x86_32
+media-libs/libmodplug abi_x86_32
+media-libs/libogg abi_x86_32
+media-libs/libtheora abi_x86_32
+media-libs/libvorbis abi_x86_32
+media-libs/libvpx abi_x86_32
+media-libs/libwebp abi_x86_32
+media-libs/opencore-amr abi_x86_32
+media-libs/openjpeg abi_x86_32
+media-libs/opus abi_x86_32
+media-libs/soxr abi_x86_32
+media-libs/tiff abi_x86_32
+media-libs/x264 abi_x86_32
+media-libs/xvid abi_x86_32
+media-libs/zvbi abi_x86_32
+media-sound/lame abi_x86_32
+media-video/ffmpeg abi_x86_32
+virtual/rust abi_x86_32
+x11-libs/gdk-pixbuf abi_x86_32
+x11-libs/libXft abi_x86_32
+x11-libs/libXv abi_x86_32
+x11-libs/pango abi_x86_32

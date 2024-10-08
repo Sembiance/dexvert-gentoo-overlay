@@ -1,0 +1,11 @@
+diff '--color=auto' -Naur a/src/deark-unix.c b/src/deark-unix.c
+--- a/src/deark-unix.c	2024-09-28 16:07:38.288516481 -0400
++++ b/src/deark-unix.c	2024-09-28 16:08:03.280930374 -0400
+@@ -9,6 +9,7 @@
+ 
+ #ifdef DE_UNIX
+ 
++#define _XOPEN_SOURCE 700
+ #include <sys/stat.h>
+ #include <sys/types.h>
+ #include <sys/time.h>
