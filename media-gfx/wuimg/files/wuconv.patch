@@ -1,0 +1,12 @@
+diff '--color=auto' -Naur a/src/meson.build b/src/meson.build
+--- a/src/meson.build	2024-10-18 21:57:23.244014264 -0400
++++ b/src/meson.build	2024-10-18 21:57:38.172243077 -0400
+@@ -228,7 +228,7 @@
+ 	install : true)
+ executable('wuconv', ['main_wuconv.c', 'imgconv.c'] + src_list,
+ 	dependencies : dep_list,
+-	build_by_default : false)
++	build_by_default : true)
+ executable('wufuzz', ['main_fuzz.c'] + src_list,
+ 	dependencies : dep_list,
+ 	build_by_default : false)
