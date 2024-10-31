@@ -1,3 +1,5 @@
+# ROB: No idea why I have this here.... but it differes a good bit from the stock /usr/portage ebuild
+
 # Copyright 1999-2024 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 

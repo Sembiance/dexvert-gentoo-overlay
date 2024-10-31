@@ -4,6 +4,8 @@
 app-text/psiconv::gentoo
 media-gfx/pablodraw::gentoo
 media-gfx/ansilove::gentoo
+media-gfx/tgif::gentoo
+media-gfx/fontforge::gentoo
 app-arch/unzip::gentoo
 sys-libs/libstdc++-v3::gentoo
 media-libs/netpbm::gentoo
