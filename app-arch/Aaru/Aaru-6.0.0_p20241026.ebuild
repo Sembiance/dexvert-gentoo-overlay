@@ -11,7 +11,7 @@ KEYWORDS="~amd64"
 RESTRICT="mirror test network-sandbox strip"
 
 DEPEND="dev-lang/mono
-	dev-dotnet/dotnet-sdk-bin"
+	dev-dotnet/dotnet-sdk-bin:8.0"
 RDEPEND="${DEPEND}"
 
 src_compile() {

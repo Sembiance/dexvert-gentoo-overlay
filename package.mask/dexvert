@@ -2,12 +2,14 @@
 
 # Prefer my overlay packages instead of gentoo packages:
 app-text/psiconv::gentoo
+media-gfx/blender::gentoo
 media-gfx/pablodraw::gentoo
 media-gfx/ansilove::gentoo
 media-gfx/tgif::gentoo
 media-gfx/fontforge::gentoo
 app-arch/unzip::gentoo
 sys-libs/libstdc++-v3::gentoo
+app-misc/binwalk::gentoo
 media-libs/netpbm::gentoo
 media-libs/rlottie::gentoo
 media-libs/libxmp::gentoo
@@ -22,4 +24,5 @@ games-emulation/dosbox::gentoo
 net-ftp/uftpd::gentoo
 
 # Restrict certain versions
+>=dev-dotnet/dotnet-sdk-bin-9.0.0
 >=media-libs/allegro-5

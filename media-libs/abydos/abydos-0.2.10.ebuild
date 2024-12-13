@@ -13,9 +13,7 @@ RESTRICT="mirror test"
 
 IUSE="debug"
 
-PATCHES=( "${FILESDIR}/webp_link.patch"
-	"${FILESDIR}/grok.patch"
-)
+PATCHES=( "${FILESDIR}/webp_link.patch" )
 
 # To debug abydos source, run in the src dir 'meson setup build' and then 'cd build' 'meson compile'
 DEPEND="x11-libs/cairo:=
@@ -52,3 +50,12 @@ DEPEND="x11-libs/cairo:=
 	app-text/libgxps:=
 	app-text/libspectre:="
 RDEPEND=${DEPEND}
+
+src_configure() {
+	# grok (JPEG 2000 support) updated and don't feel like updating abydos code to work with new API
+	local emesonargs=(
+		-Dwith-grok=disabled
+	)
+
+	meson_src_configure
+}

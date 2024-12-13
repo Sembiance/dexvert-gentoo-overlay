@@ -44,7 +44,7 @@ RDEPEND="
 	kde-frameworks/extra-cmake-modules"
 BDEPEND="virtual/pkgconfig"
 
-PATCHES=( "${FILESDIR}/vnc.patch" )
+PATCHES=( "${FILESDIR}/vnc.patch" "${FILESDIR}/removeCopiedItDialog.patch" )
 
 src_configure() {
 	# LTO needs to be filtered. See https://bugs.gentoo.org/854507
