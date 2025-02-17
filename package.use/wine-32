@@ -36,11 +36,13 @@ sys-apps/dbus abi_x86_32
 sys-apps/systemd-utils abi_x86_32
 sys-apps/util-linux abi_x86_32
 sys-devel/llvm abi_x86_32
+sys-libs/gdbm abi_x86_32
 sys-libs/libcap abi_x86_32
 sys-libs/libunwind abi_x86_32
 sys-libs/libxcrypt abi_x86_32
 sys-libs/ncurses abi_x86_32
 sys-libs/pam abi_x86_32
+sys-libs/readline abi_x86_32
 virtual/glu abi_x86_32
 virtual/libcrypt abi_x86_32
 virtual/libiconv abi_x86_32
@@ -82,6 +84,7 @@ x11-libs/pixman abi_x86_32
 dev-lang/rust abi_x86_32
 dev-libs/fribidi abi_x86_32
 gnome-base/librsvg abi_x86_32
+llvm-core/llvm abi_x86_32
 media-libs/dav1d abi_x86_32
 media-libs/game-music-emu abi_x86_32
 media-libs/jbigkit abi_x86_32

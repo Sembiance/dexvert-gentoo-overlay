@@ -7,6 +7,7 @@ media-gfx/pablodraw::gentoo
 media-gfx/ansilove::gentoo
 media-gfx/tgif::gentoo
 media-gfx/fontforge::gentoo
+media-gfx/gimp::gentoo
 app-arch/unzip::gentoo
 sys-libs/libstdc++-v3::gentoo
 app-misc/binwalk::gentoo
@@ -15,6 +16,7 @@ media-libs/rlottie::gentoo
 media-libs/libxmp::gentoo
 media-libs/vips::gentoo
 media-libs/libnsbmp::gentoo
+media-libs/openimageio::gentoo
 media-libs/libmikmod::gentoo
 media-libs/gd::gentoo
 media-libs/libnsgif::gentoo

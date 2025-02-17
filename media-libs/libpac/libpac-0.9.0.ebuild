@@ -10,6 +10,9 @@ SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
+RDEPEND="media-libs/libao"
+DEPEND=""
+
 PATCHES=( "${FILESDIR}/pacplay_wav.patch" )
 
 src_compile() {

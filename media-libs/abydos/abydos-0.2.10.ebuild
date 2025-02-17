@@ -41,7 +41,6 @@ DEPEND="x11-libs/cairo:=
 	<media-libs/libnsbmp-0.1.7:=
 	media-libs/freeimage:=
 	media-libs/libpgf:=
-	media-libs/openimageio:=
 	media-libs/rlottie:=
 	media-libs/devil:=
 	media-libs/vips:=
@@ -55,6 +54,7 @@ src_configure() {
 	# grok (JPEG 2000 support) updated and don't feel like updating abydos code to work with new API
 	local emesonargs=(
 		-Dwith-grok=disabled
+		-Dwith-openimageio=disabled
 	)
 
 	meson_src_configure
