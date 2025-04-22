@@ -1,0 +1,45 @@
+diff '--color=auto' -Naur a/Makefile b/Makefile
+--- a/Makefile	2025-04-03 10:43:31.262109398 -0400
++++ b/Makefile	2025-04-03 10:51:56.715461645 -0400
+@@ -48,31 +48,16 @@
+ 
+ OBJS= main.o sngc.o sngd.o
+ 
+-all: sng man html
++all: sng
+ 
+ sng: $(OBJS)
+ 	$(CC) $(CFLAGS) $(TARGET_ARCH) $(OBJS) $(LDFLAGS) $(LIBS) -o $@
+ 
+ $(OBJS): sng.h Makefile
+ 
+-# Note: to suppress the footers with timestamps being generated in HTML,
+-# we use "-a nofooter".
+-# To debug asciidoc problems, you may need to run "xmllint --nonet --noout --valid"
+-# on the intermediate XML that throws an error.
+-.SUFFIXES: .html .adoc .1
+-
+-.adoc.1:
+-	asciidoctor -D. -a nofooter -b manpage $<
+-.adoc.html:
+-	asciidoctor -D. -a nofooter -a webfonts! $<
+-
+ docdebug:
+ 	xmllint --nonet --noout --valid sng.xml
+ 
+-man: sng.1
+-
+-html: sng.html
+-
+ clean:
+ 	rm -f $(OBJS) sng
+ 	rm -f *.1 *.html gmon.out
+@@ -102,7 +87,7 @@
+ install-bin: sng
+ 	$(INSTALL) -d "$(target)/bin"
+ 	$(INSTALL) $^ "$(target)/bin"
+-install-man: man
++install-man:
+ 	$(INSTALL) -d "$(mandir)/man1"
+ 	$(INSTALL) -m 644 sng.1 "$(mandir)/man1"
+ uninstall: uninstall-man uninstall-bin
