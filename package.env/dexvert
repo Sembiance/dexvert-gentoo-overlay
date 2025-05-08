@@ -27,6 +27,7 @@ media-video/xanim gcc14-ignore-warnings
 =media-libs/urt-3.1b-r3 gcc14-gnu89-downgrade
 =media-video/mplayer-1.5_p20231206 gcc14-gnu89-downgrade
 =sys-libs/libstdc++-v3-3.3.6-r4 compiler-gcc13
+=media-sound/abcmidi-2025.02.16 compiler-gcc13
 
 # fontforge when built with woff2 useflag fails to compile
 # Seems it thinks we are to compile support with clang but invokes gcc
