@@ -3,9 +3,8 @@
 
 EAPI=8
 
-DISTUTILS_USE_PEP517=setuptools
 PYTHON_COMPAT=( python3_{10..13} pypy3 )
-
+DISTUTILS_USE_PEP517=setuptools
 inherit distutils-r1 optfeature
 
 if [[ ${PV} == 9999 ]] ; then

@@ -35,7 +35,8 @@ net-libs/gnutls abi_x86_32
 sys-apps/dbus abi_x86_32
 sys-apps/systemd-utils abi_x86_32
 sys-apps/util-linux abi_x86_32
-sys-devel/llvm abi_x86_32
+# move sys-devel/llvm llvm-core/llvm
+llvm-core/llvm abi_x86_32
 sys-libs/gdbm abi_x86_32
 sys-libs/libcap abi_x86_32
 sys-libs/libunwind abi_x86_32
@@ -109,3 +110,10 @@ x11-libs/gdk-pixbuf abi_x86_32
 x11-libs/libXft abi_x86_32
 x11-libs/libXv abi_x86_32
 x11-libs/pango abi_x86_32
+
+# And more (2025-05-05):
+media-libs/libdvdnav abi_x86_32
+media-libs/libdvdread abi_x86_32
+media-libs/libass abi_x86_32
+media-libs/libv4l abi_x86_32
+media-libs/libdvdcss abi_x86_32

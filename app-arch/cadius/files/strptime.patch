@@ -1,0 +1,12 @@
+diff '--color=auto' -Naur a/Src/Dc_Prodos.c b/Src/Dc_Prodos.c
+--- a/Src/Dc_Prodos.c	2025-05-07 19:53:06.878581486 -0400
++++ b/Src/Dc_Prodos.c	2025-05-07 19:52:22.669683301 -0400
+@@ -6,6 +6,8 @@
+ /*  Auteur : Olivier ZARDINI  *  Brutal Deluxe Software  *  Dec 2011  */
+ /**********************************************************************/
+ 
++#define _XOPEN_SOURCE 700
++
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>

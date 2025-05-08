@@ -20,7 +20,7 @@ app-arch/brotli abi_x86_32
 media-gfx/blender collada -bullet -fluid -cycles -embree -nanovdb -potrace -color-management -oidn -openpgl -opensubdiv -openmp -openvdb -pdf -sndfile
 
 # blender needs python 3.11
-media-gfx/blender PYTHON_SINGLE_TARGET: python3_11 -python3_12
+media-gfx/blender PYTHON_SINGLE_TARGET: python3_11
 */* PYTHON_TARGETS: python3_11
 
 # Detect-It-Easy needs these
@@ -28,6 +28,14 @@ dev-qt/qtscript scripttools
 
 # xdg-mime doesn't properly identify some files without this flag on (xdg-mime query filetype /mnt/compendium/DevLab/dexvert/test/sample/text/advancedStreamRedirector/beck.asx)
 x11-misc/xdg-utils perl
+
+# assimp & scribus require this
+sys-libs/zlib minizip
+
+# As of May 2025, darktable-cli failed with:
+#  symbol lookup error: /usr/lib64/darktable/plugins/imageio/format/libexr.so: undefined symbol: _Z13luaA_type_addP9lua_StatePKcm
+# But don't need lua anyways, so just disable it
+media-gfx/darktable -lua
 
 # freecad features I don't need and other useflags it requires
 #media-gfx/freecad -fem -inspection -openscad -part-design -points -raytracing -robot -show -techdraw -path

@@ -1,7 +1,7 @@
 EAPI=8
 
 PYTHON_COMPAT=( python3_{7..13} )
-
+DISTUTILS_USE_PEP517=setuptools
 inherit distutils-r1
 
 DESCRIPTION="Tool and library for handling Web ARChive (WARC) files."

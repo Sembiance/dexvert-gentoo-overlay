@@ -12,12 +12,12 @@ SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
-DEPEND="dev-qt/qtcore:5
-	dev-qt/qtgui:5
+DEPEND="dev-qt/qtcore
+	dev-qt/qtgui
 	kde-frameworks/extra-cmake-modules
-	kde-frameworks/kxmlgui:5
-	kde-frameworks/ki18n:5
-	kde-frameworks/kauth:5
-	kde-frameworks/kcrash:5
+	kde-frameworks/kxmlgui
+	kde-frameworks/ki18n
+	kde-frameworks/kauth
+	kde-frameworks/kcrash
 	dev-qt/qtsvg:5"
 RDEPEND=${DEPEND}

@@ -1,0 +1,29 @@
+diff '--color=auto' -Naur a/3rdparty/vgm/stdbool.h b/3rdparty/vgm/stdbool.h
+--- a/3rdparty/vgm/stdbool.h	2025-05-02 14:48:45.000000000 -0400
++++ b/3rdparty/vgm/stdbool.h	2025-05-07 21:06:50.705187220 -0400
+@@ -5,10 +5,10 @@
+ #ifndef __cplusplus	// C++ already has the bool-type
+ 
+ // the MS VC++ 6 compiler uses a one-byte-type (unsigned char, to be exact), so I'll reproduce this here
+-typedef unsigned char	bool;
++//typedef unsigned char	bool;
+ 
+-#define false	0x00
+-#define true	0x01
++//#define false	0x00
++//#define true	0x01
+ 
+ #endif // ! __cplusplus
+ 
+diff '--color=auto' -Naur a/3rdparty/xmp/src/mixer.c b/3rdparty/xmp/src/mixer.c
+--- a/3rdparty/xmp/src/mixer.c	2025-05-02 14:48:45.000000000 -0400
++++ b/3rdparty/xmp/src/mixer.c	2025-05-07 21:13:42.351935301 -0400
+@@ -290,7 +290,7 @@
+ 	int prev_l, prev_r;
+ 	int lps, lpe;
+ 	int32 *buf_pos;
+-	void (*mix_fn)();
++	void (*mix_fn)(struct mixer_voice *, int *, int, int, int, int);
+ 	mixer_set *mixers;
+ 
+ 	switch (s->interp) {

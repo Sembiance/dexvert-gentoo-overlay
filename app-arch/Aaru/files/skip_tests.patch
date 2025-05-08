@@ -1,0 +1,14 @@
+diff '--color=auto' -Naur a/Aaru.sln b/Aaru.sln
+--- a/Aaru.sln	2025-05-07 21:47:02.786503343 -0400
++++ b/Aaru.sln	2025-05-07 21:47:12.730158463 -0400
+@@ -36,10 +36,6 @@
+ EndProject
+ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aaru.Gui", "Aaru.Gui\Aaru.Gui.csproj", "{18C4C44D-2562-4B6D-8181-32D7EA067D96}"
+ EndProject
+-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aaru.Tests", "Aaru.Tests\Aaru.Tests.csproj", "{B2A2CCF8-150D-4A00-BCB5-1B0CBCFA95D5}"
+-EndProject
+-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aaru.Tests.Devices", "Aaru.Tests.Devices\Aaru.Tests.Devices.csproj", "{A40662EB-D202-46A4-AB41-9C32ADE6D6B5}"
+-EndProject
+ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aaru.Decryption", "Aaru.Decryption\Aaru.Decryption.csproj", "{B609D333-80C5-4503-BF46-8B9B91F04E97}"
+ EndProject
+ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aaru.Archives", "Aaru.Archives\Aaru.Archives.csproj", "{282271D0-CCC2-4ED7-BA38-EC06A84BB974}"

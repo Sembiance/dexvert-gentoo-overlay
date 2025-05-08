@@ -13,6 +13,7 @@ KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
 DEPEND="dev-qt/qtscript:5[scripttools]
+	dev-qt/qtsvg
 	dev-qt/qtconcurrent
 	dev-qt/qtsql"
 RDEPEND="${DEPEND}"

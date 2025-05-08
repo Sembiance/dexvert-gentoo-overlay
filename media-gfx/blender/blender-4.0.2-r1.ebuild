@@ -1,45 +1,27 @@
-# Copyright 1999-2024 Gentoo Authors
-# Distributed under the terms of the GNU General Public License v2
+# Used by dexvert, so we maintain this old version. To update, see dexvert/sandbox/todo.txt
 
 EAPI=8
 
 PYTHON_COMPAT=( python3_{10..11} )
-# matches media-libs/osl
 LLVM_COMPAT=( {15..17} )
 
 inherit check-reqs cmake cuda flag-o-matic llvm-r1 pax-utils python-single-r1 toolchain-funcs xdg-utils
 
 DESCRIPTION="3D Creation/Animation/Publishing System"
 HOMEPAGE="https://www.blender.org"
-
-if [[ ${PV} = *9999* ]] ; then
-	EGIT_LFS="yes"
-	inherit git-r3
-	EGIT_REPO_URI="https://projects.blender.org/blender/blender.git"
-	EGIT_SUBMODULES=( '*' '-lib/*' )
-	ADDONS_EGIT_REPO_URI="https://projects.blender.org/blender/blender-addons.git"
-	RESTRICT="!test? ( test )"
-else
-	SRC_URI="
-		https://download.blender.org/source/${P}.tar.xz
-	"
-	# 	test? (
-	# 		https://projects.blender.org/blender/blender-test-data/archive/blender-v$(ver_cut 1-2)-release.tar.gz
-	# 	)
-	# "
-	KEYWORDS="~amd64 ~arm ~arm64"
-	RESTRICT="test" # the test archive returns LFS references.
-fi
-
 LICENSE="GPL-3+ cycles? ( Apache-2.0 )"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.xz"
+
 SLOT="${PV%.*}"
+KEYWORDS="~amd64"
+RESTRICT="mirror test"
+
 IUSE="
 	alembic +bullet collada +color-management cuda +cycles +cycles-bin-kernels
 	debug doc +embree experimental +ffmpeg +fftw +fluid +gmp gnome hip jack
 	jemalloc jpeg2k man +nanovdb ndof nls +oidn oneapi openal +openexr +openmp openpgl
 	+opensubdiv +openvdb optix osl +pdf +potrace +pugixml pulseaudio
-	renderdoc sdl +sndfile +tbb test +tiff valgrind vulkan wayland +webp X
-"
+	renderdoc sdl +sndfile +tbb test +tiff valgrind vulkan wayland +webp X"
 
 REQUIRED_USE="${PYTHON_REQUIRED_USE}
 	alembic? ( openexr )
@@ -81,7 +63,7 @@ RDEPEND="${PYTHON_DEPS}
 	color-management? ( media-libs/opencolorio:= )
 	cuda? ( dev-util/nvidia-cuda-toolkit:= )
 	embree? ( media-libs/embree:=[raymask] )
-	ffmpeg? ( media-video/ffmpeg:=[x264,mp3,encode,theora,jpeg2k?,vpx,vorbis,opus,xvid] )
+	ffmpeg? ( media-video/ffmpeg:=[x264,lame,theora,jpeg2k?,vpx,vorbis,opus,xvid] )
 	fftw? ( sci-libs/fftw:3.0= )
 	gmp? ( dev-libs/gmp[cxx] )
 	gnome? ( gui-libs/libdecor )
@@ -182,6 +164,8 @@ PATCHES=(
 	"${FILESDIR}/${PN}-4.0.2-FindClang.patch"
 	"${FILESDIR}/${PN}-4.0.2-CUDA_NVCC_FLAGS.patch"
 	"${FILESDIR}/${PN}-4.0.2-r1-osl-1.13.patch"
+	"${FILESDIR}/ffmpeg-7_audaspace.patch"
+	"${FILESDIR}/ffmpeg-7.patch"
 )
 
 blender_check_requirements() {
@@ -541,31 +525,12 @@ src_install() {
 }
 
 pkg_postinst() {
-	elog
-	elog "Blender uses python integration. As such, may have some"
-	elog "inherent risks with running unknown python scripts."
-	elog
-	elog "It is recommended to change your blender temp directory"
-	elog "from /tmp to /home/user/tmp or another tmp file under your"
-	elog "home directory. This can be done by starting blender, then"
-	elog "changing the 'Temporary Files' directory in Blender preferences."
-	elog
-
 	if use osl; then
 		ewarn ""
 		ewarn "OSL is know to cause runtime segfaults if Mesa has been linked to"
 		ewarn "an other LLVM version than what OSL is linked to."
 		ewarn "See https://bugs.gentoo.org/880671 for more details"
 		ewarn ""
-	fi
-
-	if ! use python_single_target_python3_10; then
-		elog "You are building Blender with a newer python version than"
-		elog "supported by this version upstream."
-		elog "If you experience breakages with e.g. plugins, please switch to"
-		elog "python_single_target_python3_10 instead."
-		elog "Bug: https://bugs.gentoo.org/737388"
-		elog
 	fi
 
 	xdg_icon_cache_update
