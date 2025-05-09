@@ -8,6 +8,7 @@ media-gfx/ansilove::gentoo
 media-gfx/tgif::gentoo
 media-gfx/fontforge::gentoo
 media-gfx/gimp::gentoo
+app-arch/unadf::gentoo
 app-arch/unzip::gentoo
 sys-libs/libstdc++-v3::gentoo
 app-misc/binwalk::gentoo
@@ -22,7 +23,6 @@ media-libs/gd::gentoo
 media-libs/libnsgif::gentoo
 app-emulation/uade::gentoo
 app-emulation/86Box::gentoo
-x11-misc/xkeyboard-config::gentoo
 games-emulation/dosbox::gentoo
 net-ftp/uftpd::gentoo
 

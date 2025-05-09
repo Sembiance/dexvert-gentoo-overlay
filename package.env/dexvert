@@ -15,6 +15,7 @@ games-util/ztools gcc14-gnu89-downgrade
 media-gfx/swftools gcc14-gnu89-downgrade
 media-gfx/xcur2png gcc14-gnu89-downgrade
 media-libs/abydos gcc14-ignore-warnings
+media-libs/grok compiler-gcc13
 media-libs/libbpg gcc14-gnu89-downgrade
 media-sound/devoc gcc14-gnu89-downgrade
 media-video/xanim gcc14-ignore-warnings
