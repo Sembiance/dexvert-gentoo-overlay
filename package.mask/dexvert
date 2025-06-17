@@ -7,7 +7,6 @@ media-gfx/pablodraw::gentoo
 media-gfx/ansilove::gentoo
 media-gfx/tgif::gentoo
 media-gfx/fontforge::gentoo
-media-gfx/gimp::gentoo
 app-arch/unadf::gentoo
 app-arch/unzip::gentoo
 sys-libs/libstdc++-v3::gentoo

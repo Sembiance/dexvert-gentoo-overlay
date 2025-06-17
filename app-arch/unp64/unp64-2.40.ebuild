@@ -11,6 +11,8 @@ SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
+PATCHES=( "${FILESDIR}/bool.patch" )
+
 src_compile() {
 	cd src
 	make

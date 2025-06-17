@@ -16,6 +16,8 @@ DEPEND="x11-libs/libSM[abi_x86_32]
 	x11-libs/libXt[abi_x86_32]"
 RDEPEND="${DEPEND}"
 
+PATCHES=( "${FILESDIR}/xa_export.patch" )
+
 src_prepare() {
     default
     sed -i 's/^CFLAGS\s*=\s/CFLAGS += /' Makefile

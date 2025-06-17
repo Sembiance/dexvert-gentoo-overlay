@@ -1,0 +1,3 @@
+#!/bin/bash
+
+GENTOO_VM=openjdk-bin-21 java -jar /opt/fernflower/fernflower.jar "$@"

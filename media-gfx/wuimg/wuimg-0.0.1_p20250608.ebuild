@@ -11,7 +11,7 @@ SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
-PATCHES=( "${FILESDIR}/wuconv.patch" )
+PATCHES=( "${FILESDIR}/wuconv_2.patch" )
 
 DEPEND="app-arch/libarchive
 	media-libs/libepoxy
@@ -30,7 +30,7 @@ DEPEND="app-arch/libarchive
 	media-libs/libjxl
 	media-libs/libpng
 	media-libs/liblerc
-	media-libs/charls
+	<media-libs/charls-2.5
 	media-libs/libraw
 	gnome-base/librsvg
 	media-libs/tiff

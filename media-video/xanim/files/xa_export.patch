@@ -1,0 +1,22 @@
+diff '--color=auto' -Naur a/xa_export.c b/xa_export.c
+--- a/xa_export.c	2025-06-15 16:50:22.736874750 -0400
++++ b/xa_export.c	2025-06-15 16:50:47.456855034 -0400
+@@ -102,15 +102,16 @@
+ 	unsigned long red_mask = image->red_mask;
+ 	unsigned long green_mask = image->green_mask;
+ 	unsigned long blue_mask = image->blue_mask;
++	int x, y;
+ 
+ 	sprintf(path, export_data.path, export_data.frame, "ppm");
+ 	fp = fopen(path, "wb");
+ 	if(fp)
+ 	{
+ 		fprintf(fp, "P6\n%d %d\n255\n", image->width, image->height);
+-		for (int y = 0; y < image->height; y++)
++		for (y = 0; y < image->height; y++)
+ 		{
+-			for (int x = 0; x < image->width ; x++)
++			for (x = 0; x < image->width ; x++)
+ 			{
+ 				unsigned char color[3];
+ 				unsigned long pixel = XGetPixel(image, x, y);

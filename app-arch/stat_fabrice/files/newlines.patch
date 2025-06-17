@@ -1,0 +1,31 @@
+diff '--color=auto' -Naur a/stat.c b/stat.c
+--- a/stat.c	2025-06-03 07:45:13.789652198 -0400
++++ b/stat.c	2025-06-03 07:44:32.973474770 -0400
+@@ -255,17 +255,16 @@
+ void Help(void) {
+ 	 Version();
+ 	 fprintf(stderr,
+-"This is a *test* about PPM Compression
+-usage: %s [-hVvdpn] [-S suffix] [-a number] file...
+--h (--help)        : This help
+--V (--version)     : Print Version
+--v (--verbose)     : Verbose mode (additive) (for testing only)
+--d (--decompress)  : Decompress
+--S .suf (--suffix) : Set suffix .suf on compressed files (now=%s)
+--p (--pipe)        : Read from stdin & write to stdout
+--a n (--algorithm) : Encoding method (0=Store, 1=PPM)
+--n (--nodelete)    : Do not delete original file
+-"  
++"This is a *test* about PPM Compression\n\
++usage: %s [-hVvdpn] [-S suffix] [-a number] file...\n\
++-h (--help)        : This help\n\
++-V (--version)     : Print Version\n\
++-v (--verbose)     : Verbose mode (additive) (for testing only)\n\
++-d (--decompress)  : Decompress\n\
++-S .suf (--suffix) : Set suffix .suf on compressed files (now=%s)\n\
++-p (--pipe)        : Read from stdin & write to stdout\n\
++-a n (--algorithm) : Encoding method (0=Store, 1=PPM)\n\
++-n (--nodelete)    : Do not delete original file\n"
+ 					 ,prog_name,file_suffix);
+ }
+ 
