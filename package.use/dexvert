@@ -44,5 +44,8 @@ media-gfx/darktable -lua
 #dev-python/pyside2 webengine webchannel qml positioning quick
 #dev-qt/qtquickcontrols2 widgets
 
+# img2pdf needs this
+dev-python/pillow lcms
+
 # Always want
 media-libs/libzmf tools
