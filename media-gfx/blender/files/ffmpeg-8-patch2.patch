@@ -1,0 +1,12 @@
+diff '--color=auto' -Naur a/source/blender/imbuf/intern/indexer.cc b/source/blender/imbuf/intern/indexer.cc
+--- a/source/blender/imbuf/intern/indexer.cc	2025-12-18 17:52:33.709944357 -0500
++++ b/source/blender/imbuf/intern/indexer.cc	2025-12-18 17:38:41.871791678 -0500
+@@ -1078,7 +1078,7 @@
+           context->last_seek_pos_pts = context->seek_pos_pts;
+           context->last_seek_pos_dts = context->seek_pos_dts;
+ 
+-          context->seek_pos = in_frame->pkt_pos;
++          context->seek_pos = next_packet->pos;
+           context->seek_pos_pts = in_frame->pts;
+           context->seek_pos_dts = in_frame->pkt_dts;
+         }

@@ -13,6 +13,7 @@ sys-libs/libstdc++-v3::gentoo
 app-misc/binwalk::gentoo
 media-libs/netpbm::gentoo
 media-libs/rlottie::gentoo
+media-libs/gegl::gentoo
 media-libs/libxmp::gentoo
 media-libs/vips::gentoo
 media-libs/libnsbmp::gentoo
@@ -26,5 +27,4 @@ games-emulation/dosbox::gentoo
 net-ftp/uftpd::gentoo
 
 # Restrict certain versions
->app-office/scribus-1.6.999
 >=media-libs/allegro-5

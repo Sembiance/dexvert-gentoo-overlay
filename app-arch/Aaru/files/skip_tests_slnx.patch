@@ -1,0 +1,17 @@
+diff '--color=auto' -Naur a/Aaru.slnx b/Aaru.slnx
+--- a/Aaru.slnx	2025-12-19 12:47:56.724979020 -0500
++++ b/Aaru.slnx	2025-12-19 12:48:33.941275973 -0500
+@@ -68,11 +68,9 @@
+   <Project Path="Aaru.Logging/Aaru.Logging.csproj"/>
+   <Project Path="Aaru.Partitions/Aaru.Partitions.csproj"/>
+   <Project Path="Aaru.Settings/Aaru.Settings.csproj"/>
+-  <Project Path="Aaru.Tests.Devices/Aaru.Tests.Devices.csproj"/>
+-  <Project Path="Aaru.Tests/Aaru.Tests.csproj"/>
+   <Project Path="Aaru.Tui\Aaru.Tui.csproj" Type="Classic C#">
+     <Configuration Solution="Debug|x86" Project="Debug|Any CPU"/>
+     <Configuration Solution="Release|x86" Project="Release|Any CPU"/>
+   </Project>
+   <Project Path="Aaru/Aaru.csproj"/>
+-</Solution>
+\ No newline at end of file
++</Solution>

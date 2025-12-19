@@ -1,0 +1,110 @@
+EAPI=8
+
+PYTHON_COMPAT=( python3_{7..13} )
+DISTUTILS_USE_PEP517=maturin
+
+CRATES="
+    aho-corasick@1.1.3
+    anes@0.1.6
+    anstyle@1.0.11
+    autocfg@1.5.0
+    bumpalo@3.19.0
+    cast@0.3.0
+    cc@1.2.36
+    cfg-if@1.0.3
+    ciborium-io@0.2.2
+    ciborium-ll@0.2.2
+    ciborium@0.2.2
+    clap@4.5.47
+    clap_builder@4.5.47
+    clap_lex@0.7.5
+    codespan-reporting@0.12.0
+    criterion-plot@0.6.0
+    criterion@0.7.0
+    crossbeam-deque@0.8.6
+    crossbeam-epoch@0.9.18
+    crossbeam-utils@0.8.21
+    crunchy@0.2.4
+    cxx-build@1.0.184
+    cxx@1.0.179
+    cxxbridge-cmd@1.0.179
+    cxxbridge-flags@1.0.179
+    cxxbridge-macro@1.0.179
+    either@1.15.0
+    equivalent@1.0.2
+    find-msvc-tools@0.1.1
+    foldhash@0.2.0
+    half@2.6.0
+    hashbrown@0.15.5
+    heck@0.5.0
+    indexmap@2.11.0
+    indoc@2.0.6
+    itertools@0.13.0
+    itoa@1.0.15
+    js-sys@0.3.78
+    libc@0.2.175
+    link-cplusplus@1.0.12
+    log@0.4.28
+    memchr@2.7.5
+    memoffset@0.9.1
+    num-traits@0.2.19
+    once_cell@1.21.3
+    oorandom@11.1.5
+    plotters-backend@0.3.7
+    plotters-svg@0.3.7
+    plotters@0.3.7
+    portable-atomic@1.11.1
+    proc-macro2@1.0.101
+    pyo3-build-config@0.25.1
+    pyo3-ffi@0.25.1
+    pyo3-macros-backend@0.25.1
+    pyo3-macros@0.25.1
+    pyo3@0.25.1
+    quote@1.0.40
+    rayon-core@1.13.0
+    rayon@1.11.0
+    regex-automata@0.4.10
+    regex-syntax@0.8.6
+    regex@1.11.2
+    rustversion@1.0.22
+    ryu@1.0.20
+    same-file@1.0.6
+    scratch@1.0.9
+    serde@1.0.219
+    serde_derive@1.0.219
+    serde_json@1.0.143
+    shlex@1.3.0
+    strsim@0.11.1
+    syn@2.0.106
+    target-lexicon@0.13.2
+    termcolor@1.4.1
+    tinytemplate@1.2.1
+    unicode-ident@1.0.18
+    unicode-width@0.2.1
+    unindent@0.2.4
+    walkdir@2.5.0
+    wasm-bindgen-backend@0.2.101
+    wasm-bindgen-macro-support@0.2.101
+    wasm-bindgen-macro@0.2.101
+    wasm-bindgen-shared@0.2.101
+    wasm-bindgen@0.2.101
+    web-sys@0.3.78
+    winapi-util@0.1.11
+    windows-link@0.2.0
+    windows-sys@0.61.0
+"
+
+inherit cargo distutils-r1
+
+DESCRIPTION="A Python 3.8+ binding for LZ (lzokay) library"
+HOMEPAGE="https://github.com/vlaci/lzallright"
+LICENSE="MIT"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz
+	${CARGO_CRATE_URIS}"
+S="${WORKDIR}/${PN}"
+
+SLOT="0"
+KEYWORDS="~amd64"
+RESTRICT="mirror test"
+
+DEPEND="dev-python/setuptools[${PYTHON_USEDEP}]"

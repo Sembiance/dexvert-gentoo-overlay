@@ -118,3 +118,9 @@ media-libs/libass abi_x86_32
 media-libs/libv4l abi_x86_32
 media-libs/libdvdcss abi_x86_32
 dev-util/spirv-tools abi_x86_32
+
+# More (2025-12-17):
+dev-libs/wayland abi_x86_32
+
+# Needed by boo2pdf
+x11-libs/libXtst abi_x86_32

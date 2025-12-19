@@ -1,0 +1,57 @@
+diff '--color=auto' -Naur a/meson.build b/meson.build
+--- a/meson.build	2025-12-18 18:52:43.761358638 -0500
++++ b/meson.build	2025-12-18 18:53:30.114163863 -0500
+@@ -35,6 +35,7 @@
+ libdl_dep = cc.find_library('dl')
+ libm_dep = cc.find_library('m')
+ cairo_dep = dependency('cairo')
++glib_dep = dependency('glib-2.0')
+ 
+ enable_cpp = add_languages('cpp', required: false)
+ cargo = find_program('cargo', required: false)
+diff '--color=auto' -Naur a/plugins/meson.build b/plugins/meson.build
+--- a/plugins/meson.build	2025-12-18 18:54:04.650912172 -0500
++++ b/plugins/meson.build	2025-12-18 18:53:56.066847890 -0500
+@@ -56,7 +56,7 @@
+ #shared_module('quciktime',   'quicktime.c',   dependencies: [cairo_dep, libquicktime_dep],         install: true,  include_directories: '../src', name_prefix: '', install_dir: plugindir)
+ shared_module('raw',         'raw.cc',        dependencies: [cairo_dep, libraw_dep, nil_dep],      install: true,  include_directories: '../src', name_prefix: '', install_dir: plugindir)
+ shared_module('rosprite',    'rosprite.c',    dependencies: [cairo_dep, nil_dep, librosprite_dep], install: true,  include_directories: '../src', name_prefix: '', install_dir: plugindir)
+-shared_module('spectre',     'spectre.c',     dependencies: [cairo_dep, libspectre_dep],           install: true,  include_directories: '../src', name_prefix: '', install_dir: plugindir)
++shared_module('spectre',     'spectre.c',     dependencies: [cairo_dep, libspectre_dep, glib_dep], install: true,  include_directories: '../src', name_prefix: '', install_dir: plugindir)
+ shared_module('spng',        'spng.c',        dependencies: [cairo_dep, nil_dep, spng_dep],        install: true,  include_directories: '../src', name_prefix: '', install_dir: plugindir)
+ shared_module('sunras',      'sunras.c','shared/buffer.c', dependencies: [cairo_dep, nil_dep],     install: true,  include_directories: ['../src','shared'], name_prefix: '', install_dir: plugindir)
+ shared_module('svf',         'svf.c',         dependencies: [cairo_dep, loa_dep],                  install: true,  include_directories: '../src', name_prefix: '', install_dir: plugindir)
+diff '--color=auto' -Naur a/plugins/python/pil.c b/plugins/python/pil.c
+--- a/plugins/python/pil.c	2025-12-18 18:54:31.395164656 -0500
++++ b/plugins/python/pil.c	2025-12-18 18:52:16.792875615 -0500
+@@ -175,18 +175,18 @@
+     int src_bpc = 4;
+     nile_format_t src_format;
+     int channel_width = img->pixelsize / img->bands;
+-    if(!strcmp(img->mode, "F")){
++    if(img->mode==IMAGING_MODE_F){
+ #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1,17,2)
+         dst_format = NIL_CAIRO_FORMAT_RGB96F;
+ #else
+         dst_format = NIL_CAIRO_FORMAT_RGB24;
+ #endif
+         src_format = NILE_FORMAT_f_g32;
+-    }else if(!strcmp(img->mode, "P")){
++    }else if(img->mode==IMAGING_MODE_P){
+         is_indexed = 1;
+         dst_format = NIL_CAIRO_FORMAT_ARGB32;
+         src_format = NILE_FORMAT_r8g8b8a8;
+-    }else if(!strcmp(img->mode, "RGB")){
++    }else if(img->mode==IMAGING_MODE_RGB){
+         switch(channel_width){
+         case 1:
+             src_format = NILE_FORMAT_r8g8b8;
+@@ -211,7 +211,7 @@
+         default:
+             return NULL;
+         }
+-    }else if(!strcmp(img->mode, "RGBA")){
++    }else if(img->mode==IMAGING_MODE_RGBA){
+         switch(channel_width){
+         case 1:
+             src_format = NILE_FORMAT_r8g8b8a8;

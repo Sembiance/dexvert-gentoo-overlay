@@ -1,0 +1,23 @@
+diff '--color=auto' -Naur a/operations/external/ff-load.c b/operations/external/ff-load.c
+--- a/operations/external/ff-load.c	2025-12-18 14:29:21.811516698 -0500
++++ b/operations/external/ff-load.c	2025-12-18 14:29:11.387404702 -0500
+@@ -348,8 +348,8 @@
+ 
+   if (frame < 2 || frame > prevframe + 64 || frame < prevframe )
+   {
+-    int64_t seek_target = av_rescale_q (((frame) * AV_TIME_BASE * 1.0) / o->frame_rate
+-, AV_TIME_BASE_Q, p->video_stream->time_base) / p->video_ctx->ticks_per_frame;
++    int64_t seek_target = av_rescale_q (((frame * AV_TIME_BASE) / o->frame_rate)
++, AV_TIME_BASE_Q, p->video_stream->time_base);
+ 
+     if (av_seek_frame (p->video_fcontext, p->video_index, seek_target, (AVSEEK_FLAG_BACKWARD )) < 0)
+       fprintf (stderr, "video seek error!\n");
+@@ -403,7 +403,7 @@
+                   break;
+                 }
+               got_picture = 1;
+-              if ((pkt.dts == pkt.pts) || (p->lavc_frame->key_frame!=0))
++              if ((pkt.dts == pkt.pts) || (p->lavc_frame->flags & AV_FRAME_FLAG_KEY))
+                 {
+                   // cur_dts and first_dts are moved to libavformat/internal.h
+                   /*

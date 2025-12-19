@@ -1,0 +1,33 @@
+diff '--color=auto' -Naur a/console_source/CMakeLists.txt b/console_source/CMakeLists.txt
+--- a/console_source/CMakeLists.txt	2025-12-19 15:35:07.643379612 -0500
++++ b/console_source/CMakeLists.txt	2025-12-19 15:30:25.037983543 -0500
+@@ -57,6 +57,7 @@
+ target_link_libraries(${PROJECT_NAME} bzip2)
+ target_link_libraries(${PROJECT_NAME} lzma)
+ target_link_libraries(${PROJECT_NAME} zlib)
++target_link_libraries(${PROJECT_NAME} ppmd)
+ target_link_libraries(${PROJECT_NAME} capstone_x86)
+ 
+ target_link_libraries(${PROJECT_NAME} Qt5::Core)
+diff '--color=auto' -Naur a/gui_source/CMakeLists.txt b/gui_source/CMakeLists.txt
+--- a/gui_source/CMakeLists.txt	2025-12-19 15:34:46.923077532 -0500
++++ b/gui_source/CMakeLists.txt	2025-12-19 15:24:28.919696285 -0500
+@@ -79,6 +79,7 @@
+ target_link_libraries(${PROJECT_NAME} bzip2)
+ target_link_libraries(${PROJECT_NAME} lzma)
+ target_link_libraries(${PROJECT_NAME} zlib)
++target_link_libraries(${PROJECT_NAME} ppmd)
+ target_link_libraries(${PROJECT_NAME} capstone)
+ target_link_libraries(${PROJECT_NAME} cppfilt)
+ 
+diff '--color=auto' -Naur a/lite_source/CMakeLists.txt b/lite_source/CMakeLists.txt
+--- a/lite_source/CMakeLists.txt	2025-12-19 15:35:31.171725263 -0500
++++ b/lite_source/CMakeLists.txt	2025-12-19 15:36:06.061293496 -0500
+@@ -57,6 +57,7 @@
+ target_link_libraries(${PROJECT_NAME} bzip2)
+ target_link_libraries(${PROJECT_NAME} lzma)
+ target_link_libraries(${PROJECT_NAME} zlib)
++target_link_libraries(${PROJECT_NAME} ppmd)
+ target_link_libraries(${PROJECT_NAME} capstone_x86)
+ 
+ target_link_libraries(${PROJECT_NAME} Qt5::Widgets)

@@ -1,0 +1,12 @@
+diff '--color=auto' -Naur a/app/object.cpp b/app/object.cpp
+--- a/app/object.cpp	2025-12-19 15:14:23.804660748 -0500
++++ b/app/object.cpp	2025-12-19 15:15:35.749866264 -0500
+@@ -206,7 +206,7 @@
+ 	if (layer<0 || layer>Draw::MAXLAYER)
+ 		rdr.addError(QString("Invalid layer number %1").arg(layer),Draw::errorWARNING);
+ 	if ((objflag & ~Draw::flagFILEOK)!=0)
+-		rdr.addError(QString("Reserved flags %1 not zero").arg(objflag,2,16,QChar('0')),Draw::errorWARNING);
++		rdr.addError(QString("Reserved flags %1 not zero").arg(objflag.toInt(),2,16,QChar('0')),Draw::errorWARNING);
+ 
+ 	// Clear reserved bits of the object flags, as otherwise if the
+ 	// flagNOBBOX or flagREGENBBOX bits are set they cause the reading

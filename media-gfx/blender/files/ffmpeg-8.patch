@@ -1,0 +1,12 @@
+diff '--color=auto' -Naur a/source/blender/blenkernel/intern/writeffmpeg.c b/source/blender/blenkernel/intern/writeffmpeg.c
+--- a/source/blender/blenkernel/intern/writeffmpeg.c	2025-12-18 17:25:59.331558666 -0500
++++ b/source/blender/blenkernel/intern/writeffmpeg.c	2025-12-18 17:26:24.611828745 -0500
+@@ -1045,7 +1045,7 @@
+     /* Used to be if ((c->codec_id >= CODEC_ID_PCM_S16LE) && (c->codec_id <= CODEC_ID_PCM_DVD))
+      * not sure if that is needed anymore, so let's try out if there are any
+      * complaints regarding some FFmpeg versions users might have. */
+-    context->audio_input_samples = AV_INPUT_BUFFER_MIN_SIZE * 8 / c->bits_per_coded_sample /
++    context->audio_input_samples = 4096 * 8 / c->bits_per_coded_sample /
+                                    num_channels;
+   }
+   else {

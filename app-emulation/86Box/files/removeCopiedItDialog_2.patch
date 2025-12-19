@@ -1,0 +1,27 @@
+diff '--color=auto' -Naur a/src/qt/qt_main.cpp b/src/qt/qt_main.cpp
+--- a/src/qt/qt_main.cpp	2025-12-19 14:59:20.420068875 -0500
++++ b/src/qt/qt_main.cpp	2025-12-19 14:59:57.804498110 -0500
+@@ -680,21 +680,8 @@
+ 
+     // UUID / copy / move detection
+     if (!util::compareUuid()) {
+-        QMessageBox movewarnbox;
+-        movewarnbox.setIcon(QMessageBox::Icon::Warning);
+-        movewarnbox.setText(QObject::tr("This machine might have been moved or copied."));
+-        movewarnbox.setInformativeText(QObject::tr("In order to ensure proper networking functionality, 86Box needs to know if this machine was moved or copied.\n\nSelect \"I Copied It\" if you are not sure."));
+-        const QPushButton *movedButton  = movewarnbox.addButton(QObject::tr("I Moved It"), QMessageBox::AcceptRole);
+-        const QPushButton *copiedButton = movewarnbox.addButton(QObject::tr("I Copied It"), QMessageBox::DestructiveRole);
+-        QPushButton       *cancelButton = movewarnbox.addButton(QObject::tr("Cancel"), QMessageBox::RejectRole);
+-        movewarnbox.setDefaultButton(cancelButton);
+-        movewarnbox.exec();
+-        if (movewarnbox.clickedButton() == copiedButton) {
+-            util::storeCurrentUuid();
+-            util::generateNewMacAdresses();
+-        } else if (movewarnbox.clickedButton() == movedButton) {
+-            util::storeCurrentUuid();
+-        }
++        util::storeCurrentUuid();
++        util::generateNewMacAdresses();
+     }
+ 
+ #ifdef Q_OS_WINDOWS

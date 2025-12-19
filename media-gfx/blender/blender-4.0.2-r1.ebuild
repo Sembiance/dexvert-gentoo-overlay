@@ -164,8 +164,10 @@ PATCHES=(
 	"${FILESDIR}/${PN}-4.0.2-FindClang.patch"
 	"${FILESDIR}/${PN}-4.0.2-CUDA_NVCC_FLAGS.patch"
 	"${FILESDIR}/${PN}-4.0.2-r1-osl-1.13.patch"
-	"${FILESDIR}/ffmpeg-7_audaspace.patch"
+	"${FILESDIR}/ffmpeg-7_audaspace2.patch"
 	"${FILESDIR}/ffmpeg-7.patch"
+	"${FILESDIR}/ffmpeg-8.patch"
+	"${FILESDIR}/ffmpeg-8-patch2.patch"
 )
 
 blender_check_requirements() {

@@ -1,6 +1,6 @@
 diff '--color=auto' -Naur a/extern/audaspace/plugins/ffmpeg/FFMPEGReader.cpp b/extern/audaspace/plugins/ffmpeg/FFMPEGReader.cpp
---- a/extern/audaspace/plugins/ffmpeg/FFMPEGReader.cpp	2025-05-06 23:12:04.125695486 -0400
-+++ b/extern/audaspace/plugins/ffmpeg/FFMPEGReader.cpp	2025-05-06 23:04:54.366107830 -0400
+--- a/extern/audaspace/plugins/ffmpeg/FFMPEGReader.cpp	2025-12-18 17:14:37.296154828 -0500
++++ b/extern/audaspace/plugins/ffmpeg/FFMPEGReader.cpp	2025-12-18 17:15:44.784977765 -0500
 @@ -112,7 +112,7 @@
  		if(ret != 0)
  			break;
@@ -35,6 +35,18 @@ diff '--color=auto' -Naur a/extern/audaspace/plugins/ffmpeg/FFMPEGReader.cpp b/e
  	m_tointerleave = av_sample_fmt_is_planar(m_codecCtx->sample_fmt);
  
  	switch(av_get_packed_sample_fmt(m_codecCtx->sample_fmt))
+@@ -269,9 +269,9 @@
+ 		m_membuffer(buffer),
+ 		m_membufferpos(0)
+ {
+-	m_membuf = reinterpret_cast<data_t*>(av_malloc(AV_INPUT_BUFFER_MIN_SIZE + AV_INPUT_BUFFER_PADDING_SIZE));
++	m_membuf = reinterpret_cast<data_t*>(av_malloc(4096 + AV_INPUT_BUFFER_PADDING_SIZE));
+ 
+-	m_aviocontext = avio_alloc_context(m_membuf, AV_INPUT_BUFFER_MIN_SIZE, 0, this, read_packet, nullptr, seek_packet);
++	m_aviocontext = avio_alloc_context(m_membuf, 4096, 0, this, read_packet, nullptr, seek_packet);
+ 
+ 	if(!m_aviocontext)
+ 	{
 @@ -345,7 +345,7 @@
  			info.specs.rate = m_formatCtx->streams[i]->codec->sample_rate;
  			info.specs.format = convertSampleFormat(m_formatCtx->streams[i]->codec->sample_fmt);
@@ -45,8 +57,8 @@ diff '--color=auto' -Naur a/extern/audaspace/plugins/ffmpeg/FFMPEGReader.cpp b/e
  			info.specs.format = convertSampleFormat(AVSampleFormat(m_formatCtx->streams[i]->codecpar->format));
  #endif
 diff '--color=auto' -Naur a/extern/audaspace/plugins/ffmpeg/FFMPEGWriter.cpp b/extern/audaspace/plugins/ffmpeg/FFMPEGWriter.cpp
---- a/extern/audaspace/plugins/ffmpeg/FFMPEGWriter.cpp	2025-05-06 23:12:04.125663517 -0400
-+++ b/extern/audaspace/plugins/ffmpeg/FFMPEGWriter.cpp	2025-05-06 23:04:48.558017973 -0400
+--- a/extern/audaspace/plugins/ffmpeg/FFMPEGWriter.cpp	2025-12-18 17:17:25.866588501 -0500
++++ b/extern/audaspace/plugins/ffmpeg/FFMPEGWriter.cpp	2025-12-18 17:17:04.626393370 -0500
 @@ -77,8 +77,8 @@
  
  	m_frame->nb_samples = m_input_samples;

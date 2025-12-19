@@ -13,7 +13,7 @@ RESTRICT="mirror test strip"
 
 IUSE="debug"
 
-#PATCHES=( "${FILESDIR}/webp_link.patch" )
+PATCHES=( "${FILESDIR}/spectre_pil.patch" )
 
 # To debug abydos source, run in the src dir 'meson setup build' and then 'cd build' 'meson compile'
 DEPEND="x11-libs/cairo:=
@@ -30,7 +30,7 @@ DEPEND="x11-libs/cairo:=
 	media-libs/libraw:=
 	media-libs/libwebp:=
 	media-libs/libwmf:=
-	media-libs/gegl:=
+	<=media-libs/gegl-0.4.62:=
 	media-libs/gd:=
 	media-libs/grok:=
 	media-libs/libquicktime:=
