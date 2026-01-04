@@ -10,7 +10,7 @@ SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
-DEPEND=">=virtual/jdk-21"
+DEPEND="virtual/jdk:21"
 RDEPEND=${DEPEND}
 
 src_install() {

@@ -1,0 +1,11 @@
+diff '--color=auto' -Naur a/unix/unxcfg.h b/unix/unxcfg.h
+--- a/unix/unxcfg.h	2025-12-21 09:40:20.263032268 -0500
++++ b/unix/unxcfg.h	2025-12-21 09:40:33.583338169 -0500
+@@ -118,7 +118,6 @@
+ #  endif
+ #else
+ #  include <time.h>
+-   struct tm *gmtime(), *localtime();
+ #endif
+ 
+ #if (defined(BSD4_4) || (defined(SYSV) && defined(MODERN)))

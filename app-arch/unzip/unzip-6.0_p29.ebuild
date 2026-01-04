@@ -1,6 +1,7 @@
 EAPI=8
 
 # I modified app-arch/unzip to support some old copyright encumbered code called USE_SMITH
+# Also removed use flags and just compiled straight in and cleaned up other stuff
 # The unreduce_full.c file came from: ftp://ftp.info-zip.org/pub/infozip/src/unreduce_full.zip
 
 inherit toolchain-funcs flag-o-matic
@@ -12,29 +13,28 @@ MY_P="${PN}${MY_PV}"
 DESCRIPTION="unzipper for pkzip-compressed files"
 HOMEPAGE="http://infozip.sourceforge.net/UnZip.html"
 LICENSE="Info-ZIP"
-SRC_URI="mhttps://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${MY_P}.tar.gz
-	https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${PN}_${PV/_p/-}.debian.tar.xz"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${MY_P}.tar.gz
+	https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${MY_P}.debian.tar.xz"
+S="${WORKDIR}/${MY_P}"
 
 SLOT="0"
-KEYWORDS="~alpha amd64 arm arm64 hppa ia64 m68k ~mips ppc ppc64 ~riscv s390 sparc x86 ~x86-linux"
-IUSE="bzip2 natspec unicode smith"
+KEYWORDS="~amd64"
+RESTRICT="mirror test"
 
-DEPEND="bzip2? ( app-arch/bzip2 )
-	natspec? ( dev-libs/libnatspec )"
+DEPEND="app-arch/bzip2
+	dev-libs/libnatspec"
 RDEPEND="${DEPEND}"
-
-S="${WORKDIR}/${MY_P}"
 
 src_prepare() {
 	local deb="${WORKDIR}"/debian/patches
 	rm "${deb}"/02-this-is-debian-unzip.patch || die
 	eapply "${deb}"/*.patch
-
+	eapply "${FILESDIR}/${PN}-6.0-natspec.patch"
+	eapply "${FILESDIR}/unxcfg.patch"
 	eapply "${FILESDIR}"/${PN}-6.0-no-exec-stack.patch
 	eapply "${FILESDIR}"/${PN}-6.0-format-security.patch
 	eapply "${FILESDIR}"/${PN}-6.0-fix-false-overlap-detection-on-32bit-systems.patch
 	eapply "${FILESDIR}"/no_message_pause.patch
-	use natspec && eapply "${FILESDIR}/${PN}-6.0-natspec.patch" #275244
 	sed -i -r \
 		-e '/^CFLAGS/d' \
 		-e '/CFLAGS/s:-O[0-9]?:$(CFLAGS) $(CPPFLAGS):' \
@@ -46,43 +46,24 @@ src_prepare() {
 		-e 's:LF = :LF = $(LDFLAGS) :' \
 		-e 's:SL = :SL = $(LDFLAGS) :' \
 		-e 's:FL = :FL = $(LDFLAGS) :' \
-		-e "/^#L_BZ2/s:^$(use bzip2 && echo .)::" \
+		-e "/^#L_BZ2/s:^$(echo .)::" \
 		-e 's:$(AS) :$(AS) $(ASFLAGS) :g' \
 		unix/Makefile \
 		|| die "sed unix/Makefile failed"
 
-	# Delete bundled code to make sure we don't use it.
 	rm -r bzip2 || die
-
-    if use smith ; then
-        cp "${FILESDIR}"/unreduce_full.c "${S}"/unreduce.c
-    fi
+    cp "${FILESDIR}"/unreduce_full.c "${S}"/unreduce.c
 
 	eapply_user
 }
 
 src_configure() {
-	case ${CHOST} in
-		i?86*-*linux*)       TARGET="linux_asm" ;;
-		*linux*)             TARGET="linux_noasm" ;;
-		i?86*-*bsd* | \
-		i?86*-dragonfly*)    TARGET="freebsd" ;; # mislabelled bsd with x86 asm
-		*bsd* | *dragonfly*) TARGET="bsd" ;;
-		*-darwin*)           TARGET="macosx" ;;
-		*-cygwin*)           TARGET="cygwin" ;;
-		*) die "Unknown target; please update the ebuild to handle ${CHOST}	" ;;
-	esac
-
-	[[ ${CHOST} == *linux* ]] && append-cppflags -DNO_LCHMOD
-	use bzip2 && append-cppflags -DUSE_BZIP2
-	use unicode && append-cppflags -DUNICODE_SUPPORT -DUNICODE_WCHAR -DUTF8_MAYBE_NATIVE -DUSE_ICONV_MAPPING
-	append-cppflags -DLARGE_FILE_SUPPORT #281473
-	use smith && append-cppflags -DUSE_SMITH_CODE
+	TARGET="linux_noasm"
+	append-cppflags -DNO_LCHMOD -DUSE_BZIP2 -DUNICODE_SUPPORT -DUNICODE_WCHAR -DUTF8_MAYBE_NATIVE -DUSE_ICONV_MAPPING -DLARGE_FILE_SUPPORT -DUSE_SMITH_CODE
 }
 
 src_compile() {
-	ASFLAGS="${ASFLAGS} $(get_abi_var CFLAGS)" \
-		emake -f unix/Makefile ${TARGET}
+	ASFLAGS="${ASFLAGS}" emake -f unix/Makefile ${TARGET}
 }
 
 src_install() {
