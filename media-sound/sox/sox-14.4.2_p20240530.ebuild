@@ -23,6 +23,7 @@ RDEPEND="
 	>=media-libs/flac-1.1.3:=
 	media-libs/libid3tag:=
 	media-libs/libmad
+	media-libs/opusfile
 	media-libs/libogg
 	media-libs/libvorbis
 	media-libs/libpng:0=
@@ -63,7 +64,7 @@ src_configure() {
 
 		--disable-ao
 		--without-ladspa
-		--disable-opus
+		--enable-opus
 		--disable-oss
 		--disable-pulseaudio
 		--disable-sndio

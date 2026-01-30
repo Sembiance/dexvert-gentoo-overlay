@@ -12,3 +12,5 @@ KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
 PATCHES=( "${FILESDIR}/compile_includes.patch" )
+
+BDEPEND="<sys-devel/gcc-14"

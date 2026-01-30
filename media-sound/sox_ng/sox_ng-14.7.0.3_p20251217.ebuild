@@ -23,6 +23,7 @@ RDEPEND="
 	>=media-libs/flac-1.1.3:=
 	media-libs/libid3tag:=
 	media-libs/libmad
+	media-libs/opusfile
 	media-libs/libogg
 	media-libs/libvorbis
 	media-libs/libpng:0=
@@ -59,6 +60,7 @@ src_configure() {
 		--with-magic
 		--enable-openmp
 		--with-oggvorbis
+		--with-opus
 		--with-png
 		--with-sndfile
 		--with-twolame
@@ -68,7 +70,6 @@ src_configure() {
 		--without-ffmpeg
 		--without-fftw
 		--without-ladspa
-		--without-opus
 		--without-oss
 		--without-pulseaudio
 		--without-sndio
