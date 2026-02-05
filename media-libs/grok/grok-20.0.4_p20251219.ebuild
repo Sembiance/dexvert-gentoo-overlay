@@ -11,6 +11,8 @@ SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
+BDEPEND="sys-devel/gcc:13"
+
 src_configure() {
     local mycmakeargs=(
         -DBUILD_TESTING=OFF

@@ -1,7 +1,7 @@
 # FOR MORE INFO on how to install, see dev/wine.txt
 
 # wine 32bit needs a ton of stuff to be compiled with 32bit support
-app-emulation/wine-vanilla abi_x86_32
+app-emulation/wine-vanilla -wow64 abi_x86_32
 app-emulation/wine-gecko abi_x86_32
 x11-drivers/nvidia-drivers abi_x86_32
 

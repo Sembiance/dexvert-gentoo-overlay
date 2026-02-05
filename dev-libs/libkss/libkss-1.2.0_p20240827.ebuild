@@ -12,6 +12,8 @@ SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
+BDEPEND="sys-devel/gcc:13"
+
 src_compile() {
    cmake_src_compile kss2wav
 }

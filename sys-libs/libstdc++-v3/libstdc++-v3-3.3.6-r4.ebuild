@@ -20,7 +20,7 @@ KEYWORDS="~amd64 ~x86"
 IUSE="multilib nls"
 
 RDEPEND="sys-libs/zlib
-	<sys-devel/gcc-14"
+	sys-devel/gcc:13"
 DEPEND="
 	${RDEPEND}
 	app-alternatives/yacc"

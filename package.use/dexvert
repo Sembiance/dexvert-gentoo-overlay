@@ -49,3 +49,6 @@ dev-python/pillow lcms
 
 # Always want
 media-libs/libzmf tools
+
+# Need for post processing
+dev-util/nvidia-cuda-toolkit PYTHON_TARGETS: python3_12

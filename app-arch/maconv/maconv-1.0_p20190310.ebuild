@@ -13,4 +13,4 @@ RESTRICT="mirror test"
 
 PATCHES=( "${FILESDIR}/compile_includes.patch" )
 
-BDEPEND="<sys-devel/gcc-14"
+BDEPEND="sys-devel/gcc:13"

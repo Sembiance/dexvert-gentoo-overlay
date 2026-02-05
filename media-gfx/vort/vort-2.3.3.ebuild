@@ -11,7 +11,7 @@ SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
-BDEPEND="<sys-devel/gcc-14"
+BDEPEND="sys-devel/gcc:13"
 
 src_compile() {
 	make linux
