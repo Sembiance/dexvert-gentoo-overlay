@@ -35,6 +35,8 @@ RDEPEND="
 
 DEPEND="${RDEPEND}"
 
+PATCHES=( "${FILESDIR}/memory.patch" )
+
 src_configure() {
     local emesonargs=(
         -D cache=true

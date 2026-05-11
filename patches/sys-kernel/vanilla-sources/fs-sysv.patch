@@ -1,3 +1,5 @@
+Vibe coded by Codex
+
 --- a/fs/Kconfig
 +++ b/fs/Kconfig
 @@ -329,6 +329,7 @@ source "fs/qnx6/Kconfig"
@@ -997,7 +999,7 @@
 +}
 --- /dev/null
 +++ b/fs/sysv/inode.c
-@@ -0,0 +1,354 @@
+@@ -0,0 +1,355 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + *  linux/fs/sysv/inode.c
@@ -1029,6 +1031,7 @@
 +#include <linux/vfs.h>
 +#include <linux/writeback.h>
 +#include <linux/namei.h>
++#include <linux/fs_context.h>
 +#include <asm/byteorder.h>
 +#include "sysv.h"
 +
@@ -1057,13 +1060,14 @@
 +	return 0;
 +}
 +
-+static int sysv_remount(struct super_block *sb, int *flags, char *data)
++int sysv_reconfigure(struct fs_context *fc)
 +{
++	struct super_block *sb = fc->root->d_sb;
 +	struct sysv_sb_info *sbi = SYSV_SB(sb);
 +
 +	sync_filesystem(sb);
 +	if (sbi->s_forced_ro)
-+		*flags |= SB_RDONLY;
++		fc->sb_flags |= SB_RDONLY;
 +	return 0;
 +}
 +
@@ -1185,7 +1189,7 @@
 +	inode = iget_locked(sb, ino);
 +	if (!inode)
 +		return ERR_PTR(-ENOMEM);
-+	if (!(inode->i_state & I_NEW))
++	if (!(inode_state_read_once(inode) & I_NEW))
 +		return inode;
 +
 +	raw_inode = sysv_raw_inode(sb, ino, &bh);
@@ -1328,7 +1332,6 @@
 +	.evict_inode	= sysv_evict_inode,
 +	.put_super	= sysv_put_super,
 +	.sync_fs	= sysv_sync_fs,
-+	.remount_fs	= sysv_remount,
 +	.statfs		= sysv_statfs,
 +};
 +
@@ -2151,7 +2154,7 @@
 +};
 --- /dev/null
 +++ b/fs/sysv/super.c
-@@ -0,0 +1,616 @@
+@@ -0,0 +1,618 @@
 +// SPDX-License-Identifier: GPL-2.0-only
 +/*
 + *  linux/fs/sysv/inode.c
@@ -2697,10 +2700,12 @@
 +
 +static const struct fs_context_operations sysv_context_ops = {
 +	.get_tree	= sysv_get_tree,
++	.reconfigure	= sysv_reconfigure,
 +};
 +
 +static const struct fs_context_operations v7_context_ops = {
 +	.get_tree	= v7_get_tree,
++	.reconfigure	= sysv_reconfigure,
 +};
 +
 +static int sysv_init_fs_context(struct fs_context *fc)
@@ -2770,12 +2775,14 @@
 +MODULE_LICENSE("GPL");
 --- /dev/null
 +++ b/fs/sysv/sysv.h
-@@ -0,0 +1,245 @@
+@@ -0,0 +1,248 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +#ifndef _SYSV_H
 +#define _SYSV_H
 +
 +#include <linux/buffer_head.h>
++
++struct fs_context;
 +
 +typedef __u16 __bitwise __fs16;
 +typedef __u32 __bitwise __fs32;
@@ -2914,6 +2921,7 @@
 +extern int sysv_write_inode(struct inode *, struct writeback_control *wbc);
 +extern int sysv_sync_inode(struct inode *);
 +extern void sysv_set_inode(struct inode *, dev_t);
++extern int sysv_reconfigure(struct fs_context *);
 +extern int sysv_getattr(struct mnt_idmap *, const struct path *,
 +			struct kstat *, u32, unsigned int);
 +extern int sysv_init_icache(void);
@@ -3233,4 +3241,3 @@
 +#define SYSV_DIRSIZE	sizeof(struct sysv_dir_entry)	/* size of every directory entry */
 +
 +#endif /* _LINUX_SYSV_FS_H */
-

@@ -15,6 +15,8 @@ RESTRICT="mirror test"
 DEPEND="dev-qt/qtscript[scripttools]
 	dev-qt/qtsvg:5
 	dev-qt/qtconcurrent
+	dev-qt/qtopengl
+	dev-qt/qtnetwork
 	dev-qt/qtprintsupport
 	dev-qt/qtsql"
 RDEPEND="${DEPEND}"

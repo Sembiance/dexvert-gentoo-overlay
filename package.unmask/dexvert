@@ -3,3 +3,6 @@ sys-fs/dmg2img
 
 # masked in gentoo for 'testing' but that's not something we care about
 dev-tex/bibtexu
+
+# masked in gentoo, but needed for Detect-It-Easy
+dev-qt/qtscript

@@ -1,10 +1,9 @@
 # texmacs needs this
 app-office/texmacs GUILE_SINGLE_TARGET: 1-8
 
-# GIMP 2.99
+# GIMP
 media-gfx/gimp python jpegxl -javascript -lua -heif
-media-libs/babl introspection lcms
-media-libs/gegl introspection lcms
+media-libs/gegl lcms
 
 # gmic requires older GIMP
 media-gfx/gmic -gimp
@@ -52,3 +51,6 @@ media-libs/libzmf tools
 
 # Need for post processing
 dev-util/nvidia-cuda-toolkit PYTHON_TARGETS: python3_12
+
+# With this flag on, binwalk breaks, for some weird reason
+dev-libs/capstone -python

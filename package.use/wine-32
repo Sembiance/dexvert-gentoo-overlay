@@ -124,3 +124,6 @@ dev-libs/wayland abi_x86_32
 
 # Needed by boo2pdf
 x11-libs/libXtst abi_x86_32
+
+# More (2026-04-08)
+dev-libs/leancrypto abi_x86_32
