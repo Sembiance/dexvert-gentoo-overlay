@@ -1,0 +1,49 @@
+--- a/make/features.mak
++++ b/make/features.mak
+@@ -1,3 +1,5 @@
++# Vibe coded by Codex
++
+ ifneq ($(findstring $(platform),windows mingw),)
+ support_waveout = 1
+ support_aylpt = 1
+@@ -11,7 +13,7 @@
+ support_oss = 1
+ support_alsa = 1
+ #support_sdl = 1
+-support_pulseaudio = 1
++# support_pulseaudio is disabled: the Gentoo package does not depend on PulseAudio.
+ support_mp3 = 1
+ support_ogg = 1
+ support_flac = 1
+--- a/src/strings/conversion.h
++++ b/src/strings/conversion.h
+@@ -10,10 +10,13 @@
+ 
+ #pragma once
+ 
++// Vibe coded by Codex
++
+ #include "string_type.h"
+ #include "string_view.h"
+ 
+ #include <charconv>
++#include <cstdint>
+ #include <type_traits>
+ 
+ namespace Strings
+--- a/src/strings/encoding.h
++++ b/src/strings/encoding.h
+@@ -10,9 +10,13 @@
+ 
+ #pragma once
+ 
++// Vibe coded by Codex
++
+ #include "string_type.h"
+ #include "string_view.h"
+ 
++#include <cstdint>
++
+ namespace Strings
+ {
+   String ToAutoUtf8(StringView str);

@@ -54,3 +54,12 @@ dev-util/nvidia-cuda-toolkit PYTHON_TARGETS: python3_12
 
 # With this flag on, binwalk breaks, for some weird reason
 dev-libs/capstone -python
+
+# vibeExtract rnSetup requires this
+dev-util/unicorn python
+
+# Not needed and ends up equiring qt stuff
+app-emulation/virtualbox -gui
+
+# 86Box 6.0 needs this
+dev-qt/* vulkan

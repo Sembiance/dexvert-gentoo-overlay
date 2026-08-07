@@ -1,6 +1,6 @@
 EAPI=8
 
-PYTHON_COMPAT=( python3_{7..13} )
+PYTHON_COMPAT=( python3_{7..15} )
 DISTUTILS_USE_PEP517=maturin
 
 CRATES="

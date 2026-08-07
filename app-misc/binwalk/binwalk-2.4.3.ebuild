@@ -1,7 +1,7 @@
 # We have this copied here just in case it's removed from Gentoo because 3.x is totally different output than 2.x
 EAPI=8
 
-PYTHON_COMPAT=( python3_{10..13} pypy3 )
+PYTHON_COMPAT=( python3_{10..15} pypy3 )
 DISTUTILS_USE_PEP517=setuptools
 inherit distutils-r1
 

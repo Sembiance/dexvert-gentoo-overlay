@@ -1,0 +1,38 @@
+diff --git a/src/cdrom/CMakeLists.txt b/src/cdrom/CMakeLists.txt
+--- a/src/cdrom/CMakeLists.txt
++++ b/src/cdrom/CMakeLists.txt
+@@ -15,12 +15,20 @@
+ #          Copyright 2024-2026 Jasmine Iwanek.
+ #
+ 
++# Vibe coded by Codex
++option(CHDR_EXTERNAL "Use system-provided libchdr" OFF)
++
+ set(WITH_SYSTEM_ZLIB ON)
+ set(WITH_SYSTEM_ZSTD ON)
+-add_subdirectory(libchdr)
+ 
+ find_package(PkgConfig REQUIRED)
+ 
++if(CHDR_EXTERNAL)
++    pkg_check_modules(CHDR REQUIRED IMPORTED_TARGET libchdr>=0.3.0)
++else()
++    add_subdirectory(libchdr)
++endif()
++
+ pkg_check_modules(SNDFILE REQUIRED IMPORTED_TARGET sndfile)
+ 
+ add_library(cdrom OBJECT
+@@ -32,7 +40,11 @@ add_library(cdrom OBJECT
+     cdrom_chd.c
+     cdrom_image_ccd.c
+ )
+-target_link_libraries(cdrom chdr-static)
++if(CHDR_EXTERNAL)
++    target_link_libraries(cdrom PkgConfig::CHDR)
++else()
++    target_link_libraries(cdrom chdr-static)
++endif()
+ if(NOT WIN32)
+ 	target_include_directories(86Box PRIVATE PkgConfig::SNDFILE)
+ endif()

@@ -1,0 +1,151 @@
+--- a/Makefile
++++ b/Makefile
+@@ -1,17 +1,19 @@
+ # Makefile for SNG
++# Vibe coded by Codex
+ #
+ # SPDX-FileCopyrightText: (C) Eric S. Raymond <esr@thyrsus.com>
+ # SPDX-License-Identifier: BSD-2-Clause
+ 
+ PREFIX      ?= /usr/local
+ BINDIR      ?= $(PREFIX)/bin
+-DATADIR     ?= $(PREFIX)/share
+-MANDIR      ?= $(DATADIR)/man
+ 
+ RGBTXT=/usr/share/X11/rgb.txt
+ INSTALL = install
+ 
+-VERSION=$(shell sed -n <NEWS.adoc '/::/s/^\([0-9][^:]*\).*/\1/p' | head -1)
++VERSION := $(shell sed -n '/::/s/^\([0-9][^:]*\).*/\1/p' NEWS.adoc 2>/dev/null | head -1)
++ifeq ($(strip $(VERSION)),)
++VERSION := 1.1.2
++endif
+ 
+ GCC_WARNINGS1=-Wall -Wextra -Werror -Wpointer-arith -Wstrict-prototypes
+ GCC_WARNINGS2=-Wmissing-prototypes -Wmissing-declarations
+@@ -41,24 +43,13 @@
+ 
+ # Rules
+ 
+-# Note: to suppress the footers with timestamps being generated in HTML,
+-# we use "-a nofooter".
+-# To debug asciidoc problems, you may need to run "xmllint --nonet --noout --valid"
+-# on the intermediate XML that throws an error.
+-.SUFFIXES: .html .adoc .1
+-
+-.adoc.1:
+-	asciidoctor -D. -a nofooter -b manpage $<
+-.adoc.html:
+-	asciidoctor -D. -a nofooter -a webfonts! $<
+-
+-.PHONY: all man html clean
++.PHONY: all clean
+ .PHONY: shellcheck check cppcheck spellcheck reflow fixme docdebug
+ .PHONY: install uninstall version dist release refresh
+ 
+ # Build
+ 
+-all: sng man html
++all: sng
+ 
+ OBJS= main.o sngc.o sngd.o
+ 
+@@ -67,10 +58,6 @@
+ 
+ $(OBJS): sng.h Makefile
+ 
+-man: sng.1
+-
+-html: sng.html
+-
+ clean:
+ 	rm -f $(OBJS) sng
+ 	rm -f *.1 *.html gmon.out
+@@ -109,19 +96,13 @@
+ 
+ # Install/uninstall
+ 
+-install: install-bin install-man
++install: install-bin
+ install-bin:
+ 	$(INSTALL) -d "$(DESTDIR)$(BINDIR)"
+ 	$(INSTALL) -d "$(DESTDIR)$(BINDIR)/bin"
+ 	$(INSTALL) sng "$(DESTDIR)$(BINDIR)/bin/sng"
+-install-man:
+-	$(INSTALL) -d "$(DESTDIR)$(MANDIR)"
+-	$(INSTALL) -d "$(DESTDIR)$(MANDIR)/man1"
+-	$(INSTALL) -m 644 sng.1 "$(DESTDIR)$(MANDIR)/man1"
+-
+-uninstall: uninstall-man uninstall-bin
+-uninstall-man:
+-	cd $(MANDIR)/man1/ && rm -f sng.1
++
++uninstall: uninstall-bin
+ uninstall-bin:
+ 	cd $(BINDIR)/bin && rm -f sng
+ 
+@@ -143,10 +124,10 @@
+ 
+ dist: clean sng-$(VERSION).tar.gz
+ 
+-release: sng-$(VERSION).tar.gz html
++release: sng-$(VERSION).tar.gz
+ 	shipper version=$(VERSION) | sh -e -x
+ 
+-refresh: html
++refresh:
+ 	shipper -N -w version=$(VERSION) | sh -e -x
+ 
+ # end
+--- a/sngc.c
++++ b/sngc.c
+@@ -6,6 +6,7 @@
+ *****************************************************************************/
+ // SPDX-License-Identifier: BSD-2-Clause
+ // SPDX-FileCopyrightText: (C) Eric S. Raymond <esr@thyrsus.com>
++// Vibe coded by Codex
+ #include <ctype.h>
+ #include <stdbool.h>
+ #include <stdio.h>
+@@ -173,7 +174,7 @@
+ 			if (*++cp == 'x' || *cp == 'X') {
+ 				const char *hex =
+ 				    "00112233445566778899aAbBcCdDeEfF";
+-				char *dp;
++				const char *dp;
+ 				for (++cp;
+ 				     (dp = strchr(hex, *cp)) && (dcount++ < 2);
+ 				     cp++) {
+@@ -453,9 +454,9 @@
+ 
+ 		if (len > PNG_STRING_MAX_LENGTH) {
+ 			fatal("string token is too long");
++			return 0; /* fatal() does not return */
+ 		}
+-		strncpy(stash, token_buffer, PNG_STRING_MAX_LENGTH);
+-		stash[len] = '\0';
++		memcpy(stash, token_buffer, (size_t)len + 1);
+ 		return (len);
+ 	}
+ }
+@@ -475,9 +476,9 @@
+ 		}
+ 		if (len > PNG_KEYWORD_MAX_LENGTH) {
+ 			fatal("keyword token is too long");
++			return 0; /* fatal() does not return */
+ 		}
+-		strncpy(stash, token_buffer, PNG_KEYWORD_MAX_LENGTH);
+-		stash[len] = '\0';
++		memcpy(stash, token_buffer, (size_t)len + 1);
+ 		if (isspace((unsigned char)stash[0]) ||
+ 		    isspace((unsigned char)stash[len - 1])) {
+ 			fatal("keywords may not contain leading or trailing "
+@@ -1714,7 +1715,7 @@
+ static void compile_gIFx(void) {
+ /* parse gIFx specification and queue up the corresponding chunk */
+ 	png_byte chunkdata[PNG_STRING_MAX_LENGTH];
+-	char buf[PNG_STRING_MAX_LENGTH];
++	char buf[PNG_STRING_MAX_LENGTH + 1];
+ 	png_unknown_chunk chunk;
+ 	int datalen = 0;
+ 

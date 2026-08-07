@@ -6,3 +6,6 @@ dev-tex/bibtexu
 
 # masked in gentoo, but needed for Detect-It-Easy
 dev-qt/qtscript
+
+# masked in gentoo, but we need this 7z variant for it's i18n support in dexvert
+app-arch/p7zip

@@ -1,7 +1,7 @@
 # v6 in gentoo misses tons of identifications and v7 is claude vibe coded
 EAPI=8
 
-PYTHON_COMPAT=( python3_{11..14} pypy3_11 )
+PYTHON_COMPAT=( python3_{11..15} pypy3 )
 DISTUTILS_USE_PEP517=setuptools
 inherit distutils-r1
 

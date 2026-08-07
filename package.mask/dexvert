@@ -2,12 +2,12 @@
 
 # Prefer my overlay packages instead of gentoo packages:
 app-text/psiconv::gentoo
-media-gfx/blender::gentoo
 media-gfx/pablodraw::gentoo
 media-gfx/ansilove::gentoo
 media-gfx/tgif::gentoo
 media-gfx/fontforge::gentoo
 app-arch/innoextract::gentoo
+app-arch/p7zip::gentoo
 app-arch/unadf::gentoo
 app-arch/unzip::gentoo
 sys-libs/libstdc++-v3::gentoo
@@ -26,7 +26,9 @@ app-emulation/uade::gentoo
 app-emulation/86Box::gentoo
 games-emulation/dosbox::gentoo
 net-ftp/uftpd::gentoo
+dev-python/lzallright::gentoo
 dev-python/chardet::gentoo
 
 # Restrict certain versions
 >=media-libs/allegro-5
+media-sound/sox

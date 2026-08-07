@@ -11,26 +11,17 @@ SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
-IUSE="fftw gsl imagemagick netpbm octave opencv openexr opengl qt5 static-libs tiff"
-
 RDEPEND="
 	media-libs/libexif
-	fftw? ( sci-libs/fftw )
-	gsl? ( sci-libs/gsl )
-	imagemagick? ( >=media-gfx/imagemagick-6.0 )
-	netpbm? ( media-libs/netpbm )
-	octave? ( sci-mathematics/octave )
-	opencv? ( media-libs/opencv )
-	openexr? ( >=media-libs/openexr-1.0:0= )
-	opengl? ( media-libs/freeglut virtual/opengl )
-	tiff? ( media-libs/tiff )
+	sci-libs/fftw
+	sci-libs/gsl
+	>=media-gfx/imagemagick-7.0
+	media-libs/netpbm
+	>=media-libs/openexr-1.0:0=
+	media-libs/tiff
 	!media-gfx/pfscalibration
 	!media-gfx/pfstmo"
-DEPEND="${DEPEND}
-	qt5? (
-		dev-qt/qtgui:5
-		dev-qt/qtwidgets:5
-	)"
+DEPEND="${DEPEND}"
 
 # NOTE: If I need more patches in the future, check out: https://build.opensuse.org/package/show/openSUSE:Factory/pfstools
 PATCHES=( "${FILESDIR}/imagemagick-7.patch" "${FILESDIR}/clamp-overload.patch" )
@@ -38,17 +29,17 @@ PATCHES=( "${FILESDIR}/imagemagick-7.patch" "${FILESDIR}/clamp-overload.patch" )
 src_configure() {
 	local mycmakeargs=(
 		-DWITH_MATLAB=OFF
-		-DWITH_ImageMagick=$(usex imagemagick)
-		-DWITH_FFTW=$(usex fftw)
-		-DWITH_GSL=$(usex gsl)
-		-DWITH_NetPBM=$(usex netpbm)
-		-DWITH_Octave=$(usex octave)
-		-DWITH_OpenCV=$(usex opencv)
-		-DWITH_OpenEXR=$(usex openexr)
-		-DWITH_pfsglview=$(usex opengl)
-		-DWITH_QT=$(usex qt5)
-		-DBUILD_SHARED_LIBS=$(usex !static-libs)
-		-DWITH_TIFF=$(usex tiff)
+		-DWITH_ImageMagick=ON
+		-DWITH_FFTW=ON
+		-DWITH_GSL=ON
+		-DWITH_NetPBM=ON
+		-DWITH_Octave=OFF
+		-DWITH_OpenCV=OFF
+		-DWITH_OpenEXR=ON
+		-DWITH_pfsglview=OFF
+		-DWITH_QT=OFF
+		-DBUILD_SHARED_LIBS=ON
+		-DWITH_TIFF=ON
 	)
 	
 	cmake_src_configure || die
@@ -56,7 +47,6 @@ src_configure() {
 
 src_install() {
 	cmake_src_install
-
 
 	dobin "${FILESDIR}"/pfsconvert
 }

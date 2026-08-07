@@ -1,0 +1,124 @@
+Vibe coded by Codex
+
+Repair the native MSDOS entry-point mapping used by compareEP and the
+getEntryPointOffset script API.
+
+diff --git a/dep/Formats/exec/xmsdos.cpp b/dep/Formats/exec/xmsdos.cpp
+index 46477d84..caa4f653 100644
+--- a/dep/Formats/exec/xmsdos.cpp
++++ b/dep/Formats/exec/xmsdos.cpp
+@@ -18,6 +18,7 @@
+  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  * SOFTWARE.
+  */
++// Vibe coded by Codex
+ #include "xmsdos.h"
+ 
+ namespace {
+@@ -440,8 +441,9 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pPdStruct)
+     qint64 nHeaderSize = _safeHeaderSizeFromCparhdr(nImageSize, get_e_cparhdr(), nBinarySize);
+     // qint64 nCodeOffset = (get_e_cparhdr() * 16) + (get_e_cs() * 16);
+ 
+-    // result.nEntryPointAddress = ((get_e_cs() << 16) + get_e_ip()) & 0xFFFFFFFF;
+-    result.nEntryPointAddress = result.nModuleAddress + getSegmentAddress(get_e_cs(), get_e_ip());
++    const XADDR nLoadAddress = 0x10000000;
++    result.nCodeBase = nLoadAddress;
++    result.nEntryPointAddress = nLoadAddress + getSegmentAddress(get_e_cs(), get_e_ip());
+ 
+     // if (get_e_cs() * 16 + get_e_ip() >= 0x100000) {
+     //     nCodeAddress = 0x100000;
+@@ -478,8 +480,6 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pPdStruct)
+         result.listRecords.append(record);
+     }
+ 
+-    qint32 nSegmentIndex = 1;
+-
+     qint64 nDelta = nOverlayOffset - nHeaderSize;
+ 
+     if (nDelta > 0) {
+@@ -488,7 +488,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pPdStruct)
+         record.bIsVirtual = false;
+         record.nSize = nDelta;
+         record.nOffset = nHeaderSize;
+-        record.nAddress = nSegmentIndex * 0x10000000;
++        record.nAddress = nLoadAddress;
+ 
+         // record.segment = ADDRESS_SEGMENT_CODE;  // CODE
+         record.filePart = FILEPART_SEGMENT;
+@@ -496,7 +496,6 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pPdStruct)
+ 
+         result.listRecords.append(record);
+ 
+-        nSegmentIndex++;
+     }
+ 
+     // if (nCodeSize > 0) {
+diff --git a/dep/XScanEngine/modules/binary_script.cpp b/dep/XScanEngine/modules/binary_script.cpp
+index 82ed89e..a0be88b 100644
+--- a/dep/XScanEngine/modules/binary_script.cpp
++++ b/dep/XScanEngine/modules/binary_script.cpp
+@@ -18,6 +18,7 @@
+  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  * SOFTWARE.
+  */
++// Vibe coded by Codex
+ #include "binary_script.h"
+ 
+ Binary_Script::Binary_Script(XBinary *pBinary, XBinary::FILEPART filePart, const OPTIONS &scanOptions, XBinary::PDSTRUCT *pPdStruct)
+@@ -268,9 +269,9 @@ qint64 Binary_Script::findDword(qint64 nOffset, qint64 nSize, quint32 nValue)
+     return nResult;
+ }
+ 
+-qint64 Binary_Script::getEntryPointOffset()
++qint64 Binary_Script::getEntryPointOffset(qint64 nOffset)
+ {
+-    return m_nEntryPointOffset;
++    return m_nEntryPointOffset + nOffset;
+ }
+ 
+ qint64 Binary_Script::getOverlayOffset()
+diff --git a/dep/XScanEngine/modules/binary_script.h b/dep/XScanEngine/modules/binary_script.h
+index 2d0e7b8..7722430 100644
+--- a/dep/XScanEngine/modules/binary_script.h
++++ b/dep/XScanEngine/modules/binary_script.h
+@@ -18,6 +18,7 @@
+  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  * SOFTWARE.
+  */
++// Vibe coded by Codex
+ #ifndef BINARY_SCRIPT_H
+ #define BINARY_SCRIPT_H
+ 
+@@ -64,7 +65,7 @@ public slots:
+     qint64 findByte(qint64 nOffset, qint64 nSize, quint8 nValue);
+     qint64 findWord(qint64 nOffset, qint64 nSize, quint16 nValue);
+     qint64 findDword(qint64 nOffset, qint64 nSize, quint32 nValue);
+-    qint64 getEntryPointOffset();
++    qint64 getEntryPointOffset(qint64 nOffset = 0);
+     qint64 getOverlayOffset();
+     qint64 getOverlaySize();
+     qint64 getAddressOfEntryPoint();
+diff --git a/dep/Detect-It-Easy/db/MSDOS/_init b/dep/Detect-It-Easy/db/MSDOS/_init
+index 4af23363..30adccc3 100644
+--- a/dep/Detect-It-Easy/db/MSDOS/_init
++++ b/dep/Detect-It-Easy/db/MSDOS/_init
+@@ -1,4 +1,5 @@
+ // Detect It Easy: DiE-JS framework file
++// Vibe coded by Codex
+ // Don't change anything unless you're sure about what you're doing
+ 
+ var File = MSDOS;
+@@ -38,12 +39,7 @@ MSDOS.AddressToOffset = function () { MSDOS.addressToOffset.apply(this, arguments); }
+  * @param {Int} [nOffset=0] - The offset from the entry point.
+  * @returns {Int}
+  */
+-MSDOS.getEntryPointOffset = function (nOffset) {
+-    if (arguments.length == 0) {
+-        nOffset = 0;
+-    }
+-    return MSDOS.addressToOffset(MSDOS.readWord(0x16), MSDOS.readWord(0x14)) + nOffset;
+-}
++// getEntryPointOffset is supplied natively by Binary_Script.
+ 
+ /**
+  * Get the NewExe (or LE/LX) file offset (assuming it's valid).

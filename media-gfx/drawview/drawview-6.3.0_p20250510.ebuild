@@ -14,9 +14,7 @@ RESTRICT="mirror test"
 
 PATCHES=( "${FILESDIR}/qt.patch" )
 
-DEPEND="dev-qt/qtcore
-	dev-qt/qtgui
-	kde-frameworks/extra-cmake-modules
+DEPEND="kde-frameworks/extra-cmake-modules
 	kde-frameworks/kxmlgui:6
 	kde-frameworks/kcrash:6
 	kde-frameworks/kauth:6

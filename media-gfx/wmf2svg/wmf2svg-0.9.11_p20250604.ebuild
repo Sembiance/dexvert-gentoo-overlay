@@ -10,7 +10,8 @@ SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
 
-DEPEND=">=virtual/jdk-1.8"
+DEPEND=">=virtual/jdk-1.8
+	 dev-java/maven-bin"
 RDEPEND=${DEPEND}
 
 src_install() {
