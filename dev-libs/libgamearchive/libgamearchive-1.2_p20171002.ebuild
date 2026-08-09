@@ -21,3 +21,8 @@ src_prepare() {
 	default
 	eautoreconf
 }
+
+src_configure() {
+	# Boost.System is header-only; the bundled macro wrongly requires a library.
+	econf --without-boost-system
+}

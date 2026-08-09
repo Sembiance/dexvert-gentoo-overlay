@@ -15,6 +15,41 @@
  support_mp3 = 1
  support_ogg = 1
  support_flac = 1
+--- a/src/core/plugins/players/vgmstream/vgmstream_base.cpp
++++ b/src/core/plugins/players/vgmstream/vgmstream_base.cpp
+@@ -8,6 +8,8 @@
+  *
+  **/
+ 
++// Vibe coded by Codex
++
+ #include "core/plugins/archive_plugins_registrator.h"
+ #include "core/plugins/player_plugins_registrator.h"
+ #include "core/plugins/players/multitrack_plugin.h"
+@@ -325,13 +327,14 @@
+   public:
+     Holder(Vfs::Ptr model, VGMStreamPtr stream, Parameters::Accessor::Ptr props)
+       : Model(std::move(model))
++      , Info(MakeInformation(*stream))
+       , Stream(std::move(stream))
+       , Properties(std::move(props))
+     {}
+ 
+     Module::Information GetModuleInformation() const override
+     {
+-      return MakeInformation(*Stream);
++      return Info;
+     }
+ 
+     Parameters::Accessor::Ptr GetModuleProperties() const override
+@@ -363,6 +366,7 @@
+ 
+   private:
+     const Vfs::Ptr Model;
++    const Information Info;
+     mutable VGMStreamPtr Stream;
+     const Parameters::Accessor::Ptr Properties;
+   };
 --- a/src/strings/conversion.h
 +++ b/src/strings/conversion.h
 @@ -10,10 +10,13 @@

@@ -16,5 +16,6 @@ RESTRICT="mirror test"
 RDEPEND="dev-python/cstruct[${PYTHON_USEDEP}]
 	dev-python/click[${PYTHON_USEDEP}]
 	dev-python/lzallright[${PYTHON_USEDEP}]
+	dev-python/dissect_cstruct[${PYTHON_USEDEP}]
 	dev-python/python-lzo[${PYTHON_USEDEP}]"
 DEPEND="${RDEPEND}"

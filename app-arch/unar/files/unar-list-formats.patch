@@ -1,0 +1,132 @@
+--- a/unar.m
++++ b/unar.m
+@@ -18,7 +18,9 @@
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  * MA 02110-1301  USA
+  */
++// Vibe coded by Codex
+ #import "XADSimpleUnarchiver.h"
++#import "XADArchiveParser.h"
+ #import "NSStringPrinting.h"
+ #import "CSCommandLineParser.h"
+ #import "CommandLineCommon.h"
+@@ -161,12 +163,26 @@
+ 	[cmdline addSwitchOption:@"quiet" description:@"Run in quiet mode."];
+ 	[cmdline addAlias:@"q" forOption:@"quiet"];
+ 
++	[cmdline addSwitchOption:@"list-formats" description:
++	@"List all supported archive formats and exit."];
++
+ 	[cmdline addVersionOption];
+ 
+ 	[cmdline addHelpOption];
+ 
+ 	if(![cmdline parseCommandLineWithArgc:argc argv:argv]) exit(1);
+ 
++	if([cmdline boolValueForOption:@"list-formats"])
++	{
++		[@"Available archive formats are:\n" print];
++		for(NSString *format in [XADArchiveParser supportedFormatNames])
++		{
++			[[NSString stringWithFormat:@"%@\n",format] print];
++		}
++		[pool release];
++		return 0;
++	}
++
+ 	NSString *destination=[cmdline stringValueForOption:@"output-directory"];
+ 	BOOL forceoverwrite=[cmdline boolValueForOption:@"force-overwrite"];
+ 	BOOL forcerename=[cmdline boolValueForOption:@"force-rename"];
+--- a/XADArchiveParser.h
++++ b/XADArchiveParser.h
+@@ -18,6 +18,7 @@
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  * MA 02110-1301  USA
+  */
++// Vibe coded by Codex
+ #import <Foundation/Foundation.h>
+ #import "XADException.h"
+ #import "XADString.h"
+@@ -119,6 +120,8 @@
+ }
+ 
+ +(void)initialize;
+++(NSArray *)supportedFormatNames;
+++(NSArray *)formatNames;
+ +(Class)archiveParserClassForHandle:(CSHandle *)handle firstBytes:(NSData *)header
+ resourceFork:(XADResourceFork *)fork name:(NSString *)name propertiesToAdd:(NSMutableDictionary *)props;
+ + (Class)archiveParserFromParsersWithFloatingSignature:(NSArray *)parsers forHandle:(CSHandle *)handle firstBytes:(NSData *)header name:(NSString *)name propertiesToAdd:(NSMutableDictionary *)props;
+--- a/XADArchiveParser.m
++++ b/XADArchiveParser.m
+@@ -18,6 +18,7 @@
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  * MA 02110-1301  USA
+  */
++// Vibe coded by Codex
+ #import "XADArchiveParser.h"
+ #import "CSFileHandle.h"
+ #import "CSMultiFileHandle.h"
+@@ -257,6 +258,29 @@
+ 	}
+ }
+ 
+++(NSArray *)supportedFormatNames
++{
++	NSMutableSet *names=[NSMutableSet set];
++
++	for(Class parserclass in parserclasses)
++	{
++		for(NSString *name in [parserclass formatNames])
++		{
++			if(name) [names addObject:name];
++		}
++	}
++
++	return [[names allObjects] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
++}
++
+++(NSArray *)formatNames
++{
++	XADArchiveParser *parser=[[[self class] new] autorelease];
++	NSString *name=[parser formatName];
++	if(!name) return [NSArray array];
++	return [NSArray arrayWithObject:name];
++}
++
+ +(Class)archiveParserClassForHandle:(CSHandle *)handle firstBytes:(NSData *)header
+ resourceFork:(XADResourceFork *)fork name:(NSString *)name propertiesToAdd:(NSMutableDictionary *)props
+ {
+--- a/XADLibXADParser.m
++++ b/XADLibXADParser.m
+@@ -18,6 +18,7 @@
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  * MA 02110-1301  USA
+  */
++// Vibe coded by Codex
+ #import "XADLibXADParser.h"
+ #import "CSSegmentedHandle.h"
+ 
+@@ -32,6 +33,23 @@
+ 
+ struct xadMasterBaseP *xadOpenLibrary(xadINT32 version);
+ 
+++(NSArray *)formatNames
++{
++	if(!xmb) xmb=xadOpenLibrary(12);
++
++	NSMutableArray *names=[NSMutableArray array];
++	for(struct xadClient *client=xadGetClientInfo(xmb);client;client=client->xc_Next)
++	{
++		if(!client->xc_ArchiverName) continue;
++
++		NSString *name=[[[NSString alloc] initWithBytes:client->xc_ArchiverName
++		length:strlen(client->xc_ArchiverName) encoding:NSISOLatin1StringEncoding] autorelease];
++		if(name) [names addObject:name];
++	}
++
++	return names;
++}
++
+ +(int)requiredHeaderSize
+ {
+ 	if(!xmb) xmb=xadOpenLibrary(12);

@@ -9,3 +9,7 @@ SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
 PATCHES=("${FILESDIR}/sng-1.1.2-compile-fixes.patch")
+
+src_install() {
+	dobin sng
+}

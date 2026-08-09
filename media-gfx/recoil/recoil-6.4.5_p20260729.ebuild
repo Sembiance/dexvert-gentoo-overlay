@@ -14,6 +14,8 @@ DEPEND="sys-devel/fut
 	dev-libs/libxslt"
 RDEPEND="${DEPEND}"
 
+PATCHES=( "${FILESDIR}/recoil-format-features.patch" )
+
 src_install() {
 	dobin recoil2png
 	doman recoil2png.1

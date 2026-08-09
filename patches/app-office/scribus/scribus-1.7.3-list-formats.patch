@@ -1,0 +1,521 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Codex <codex@openai.com>
+Date: Sat, 8 Aug 2026 00:00:00 -0400
+Subject: [PATCH] Add headless --list-formats support
+
+Vibe coded by Codex
+
+Add a --list-formats command that starts with Qt's offscreen platform,
+loads only file-format and exporter plugins, and exits without creating
+the main window, splash screen, scanning fonts, or initializing Python.
+
+Report the runtime document/vector handlers and their capabilities,
+extensions, MIME types, IDs, priorities and plugin names, plus image and
+pattern imports, text importers, color palettes, built-in exports,
+exporter plugin metadata, and Qt reader/writer codecs.
+
+Also wait for the antiword capability probe to finish so listing text
+importers does not emit a spurious QProcess destruction warning.
+---
+diff --git a/scribus/pluginmanager.h b/scribus/pluginmanager.h
+--- a/scribus/pluginmanager.h
++++ b/scribus/pluginmanager.h
+@@ -4,6 +4,7 @@
+ a copyright and/or license notice that predates the release of Scribus 1.3.2
+ for which a new license (GPL+exception) is in place.
+ */
++// Vibe coded by Codex
+ #ifndef _PLUGIN_MANAGER_
+ #define _PLUGIN_MANAGER_
+ 
+@@ -38,7 +39,7 @@
+ 	Q_OBJECT
+ 
+ public:
+-	PluginManager();
++	explicit PluginManager(bool formatListingOnly = false);
+ 
+ 	/*! \brief Static methods for loading, unloading plugins and resolving symbols
+ 	 These methods are platform independent, but each platform uses a different
+@@ -212,6 +213,7 @@
+ 	 * Each plugin has its record key() -> PluginData
+ 	 */
+ 	PluginMap pluginMap;
++	bool m_formatListingOnly { false };
+ };
+ 
+ #endif
+diff --git a/scribus/pluginmanager.cpp b/scribus/pluginmanager.cpp
+--- a/scribus/pluginmanager.cpp
++++ b/scribus/pluginmanager.cpp
+@@ -4,6 +4,7 @@
+ a copyright and/or license notice that predates the release of Scribus 1.3.2
+ for which a new license (GPL+exception) is in place.
+ */
++// Vibe coded by Codex
+ #include "pluginmanager.h"
+ #include "scplugin.h"
+ #include "loadsaveplugin.h"
+@@ -36,9 +37,10 @@
+ #include <QLibrary>
+ #endif
+ 
+-PluginManager::PluginManager() :
++PluginManager::PluginManager(bool formatListingOnly) :
+ 	QObject(nullptr),
+-	prefs(PrefsManager::instance().prefsFile->getPluginContext("pluginmanager"))
++	prefs(PrefsManager::instance().prefsFile->getPluginContext("pluginmanager")),
++	m_formatListingOnly(formatListingOnly)
+ {
+ }
+ 
+@@ -158,10 +160,24 @@
+ 	pda.plugin = nullptr;
+ 	pda.pluginDLL = nullptr;
+ 	pda.enabled = false;
+-	pda.enableOnStartup = prefs->getBool(pda.pluginName, false);
++	pda.enableOnStartup = m_formatListingOnly ? false : prefs->getBool(pda.pluginName, false);
+ 	ScCore->setSplashStatus( tr("Plugin: loading %1", "plugin manager").arg(pda.pluginName));
+ 	if (loadPlugin(pda))
+ 	{
++		if (m_formatListingOnly)
++		{
++			const auto* actionPlugin = qobject_cast<ScActionPlugin*>(pda.plugin);
++			const bool providesFileFormats = pda.plugin->inherits("LoadSavePlugin");
++			const bool providesExportFormat = actionPlugin && actionPlugin->actionInfo().exportPlugin;
++			if (!providesFileFormats && !providesExportFormat)
++			{
++				finalizePlug(pda);
++				return 1;
++			}
++			pda.enabled = providesFileFormats;
++			pluginMap.insert(pda.pluginName, pda);
++			return 1;
++		}
+ 		//HACK: Always enable our only persistent plugin, scripter
+ 		if (pda.plugin->inherits("ScPersistentPlugin"))
+ 			pda.enableOnStartup = true;
+diff --git a/scribus/scribuscore.h b/scribus/scribuscore.h
+--- a/scribus/scribuscore.h
++++ b/scribus/scribuscore.h
+@@ -4,6 +4,7 @@
+ a copyright and/or license notice that predates the release of Scribus 1.3.2
+ for which a new license (GPL+exception) is in place.
+ */
++// Vibe coded by Codex
+ /***************************************************************************
+                           scribuscore.h  -  description
+                              -------------------
+@@ -66,6 +67,7 @@
+ 	int runScript() {return 0;}
+ 	*/
+ 	int init(bool useGUI, const QList<QString>& filesToUse);
++	int initFormats();
+ 	int initScribusCore(bool showSplash, bool showFontInfo, bool showProfileInfo, const QString& newGuiLanguage);
+ 	bool initialized() const {return m_scribusInitialized;}
+ 	const QString& getGuiLanguage() const;
+diff --git a/scribus/scribuscore.cpp b/scribus/scribuscore.cpp
+--- a/scribus/scribuscore.cpp
++++ b/scribus/scribuscore.cpp
+@@ -4,6 +4,7 @@
+ a copyright and/or license notice that predates the release of Scribus 1.3.2
+ for which a new license (GPL+exception) is in place.
+ */
++// Vibe coded by Codex
+ /***************************************************************************
+                           pageitem.h  -  description
+                              -------------------
+@@ -39,6 +40,7 @@
+ #include "langmgr.h"
+ #include "localemgr.h"
+ #include "pluginmanager.h"
++#include "prefsfile.h"
+ #include "prefsmanager.h"
+ #include "scimagecachemanager.h"
+ #include "scpaths.h"
+@@ -95,6 +97,17 @@
+ 	return 0;
+ }
+ 
++int ScribusCore::initFormats()
++{
++	CommonStrings::languageChange();
++	LanguageManager::instance()->languageChange();
++	if (!m_prefsManager.prefsFile)
++		m_prefsManager.prefsFile = new PrefsFile();
++	pluginManager = new PluginManager(true);
++	pluginManager->initPlugs();
++	return EXIT_SUCCESS;
++}
++
+ int ScribusCore::startGUI(bool showSplash, bool showFontInfo, bool showProfileInfo, const QString& newGuiLanguage)
+ {
+ 	auto* scribus = new ScribusMainWindow();
+diff --git a/scribus/gtgettext.h b/scribus/gtgettext.h
+--- a/scribus/gtgettext.h
++++ b/scribus/gtgettext.h
+@@ -4,6 +4,7 @@
+ a copyright and/or license notice that predates the release of Scribus 1.3.2
+ for which a new license (GPL+exception) is in place.
+ */
++// Vibe coded by Codex
+ /***************************************************************************
+  *   Copyright (C) 2004 by Riku Leino                                      *
+  *   tsoots@gmail.com                                                      *
+@@ -72,6 +73,7 @@
+ 	gtGetText(ScribusDoc* doc);		 // Constructor
+ 
+ 	QStringList getSupportedTypes(); // get all Fileextensions we support
++	const std::vector<ImporterData>& importers() const { return m_importers; }
+ 	ImportSetup run(); // Creates the dialog for the user to import a file based on the supported file formats.
+ 	void launchImporter(int importer,
+ 		const QString& filename,
+diff --git a/scribus/scribusapp.h b/scribus/scribusapp.h
+--- a/scribus/scribusapp.h
++++ b/scribus/scribusapp.h
+@@ -4,6 +4,7 @@
+ a copyright and/or license notice that predates the release of Scribus 1.3.2
+ for which a new license (GPL+exception) is in place.
+ */
++// Vibe coded by Codex
+ /***************************************************************************
+ 	begin                : May 2005
+ 	copyright            : (C) 2005 by Craig Bradney
+@@ -92,6 +93,7 @@
+ 		\brief If no argument specified the lang, returns the one in the locales
+ 		*/
+ 		void showUsage();
++		void showFormats();
+ 		/*!
+ 		\author Craig Bradney
+ 		\date Wed Nov 18 2004
+@@ -106,6 +108,7 @@
+ 		bool m_showSplash {true};
+ 		bool m_showFontInfo {false};
+ 		bool m_showProfileInfo {false};
++		bool m_listFormats {false};
+ 		//! \brief If is there user given prefs file...
+ 		QString m_prefsUserDir;
+ 		QList<QString> m_filesToLoad;
+diff --git a/scribus/main_nix.cpp b/scribus/main_nix.cpp
+--- a/scribus/main_nix.cpp
++++ b/scribus/main_nix.cpp
+@@ -4,6 +4,7 @@
+ a copyright and/or license notice that predates the release of Scribus 1.3.2
+ for which a new license (GPL+exception) is in place.
+ */
++// Vibe coded by Codex
+ /***************************************************************************
+ 						main.cpp  -  description
+ 							-------------------
+@@ -67,7 +68,16 @@
+ 	emergencyActivated = false;
+ 
+ #if !defined(Q_OS_MACOS)
+-	qputenv("QT_QPA_PLATFORM", "xcb");
++	bool listFormatsRequested = false;
++	for (int i = 1; i < argc; ++i)
++	{
++		if (qstrcmp(argv[i], "--list-formats") == 0)
++		{
++			listFormatsRequested = true;
++			break;
++		}
++	}
++	qputenv("QT_QPA_PLATFORM", listFormatsRequested ? "offscreen" : "xcb");
+ #endif
+ 
+ 	QImageReader::setAllocationLimit(1024);
+diff --git a/scribus/scribusapp.cpp b/scribus/scribusapp.cpp
+--- a/scribus/scribusapp.cpp
++++ b/scribus/scribusapp.cpp
+@@ -4,6 +4,7 @@
+ a copyright and/or license notice that predates the release of Scribus 1.3.2
+ for which a new license (GPL+exception) is in place.
+ */
++// Vibe coded by Codex
+ /***************************************************************************
+ 	begin                : May 2005
+ 	copyright            : (C) 2005 by Craig Bradney
+@@ -28,6 +29,8 @@
+ #include <QFile>
+ #include <QFileInfo>
+ #include <QFont>
++#include <QImageReader>
++#include <QImageWriter>
+ #include <QLibraryInfo>
+ #include <QLocale>
+ #include <QString>
+@@ -38,15 +41,20 @@
+ #include "scribusapp.h"
+ 
+ #include "downloadmanager/scdlmgr.h"
++#include "gtgettext.h"
+ #include "iconmanager.h"
+ #include "langmgr.h"
+ #include "localemgr.h"
++#include "loadsaveplugin.h"
++#include "pluginmanager.h"
+ #include "prefsfile.h"
+ #include "prefsmanager.h"
++#include "scplugin.h"
+ #include "scpaths.h"
+ #include "scribuscore.h"
+ #include "upgradechecker.h"
+ #include "util.h"
++#include "util_formats.h"
+ 
+ #ifdef WITH_TESTS
+ #include "tests/runtests.h"
+@@ -70,6 +78,7 @@
+ #define ARG_UPGRADECHECK "--upgradecheck"
+ #define ARG_TESTS "--tests"
+ #define ARG_PYTHONSCRIPT "--python-script"
++#define ARG_LISTFORMATS "--list-formats"
+ #define CMD_OPTIONS_END "--"
+ 
+ #define ARG_VERSION_SHORT "-v"
+@@ -139,6 +148,7 @@
+ #endif
+ 	m_showFontInfo = false;
+ 	m_showProfileInfo = false;
++	m_listFormats = false;
+ 	bool neversplash = false;
+ 
+ 	//Parse for command line options
+@@ -212,6 +222,12 @@
+ 			header = true;
+ 			availlangs = true;
+ 		}
++		else if (arg == ARG_LISTFORMATS)
++		{
++			m_listFormats = true;
++			m_showSplash = false;
++			useGUI = false;
++		}
+ 		else if (arg == ARG_UPGRADECHECK || arg == ARG_UPGRADECHECK_SHORT)
+ 		{
+ 			header = true;
+@@ -351,6 +367,13 @@
+ 	processEvents(QEventLoop::ExcludeUserInputEvents|QEventLoop::ExcludeSocketNotifiers, 1000);
+ 	ScCore->init(useGUI, m_filesToLoad);
+ 	processEvents();
++	if (m_listFormats)
++	{
++		int retVal = ScCore->initFormats();
++		if (retVal == EXIT_SUCCESS)
++			showFormats();
++		return retVal;
++	}
+ 	/* TODO:
+ 	 * When Scribus is truly able to run without GUI
+ 	 * we should uncomment if (useGUI)
+@@ -575,7 +598,8 @@
+ Helper procedure */
+ static void printArgLine(QTextStream & ts, const char * smallArg, const char* fullArg, const QString& desc)
+ {
+-	ts << QString("     %1 %2 %3").arg(QString("%1,").arg(smallArg), -5).arg(fullArg, -32).arg(desc);
++	const QString shortOption = (*smallArg != '\0') ? QString("%1,").arg(smallArg) : QString();
++	ts << QString("     %1 %2 %3").arg(shortOption, -5).arg(fullArg, -32).arg(desc);
+ 	Qt::endl(ts);
+ }
+ 
+@@ -592,6 +616,7 @@
+ 	printArgLine(ts, ARG_HELP_SHORT, ARG_HELP, tr("Print help (this message) and exit") );
+ 	printArgLine(ts, ARG_LANG_SHORT, ARG_LANG, tr("Uses xx as shortcut for a language, eg `en' or `de'") );
+ 	printArgLine(ts, ARG_AVAILLANG_SHORT, ARG_AVAILLANG, tr("List the currently installed interface languages") );
++	printArgLine(ts, "", ARG_LISTFORMATS, tr("List supported file formats and exit") );
+ 	printArgLine(ts, ARG_NOSPLASH_SHORT, ARG_NOSPLASH, tr("Do not show the splashscreen on startup") );
+ 	printArgLine(ts, ARG_NEVERSPLASH_SHORT, ARG_NEVERSPLASH, tr("Stop showing the splashscreen on startup. Writes an empty file called .neversplash in ~/.config/scribus") );
+ 	printArgLine(ts, ARG_PREFS_SHORT, qPrintable(QString("%1 <%2>").arg(ARG_PREFS, tr("path"))), tr("Use path for user given preferences location") );
+@@ -636,6 +661,160 @@
+ 	ts << tr("scribus -l xx or scribus --lang xx, where xx is the language of choice.") << Qt::endl;
+ }
+ 
++void ScribusQApp::showFormats()
++{
++	QFile output;
++	if (!output.open(stdout, QIODevice::WriteOnly))
++		return;
++
++	QTextStream ts(&output);
++	PluginManager* pluginManager = ScCore->pluginManager;
++	const QStringList pluginNames = pluginManager->pluginNames(true);
++	auto pluginNameFor = [pluginManager, &pluginNames](const ScPlugin* plugin) {
++		for (const QString& pluginName : pluginNames)
++		{
++			if (pluginManager->getPlugin(pluginName, true) == plugin)
++				return pluginName;
++		}
++		return QString();
++	};
++	auto printableList = [](QStringList values) {
++		values.removeAll(QString());
++		return values.isEmpty() ? QStringLiteral("(none declared)") : values.join(", ");
++	};
++	auto imageCodecNames = [](const QList<QByteArray>& codecs) {
++		QStringList result;
++		for (const QByteArray& codec : codecs)
++			result.append(QString::fromLatin1(codec).toLower());
++		result.removeDuplicates();
++		result.sort(Qt::CaseInsensitive);
++		return result;
++	};
++
++	ts << tr("Scribus %1 supported file formats").arg(VERSION) << Qt::endl;
++	ts << tr("Plugin directory: %1").arg(ScPaths::instance().pluginDir()) << Qt::endl;
++	ts << tr("The lists below reflect this build and the plugins/codecs available at runtime.") << Qt::endl;
++	Qt::endl(ts);
++
++	const QList<FileFormat>& fileFormats = LoadSavePlugin::supportedFormats();
++	ts << tr("Document and vector format handlers (%1)").arg(fileFormats.count()) << Qt::endl;
++	ts << QString(40, '-') << Qt::endl;
++	for (const FileFormat& format : fileFormats)
++	{
++		QStringList capabilities;
++		if (format.load)
++			capabilities.append(tr("load/open"));
++		if (format.save)
++			capabilities.append(tr("save"));
++		if (format.thumb)
++			capabilities.append(tr("thumbnail"));
++		if (format.colorReading)
++			capabilities.append(tr("color/palette import"));
++		if (format.nativeScribus)
++			capabilities.append(tr("native Scribus"));
++
++		ts << "- " << (format.trName.isEmpty() ? tr("(unnamed format)") : format.trName) << Qt::endl;
++		ts << "  " << tr("Capabilities: %1").arg(printableList(capabilities)) << Qt::endl;
++		ts << "  " << tr("Extensions: %1").arg(printableList(format.fileExtensions)) << Qt::endl;
++		ts << "  " << tr("MIME types: %1").arg(printableList(format.mimeTypes)) << Qt::endl;
++		ts << "  " << tr("Format ID: %1; priority: %2").arg(format.formatId).arg(format.priority) << Qt::endl;
++		const QString pluginName = pluginNameFor(format.plug);
++		if (!pluginName.isEmpty())
++			ts << "  " << tr("Plugin: %1").arg(pluginName) << Qt::endl;
++		if (!format.filter.isEmpty())
++			ts << "  " << tr("File-dialog filter: %1").arg(format.filter) << Qt::endl;
++	}
++	Qt::endl(ts);
++
++	FormatsManager* formatsManager = FormatsManager::instance();
++	const QStringList imageFilters = formatsManager
++		->fileDialogFormatList(FormatsManager::IMAGESIMGFRAME)
++		.split(QStringLiteral(";;"), Qt::SkipEmptyParts);
++	ts << tr("Image-frame import formats") << Qt::endl;
++	ts << QString(40, '-') << Qt::endl;
++	for (int i = 1; i + 1 < imageFilters.count(); ++i)
++		ts << "- " << imageFilters.at(i) << Qt::endl;
++	ts << tr("Qt image-reader codecs: %1")
++		.arg(printableList(imageCodecNames(QImageReader::supportedImageFormats()))) << Qt::endl;
++	ts << tr("Pattern resource import: %1")
++		.arg(formatsManager->extensionsForFormat(FormatsManager::PAT)) << Qt::endl;
++	Qt::endl(ts);
++
++	gtGetText textImporters(nullptr);
++	ts << tr("Text import formats (%1)").arg(textImporters.importers().size()) << Qt::endl;
++	ts << QString(40, '-') << Qt::endl;
++	for (const ImporterData& importer : textImporters.importers())
++	{
++		ts << "- " << importer.fileFormatName << Qt::endl;
++		ts << "  " << tr("Extensions: %1").arg(printableList(importer.fileEndings)) << Qt::endl;
++		ts << "  " << tr("Plugin: %1").arg(QFileInfo(importer.soFilePath).fileName()) << Qt::endl;
++	}
++	Qt::endl(ts);
++
++	ts << tr("Color and swatch import formats") << Qt::endl;
++	ts << QString(40, '-') << Qt::endl;
++	ts << "- " << tr("Adobe/AutoCAD Color Book") << Qt::endl;
++	ts << "  " << tr("Extensions: acb; implementation selected from file contents") << Qt::endl;
++	ts << "- " << tr("Adobe Color Swatch") << Qt::endl;
++	ts << "  " << tr("Extensions: aco") << Qt::endl;
++	ts << "- " << tr("Adobe Swatch Exchange") << Qt::endl;
++	ts << "  " << tr("Extensions: ase") << Qt::endl;
++	ts << "- " << tr("Color eXchange Format") << Qt::endl;
++	ts << "  " << tr("Extensions: cxf") << Qt::endl;
++	ts << "- " << tr("sK1 palette") << Qt::endl;
++	ts << "  " << tr("Extensions: skp") << Qt::endl;
++	ts << "- " << tr("SwatchBooker") << Qt::endl;
++	ts << "  " << tr("Extensions: sbz") << Qt::endl;
++	ts << "- " << tr("PostScript named colors") << Qt::endl;
++	ts << "  " << tr("Extensions: eps, epsf, epsi, eps2, eps3, epi, ept, ps") << Qt::endl;
++	ts << "- " << tr("Scribus/OpenOffice/Viva XML and GIMP text palettes") << Qt::endl;
++	ts << "  " << tr("Extensions: sla, soc, xml, gpl") << Qt::endl;
++	ts << tr("Document/vector handlers with color/palette import are marked in their capabilities above.") << Qt::endl;
++	Qt::endl(ts);
++
++	ts << tr("Built-in export formats") << Qt::endl;
++	ts << QString(40, '-') << Qt::endl;
++	ts << "- " << tr("Portable Document Format (PDF)") << Qt::endl;
++	ts << "  " << tr("Extensions: pdf") << Qt::endl;
++	ts << "  " << tr("Variants: PDF 1.3, PDF 1.4, PDF 1.5, PDF 1.6, PDF/X-1a, PDF/X-3, PDF/X-4") << Qt::endl;
++	ts << "- " << tr("Encapsulated PostScript (EPS)") << Qt::endl;
++	ts << "  " << tr("Extensions: eps") << Qt::endl;
++	ts << "- " << tr("Plain text") << Qt::endl;
++	ts << "  " << tr("Extensions: txt") << Qt::endl;
++	Qt::endl(ts);
++
++	const QStringList exportPluginNames = pluginManager->pluginNames(true, "ScActionPlugin");
++	ts << tr("Export plugins (%1)").arg(exportPluginNames.count()) << Qt::endl;
++	ts << QString(40, '-') << Qt::endl;
++	for (const QString& pluginName : exportPluginNames)
++	{
++		auto* actionPlugin = qobject_cast<ScActionPlugin*>(pluginManager->getPlugin(pluginName, true));
++		if (!actionPlugin || !actionPlugin->actionInfo().exportPlugin)
++			continue;
++		QString actionText = actionPlugin->actionInfo().text;
++		actionText.remove('&');
++		ts << "- " << actionPlugin->fullTrName() << Qt::endl;
++		ts << "  " << tr("Plugin: %1").arg(pluginName) << Qt::endl;
++		if (!actionText.isEmpty())
++			ts << "  " << tr("Action: %1").arg(actionText) << Qt::endl;
++		const ScPlugin::AboutData* about = actionPlugin->getAboutData();
++		if (about)
++		{
++			if (!about->shortDescription.isEmpty())
++				ts << "  " << tr("Summary: %1").arg(about->shortDescription) << Qt::endl;
++			if (!about->description.isEmpty())
++				ts << "  " << tr("Description: %1").arg(about->description) << Qt::endl;
++			if (!about->version.isEmpty())
++				ts << "  " << tr("Version: %1").arg(about->version) << Qt::endl;
++			actionPlugin->deleteAboutData(about);
++		}
++	}
++	ts << tr("Qt raster-image writer codecs: %1")
++		.arg(printableList(imageCodecNames(QImageWriter::supportedImageFormats()))) << Qt::endl;
++	Qt::endl(ts);
++	ts << tr("Note: a listed importer may still require an external helper or reject unsupported file variants.") << Qt::endl;
++}
++
+ void ScribusQApp::showVersion()
+ {
+ 	std::cout << tr("Scribus Version").toLocal8Bit().data() << " " << VERSION << std::endl;
+diff --git a/scribus/plugins/gettext/docim/docim.cpp b/scribus/plugins/gettext/docim/docim.cpp
+--- a/scribus/plugins/gettext/docim/docim.cpp
++++ b/scribus/plugins/gettext/docim/docim.cpp
+@@ -4,6 +4,7 @@
+ a copyright and/or license notice that predates the release of Scribus 1.3.2
+ for which a new license (GPL+exception) is in place.
+ */
++// Vibe coded by Codex
+ 
+ #include <chrono>
+ #include <thread>
+@@ -38,8 +39,11 @@
+ 	{
+ 		found = true;
+ 		test->terminate();
+-		std::this_thread::sleep_for(std::chrono::milliseconds(5));
+-		test->kill();
++		if (!test->waitForFinished(100))
++		{
++			test->kill();
++			test->waitForFinished(100);
++		}
+ 	}
+ 	delete test;
+ 	searched = true;
+@@ -190,4 +194,3 @@
+ 	delete proc;
+ }
+ 
+-

@@ -3,15 +3,16 @@
 # Prefer my overlay packages instead of gentoo packages:
 app-text/psiconv::gentoo
 media-gfx/pablodraw::gentoo
+media-gfx/blender-bin::gentoo
 media-gfx/ansilove::gentoo
 media-gfx/tgif::gentoo
 media-gfx/fontforge::gentoo
 app-arch/innoextract::gentoo
+app-arch/unar::gentoo
 app-arch/p7zip::gentoo
 app-arch/unadf::gentoo
 app-arch/unzip::gentoo
 sys-libs/libstdc++-v3::gentoo
-media-sound/sox::gentoo
 app-misc/binwalk::gentoo
 app-office/mdbtools::gentoo
 media-libs/netpbm::gentoo
@@ -30,5 +31,6 @@ dev-python/lzallright::gentoo
 dev-python/chardet::gentoo
 
 # Restrict certain versions
+>app-arch/peazip-10.8.0
 >=media-libs/allegro-5
 media-sound/sox

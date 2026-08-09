@@ -1,0 +1,214 @@
+diff --git a/man/openmpt123.1 b/man/openmpt123.1
+index b68f9d4..2277276 100644
+--- a/man/openmpt123.1
++++ b/man/openmpt123.1
+@@ -18,6 +18,9 @@ Show help
+ \fB\-\-help\-keyboard\fR
+ Show keyboard hotkeys in ui mode
+ .TP
++\fB\-\-list\-formats\fR
++List supported file extensions and format names
++.TP
+ \fB\-q\fR, \fB\-\-quiet\fR
+ Suppress non\-error screen output
+ .TP
+diff --git a/openmpt123/openmpt123.cpp b/openmpt123/openmpt123.cpp
+index 58cbd40..96ba8e1 100644
+--- a/openmpt123/openmpt123.cpp
++++ b/openmpt123/openmpt123.cpp
+@@ -7,6 +7,8 @@
+  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+  */
+ 
++// Vibe coded by Codex
++
+ static const char * const license =
+ "Copyright (c) 2004-2026, OpenMPT Project Developers and Contributors" "\n"
+ "Copyright (c) 1997-2003, Olivier Lapicque" "\n"
+@@ -146,6 +148,9 @@ struct show_version_number_exception : public std::exception {
+ struct show_long_version_number_exception : public std::exception {
+ };
+ 
++struct show_formats_exception : public std::exception {
++};
++
+ constexpr auto libopenmpt_encoding = mpt::common_encoding::utf8;
+ 
+ 
+@@ -584,6 +589,128 @@ static mpt::ustring get_device_string( const mpt::ustring & device ) {
+ 	return device;
+ }
+ 
++struct module_format_description {
++	const char * extension;
++	const char * name;
++};
++
++// Keep this list in the same order as soundlib/Tables.cpp. Entries with the
++// same extension describe formats which can only be distinguished by probing
++// the file contents.
++// clang-format off
++static constexpr module_format_description module_format_descriptions[] = {
++	{ "mptm", "OpenMPT" },
++	{ "mod", "ProTracker" },
++	{ "mod", "ChipTracker" },
++	{ "mod", "TCB Tracker" },
++	{ "s3m", "Scream Tracker 3" },
++	{ "xm", "FastTracker 2" },
++	{ "it", "Impulse Tracker" },
++	{ "667", "Composer 667" },
++	{ "669", "Composer 669 / UNIS 669" },
++	{ "amf", "ASYLUM Music Format" },
++	{ "amf", "DSMI Advanced Music Format" },
++	{ "ams", "Extreme's Tracker" },
++	{ "ams", "Velvet Studio" },
++	{ "c67", "CDFM / Composer 670" },
++	{ "cba", "Chuck Biscuits / Black Artist" },
++	{ "dbm", "DigiBooster Pro" },
++	{ "digi", "DigiBooster" },
++	{ "dmf", "X-Tracker" },
++	{ "dmf", "DSMI Advanced Music Format (Compact)" },
++	{ "dsm", "DSIK Format" },
++	{ "dsm", "Dynamic Studio" },
++	{ "dsym", "Digital Symphony" },
++	{ "dtm", "Digital Tracker" },
++	{ "etx", "EasyTrax" },
++	{ "far", "Farandole Composer" },
++	{ "fc", "Future Composer" },
++	{ "fc13", "Future Composer" },
++	{ "fc14", "Future Composer" },
++	{ "fmt", "FM Tracker" },
++	{ "fst", "ProTracker" },
++	{ "ftm", "Face The Music" },
++	{ "imf", "Imago Orpheus" },
++	{ "ims", "Images Music System" },
++	{ "ice", "Ice Tracker" },
++	{ "itp", "Impulse Tracker Project" },
++	{ "j2b", "Galaxy Sound System" },
++	{ "m15", "Soundtracker" },
++	{ "mdl", "Digitrakker" },
++	{ "med", "OctaMED" },
++	{ "mms", "MultiMedia Sound" },
++	{ "mt2", "MadTracker 2" },
++	{ "mtm", "MultiTracker" },
++	{ "mus", "Karl Morton Music Format" },
++	{ "nst", "NoiseTracker" },
++	{ "okt", "Oktalyzer" },
++	{ "plm", "Disorder Tracker 2" },
++	{ "psm", "Epic Megagames MASI" },
++	{ "pt36", "ProTracker" },
++	{ "ptm", "PolyTracker" },
++	{ "puma", "Puma Tracker" },
++	{ "rtm", "Real Tracker 2" },
++	{ "sfx", "SoundFX" },
++	{ "sfx2", "SoundFX" },
++	{ "smod", "Future Composer" },
++	{ "st26", "SoundTracker 2.6" },
++	{ "stk", "Soundtracker" },
++	{ "stm", "Scream Tracker 2" },
++	{ "stx", "Scream Tracker Music Interface Kit" },
++	{ "stp", "Soundtracker Pro II" },
++	{ "symmod", "Symphonie" },
++	{ "tcb", "TCB Tracker" },
++	{ "gmc", "Game Music Creator" },
++	{ "gtk", "Graoumf Tracker" },
++	{ "gt2", "Graoumf Tracker 1 / 2" },
++	{ "ult", "UltraTracker" },
++	{ "unic", "UNIC Tracker" },
++	{ "wow", "Mod's Grave" },
++	{ "xmf", "Astroidea XMF" },
++	{ "gdm", "General Digital Music" },
++	{ "mo3", "Un4seen MO3" },
++	{ "oxm", "OggMod FastTracker 2" },
++	{ "mdz", "Compressed ProTracker" },
++	{ "mdr", "Compressed Module" },
++	{ "s3z", "Compressed Scream Tracker 3" },
++	{ "xmz", "Compressed FastTracker 2" },
++	{ "itz", "Compressed Impulse Tracker" },
++	{ "mptmz", "Compressed OpenMPT" },
++	{ "umx", "Unreal Music" },
++	{ "xpk", "XPK packed" },
++	{ "ppm", "PowerPack PP20" },
++	{ "mmcmp", "Music Module Compressor" },
++};
++// clang-format on
++
++static void show_formats( textout & log ) {
++	const std::vector<std::string> extensions = openmpt::get_supported_extensions();
++	std::size_t extension_width = MPT_USTRING( "Extension" ).length();
++	for ( const auto & extension : extensions ) {
++		extension_width = std::max( extension_width, extension.length() + 1 );
++	}
++
++	log << MPT_USTRING( "Extension" ) << mpt::ustring( extension_width - MPT_USTRING( "Extension" ).length() + 2, MPT_UCHAR( ' ' ) ) << MPT_USTRING( "Format" ) << lf;
++	log << mpt::ustring( extension_width, MPT_UCHAR( '-' ) ) << MPT_USTRING( "  ------" ) << lf;
++	for ( const auto & extension : extensions ) {
++		mpt::ustring names;
++		for ( const auto & description : module_format_descriptions ) {
++			if ( extension == description.extension ) {
++				if ( !names.empty() ) {
++					names += MPT_USTRING( "; " );
++				}
++				names += mpt::transcode<mpt::ustring>( mpt::source_encoding, description.name );
++			}
++		}
++		if ( names.empty() ) {
++			names = MPT_USTRING( "(format name unavailable)" );
++		}
++		const mpt::ustring dotted_extension = MPT_USTRING( "." ) + mpt::transcode<mpt::ustring>( libopenmpt_encoding, extension );
++		log << dotted_extension << mpt::ustring( extension_width - dotted_extension.length() + 2, MPT_UCHAR( ' ' ) ) << names << lf;
++	}
++	log.writeout();
++}
++
+ static void show_help_keyboard( textout & log, bool man_version = false ) {
+ 	log << MPT_USTRING("Keyboard hotkeys (use 'openmpt123 --ui'):") << lf;
+ 	log << lf;
+@@ -623,6 +750,7 @@ static void show_help( textout & log, bool longhelp = false, bool man_version =
+ 		}
+ 		log << MPT_USTRING(" -h, --help                 Show help") << lf;
+ 		log << MPT_USTRING("     --help-keyboard        Show keyboard hotkeys in ui mode") << lf;
++		log << MPT_USTRING("     --list-formats         List supported file extensions and format names") << lf;
+ 		log << MPT_USTRING(" -q, --quiet                Suppress non-error screen output") << lf;
+ 		log << MPT_USTRING(" -v, --verbose              Show more screen output") << lf;
+ 		log << MPT_USTRING("     --version              Show version information and exit") << lf;
+@@ -1846,6 +1974,7 @@ static void parse_openmpt123( commandlineflags & flags, const std::vector<mpt::u
+ 	enum class action {
+ 		help,
+ 		help_keyboard,
++		list_formats,
+ 		man_version,
+ 		man_help,
+ 		version,
+@@ -1888,6 +2017,11 @@ static void parse_openmpt123( commandlineflags & flags, const std::vector<mpt::u
+ 					throw args_error_exception();
+ 				}
+ 				return_action = action::help_keyboard;
++			} else if ( arg == MPT_USTRING("--list-formats") ) {
++				if ( return_action ) {
++					throw args_error_exception();
++				}
++				return_action = action::list_formats;
+ 			} else if ( arg == MPT_USTRING("--man-version") ) {
+ 				if ( return_action ) {
+ 					throw args_error_exception();
+@@ -2105,6 +2239,9 @@ static void parse_openmpt123( commandlineflags & flags, const std::vector<mpt::u
+ 			case action::help_keyboard:
+ 				throw show_help_keyboard_exception();
+ 				break;
++			case action::list_formats:
++				throw show_formats_exception();
++				break;
+ 			case action::man_version:
+ 				throw show_man_version_exception();
+ 				break;
+@@ -2179,6 +2316,9 @@ static mpt::uint8 main( std::vector<mpt::ustring> args ) {
+ 		show_banner( std_out, flags.banner );
+ 		show_help_keyboard( std_out );
+ 		return 0;
++	} catch ( show_formats_exception & ) {
++		show_formats( std_out );
++		return 0;
+ 	} catch ( show_long_version_number_exception & ) {
+ 		show_long_version( std_out );
+ 		return 0;

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-GENTOO_VM=openjdk-bin-8 java -jar /opt/wmf2svg/wmf2svg*.jar "$@"
+GENTOO_VM=openjdk-bin-8 java -jar /opt/wmf2svg/target/wmf2svg*.jar "$@"

@@ -12,4 +12,5 @@ RESTRICT="mirror test"
 
 src_install() {
 	dobin deark
+	dodoc formats.txt
 }

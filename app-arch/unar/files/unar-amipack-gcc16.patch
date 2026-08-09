@@ -1,0 +1,194 @@
+--- a/libxad/clients/AMPK.c
++++ b/libxad/clients/AMPK.c
+@@ -32,6 +32,8 @@
+ #include "xadIO_Compress.c"
+ #include "xadIO_XPK.c"
+ 
++/* Vibe coded by Codex */
++
+ #ifndef XADMASTERVERSION
+   #define XADMASTERVERSION      13
+ #endif
+@@ -173,18 +175,25 @@
+ 
+ /* AMPK1 ******************************************************************************************/
+ 
++enum {
++  AMPK1_VAR7 = 0,
++  AMPK1_VAR8 = AMPK1_VAR7 + 314,
++  AMPK1_VAR9 = AMPK1_VAR8 + 314,
++  AMPK1_VAR10 = AMPK1_VAR9 + 1,
++  AMPK1_VAR11 = AMPK1_VAR10 + 314,
++  AMPK1_VAR12 = AMPK1_VAR11 + 1,
++  AMPK1_VAR13 = AMPK1_VAR12 + 314,
++  AMPK1_VAR14 = AMPK1_VAR13 + 1,
++  AMPK1_VAR15 = AMPK1_VAR14 + 1,
++  AMPK1_VAR16 = AMPK1_VAR15 + 4095,
++  AMPK1_NUMVARS = AMPK1_VAR16 + 1
++};
++
+ struct AMPK1Data {
+   xadUINT8      datfield[0x1000];
+-  xadUINT16     Var7[314];      /* This separation mostly is a result */
+-  xadUINT16     Var8[314];      /* of reassembling and not a real need */
+-  xadUINT16     Var9[1];
+-  xadUINT16     Var10[314];
+-  xadUINT16     Var11[1];
+-  xadUINT16     Var12[314];
+-  xadUINT16     Var13[1];
+-  xadUINT16     Var14[1];
+-  xadUINT16     Var15[4095];
+-  xadUINT16     Var16[1];
++  /* These are overlapping windows into one arithmetic-coder table. The old
++     declarations relied on indexing beyond each separately declared array. */
++  xadUINT16     vars[AMPK1_NUMVARS];
+ };
+ 
+ static xadINT32 DecrAMPK1(struct xadInOut *io)
+@@ -193,40 +202,52 @@
+   xadUINT32 u = 0, v, w = 0x20000, r, s, t;
+   struct xadMasterBase *xadMasterBase = io->xio_xadMasterBase;
+   struct AMPK1Data *dat;
++  xadUINT16 *Var7, *Var8, *Var9, *Var10, *Var11;
++  xadUINT16 *Var12, *Var13, *Var14, *Var15;
+ 
+   if(!(dat = (struct AMPK1Data *) xadAllocVec(XADM sizeof(struct AMPK1Data), XADMEMF_CLEAR)))
+     return XADERR_NOMEMORY;
+ 
++  Var7 = dat->vars + AMPK1_VAR7;
++  Var8 = dat->vars + AMPK1_VAR8;
++  Var9 = dat->vars + AMPK1_VAR9;
++  Var10 = dat->vars + AMPK1_VAR10;
++  Var11 = dat->vars + AMPK1_VAR11;
++  Var12 = dat->vars + AMPK1_VAR12;
++  Var13 = dat->vars + AMPK1_VAR13;
++  Var14 = dat->vars + AMPK1_VAR14;
++  Var15 = dat->vars + AMPK1_VAR15;
++
+   v = xadIOGetBitsHigh(io,17);
+ 
+   for(i = 314; i; --i)
+   {
+-    dat->Var7[i-1] = i;
+-    dat->Var8[i] = i-1;
+-    dat->Var10[i] = 1;
+-    dat->Var11[i] = dat->Var12[i] + dat->Var10[i];
++    Var7[i-1] = i;
++    Var8[i] = i-1;
++    Var10[i] = 1;
++    Var11[i] = Var12[i] + Var10[i];
+   }
+   for(i = 0x1000; i; --i)
+-    dat->Var13[i] = dat->Var14[i] + (10000 / (i + 200));
++    Var13[i] = Var14[i] + (10000 / (i + 200));
+ 
+   memset(dat->datfield, ' ', k);
+ 
+   while(!(io->xio_Flags & (XADIOF_LASTOUTBYTE|XADIOF_ERROR)))
+   {
+     i = w - u;
+-    r = ((dat->Var12[0] * (v - u + 1))-1)/i;
++    r = ((Var12[0] * (v - u + 1))-1)/i;
+     j = 1;
+     s = 314;
+     while(j < s)
+     {
+       t = (s + j)>>1;
+-      if(dat->Var12[t] > r)
++      if(Var12[t] > r)
+         j = ++t;
+       else
+         s = t;
+     } /* returns j */
+-    w = ((dat->Var11[j] * i) / dat->Var12[0]) + u;
+-    u += (i * dat->Var12[j]) / dat->Var12[0];
++    w = ((Var11[j] * i) / Var12[0]) + u;
++    u += (i * Var12[j]) / Var12[0];
+ 
+     for(;;)
+     {
+@@ -245,35 +266,35 @@
+       v = (v<<1) + xadIOGetBitsHigh(io, 1);
+     }
+ 
+-    i = dat->Var8[j];
+-    if(dat->Var12[0] >= 0x7FFF)
++    i = Var8[j];
++    if(Var12[0] >= 0x7FFF)
+     {
+       s = 0;
+       for(r = 314; r; --r)
+       {
+-        dat->Var12[r] = s;
+-        dat->Var10[r] = (dat->Var10[r] + 1)>>1;
+-        s += dat->Var10[r];
++        Var12[r] = s;
++        Var10[r] = (Var10[r] + 1)>>1;
++        s += Var10[r];
+       }
+-      dat->Var12[0] = s;
++      Var12[0] = s;
+     }
+ 
+-    for(r = j; dat->Var10[r] == dat->Var9[r]; --r)
++    for(r = j; Var10[r] == Var9[r]; --r)
+       ;
+ 
+     if(r < j)
+     {
+-      s = dat->Var8[r];
+-      t = dat->Var8[j];
+-      dat->Var8[r] = t;
+-      dat->Var8[j] = s;
+-      dat->Var7[s] = j;
+-      dat->Var7[t] = r;
++      s = Var8[r];
++      t = Var8[j];
++      Var8[r] = t;
++      Var8[j] = s;
++      Var7[s] = j;
++      Var7[t] = r;
+     }
+-    ++dat->Var10[r];
++    ++Var10[r];
+ 
+     while(r--)
+-      ++dat->Var12[r];
++      ++Var12[r];
+ 
+     if(i < 0x100)
+     {
+@@ -283,20 +304,20 @@
+     else
+     {
+       l = w - u;
+-      r = ((dat->Var14[0] * (v - u + 1)-1)/l);
++      r = ((Var14[0] * (v - u + 1)-1)/l);
+       j = 1;
+       s = 0x1000;
+       while(j < s)
+       {
+         t = (s + j)>>1;
+-        if(dat->Var14[t] > r)
++        if(Var14[t] > r)
+           j = ++t;
+         else
+           s = t;
+       }
+       --j; /* return j */
+-      w = ((dat->Var14[j] * l) / dat->Var14[0]) + u;
+-      u += (l * dat->Var15[j]) / dat->Var14[0];
++      w = ((Var14[j] * l) / Var14[0]) + u;
++      u += (l * Var15[j]) / Var14[0];
+ 
+       for(;;)
+       {
+@@ -317,7 +338,7 @@
+ 
+       l = k - j - 1;
+       i -= 253;
+-      for(j = 0; j < i; ++j)
++      for(j = 0; j < i && !(io->xio_Flags & (XADIOF_LASTOUTBYTE|XADIOF_ERROR)); ++j)
+       {
+         dat->datfield[k++] = xadIOPutChar(io, dat->datfield[(l+j)&0xFFF]);
+         k &= 0xFFF;

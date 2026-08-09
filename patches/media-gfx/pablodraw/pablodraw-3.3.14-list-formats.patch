@@ -1,0 +1,62 @@
+From 3c39dd8b81aa40f29cdfd26157ef42c9ab856845 Mon Sep 17 00:00:00 2001
+From: Codex <codex@openai.com>
+Date: Sat, 8 Aug 2026 20:50:00 -0400
+Subject: [PATCH] Add --list-formats command-line option
+
+Report formats from the live DocumentInfo registry so the output stays in
+sync with the formats supported by the application. Include each format's
+stable ID, display name, extensions, and read/write capabilities.
+---
+ Source/PabloDraw/CommandHandlers/ConvertCommandLine.cs | 26 ++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+
+diff --git a/Source/PabloDraw/CommandHandlers/ConvertCommandLine.cs b/Source/PabloDraw/CommandHandlers/ConvertCommandLine.cs
+index f58e2b1..455ef50 100644
+--- a/Source/PabloDraw/CommandHandlers/ConvertCommandLine.cs
++++ b/Source/PabloDraw/CommandHandlers/ConvertCommandLine.cs
+@@ -1,3 +1,4 @@
++// Vibe coded by Codex
+ using System;
+ using Pablo;
+ using System.IO;
+@@ -17,6 +18,7 @@ namespace PabloDraw.CommandHandlers
+ 			var writer = args.Writer;
+ 			args.WriteOption("--convert=<FILE>, [input.ext]", "Input file to convert from");
+ 			args.WriteOption("--out=<FILE>, [output.ext]", "Output file to convert to");
++			args.WriteOption("--list-formats", "List all supported formats");
+ 			args.WriteOption("--zoom, -z=<ZOOM>", "Sets the zoom factor (default:1.0)");
+ 			args.WriteOption("--max-width, -w=<ZOOM>", "Sets the maximum width for the output image");
+ 			foreach (var format in DocumentInfoCollection.Default.Values)
+@@ -45,6 +47,30 @@ namespace PabloDraw.CommandHandlers
+ 		public override bool Process(ProcessCommandLineArgs args)
+ 		{
+ 			var command = args.Command;
++			if (command.GetBool("list-formats") == true)
++			{
++				var writer = args.Writer;
++				writer.WriteLine("Supported formats:");
++				writer.Indent++;
++				foreach (var documentInfo in DocumentInfoCollection.Default.Values.OrderBy(info => info.ID, StringComparer.Ordinal))
++				{
++					foreach (var format in documentInfo.Formats.Values.OrderBy(item => item.ID, StringComparer.Ordinal))
++					{
++						var capabilities = new[]
++						{
++							format.CanLoad ? "read" : null,
++							format.CanSave ? "write" : null
++						}.Where(value => value != null);
++						writer.WriteLine("{0}.{1} ({2}) [{3}]", documentInfo.ID, format.ID, format.Name, string.Join(", ", capabilities));
++						writer.Indent++;
++						writer.WriteLine("Extensions: {0}", string.Join(", ", format.Extensions.Select(extension => "." + extension)));
++						writer.Indent--;
++					}
++				}
++				writer.Indent--;
++				return true;
++			}
++
+ 			var inFile = command.GetValue("convert", "generic:0");
+ 			var outFile = command.GetValue("out", "output", "generic:1");
+ 
+-- 
+2.51.0

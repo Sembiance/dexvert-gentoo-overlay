@@ -1,0 +1,35 @@
+--- a/XADCFBFParser.m
++++ b/XADCFBFParser.m
+@@ -23,6 +23,11 @@
+ #import "NSDateXAD.h"
+ #import <limits.h>
+ 
++// Vibe coded by Codex
++@interface XADCFBFParser (Private)
++-(int)sanitizedNameLength:(int)numnamebytes fromBuffer:(const uint8_t *)bytes;
++@end
++
+ static const int kCFBFEntryNameMaxSize = 64;
+ 
+ @implementation XADCFBFParser
+--- a/XADRAR5Parser.m
++++ b/XADRAR5Parser.m
+@@ -28,6 +28,7 @@
+ #import "Crypto/hmac_sha256.h"
+ #import "Crypto/pbkdf2_hmac_sha256.h"
+ 
++// Vibe coded by Codex
+ #define ZeroBlock ((RAR5Block){0})
+ #define ZeroHeaderBlock ((RAR5HeaderBlock){0})
+ 
+@@ -67,6 +68,10 @@
+ +(BOOL)isPartOfMultiVolume:(CSHandle *)handle;
+ @end
+ 
++@interface XADRAR5Parser (Private)
+++(off_t)signatureLocationInData:(NSData *)data;
++@end
++
+ @implementation XADRAR5Parser
+ 
+ +(int)requiredHeaderSize
