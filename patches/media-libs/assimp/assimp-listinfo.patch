@@ -1,0 +1,90 @@
+diff --git a/tools/assimp_cmd/Main.cpp b/tools/assimp_cmd/Main.cpp
+--- a/tools/assimp_cmd/Main.cpp
++++ b/tools/assimp_cmd/Main.cpp
+@@ -46,7 +46,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ #include "Main.h"
+ 
+ #include <assimp/ProgressHandler.hpp>
++#include <assimp/importerdesc.h>
++#include <algorithm>
+ #include <iostream>
++#include <string>
++#include <vector>
++
++// Vibe coded by Codex
+ 
+ class ConsoleProgressHandler : public ProgressHandler {
+ public:
+@@ -76,6 +82,7 @@ constexpr char AICMD_MSG_HELP[] =
+ " verbs:\n"
+ " \tinfo       - Quick file stats\n"
+ " \tlistext    - List all known file extensions available for import\n"
++" \tlistinfo   - List all supported import formats with details\n"
+ " \tknowext    - Check whether a file extension is recognized by Assimp\n"
+ #ifndef ASSIMP_BUILD_NO_EXPORT
+ " \texport     - Export a file to one of the supported output formats\n"
+@@ -155,6 +162,64 @@ int main (int argc, char* argv[]) {
+ 		return AssimpCmdError::Success;
+ 	}
+ 
++	// assimp listinfo
++	// List all supported import formats with extension, name, and website/comments
++	if (! strcmp(argv[1], "listinfo")) {
++		const size_t count = imp.GetImporterCount();
++
++		struct FormatInfo {
++			std::string extensions;
++			std::string name;
++			std::string website;
++		};
++
++		std::vector<FormatInfo> formats;
++		formats.reserve(count);
++		size_t maxExtensions = 10;
++		size_t maxName = 4;
++
++		for (size_t i = 0; i < count; ++i) {
++			const aiImporterDesc *desc = imp.GetImporterInfo(i);
++			if (desc == nullptr) {
++				continue;
++			}
++
++			FormatInfo format;
++			format.extensions = desc->mFileExtensions != nullptr ? desc->mFileExtensions : "";
++			format.name = desc->mName != nullptr ? desc->mName : "";
++			format.website = desc->mComments != nullptr ? desc->mComments : "";
++
++			maxExtensions = std::max(maxExtensions, format.extensions.length());
++			maxName = std::max(maxName, format.name.length());
++			formats.push_back(format);
++		}
++
++		std::sort(formats.begin(), formats.end(),
++				[](const FormatInfo &left, const FormatInfo &right) {
++					return left.name < right.name;
++				});
++
++		printf("%-*s  %-*s  %s\n",
++				static_cast<int>(maxExtensions), "EXTENSIONS",
++				static_cast<int>(maxName), "NAME",
++				"WEBSITE/COMMENTS");
++
++		for (size_t i = 0; i < maxExtensions; ++i) putchar('-');
++		printf("  ");
++		for (size_t i = 0; i < maxName; ++i) putchar('-');
++		printf("  ----------------\n");
++
++		for (const FormatInfo &format : formats) {
++			printf("%-*s  %-*s  %s\n",
++					static_cast<int>(maxExtensions), format.extensions.c_str(),
++					static_cast<int>(maxName), format.name.c_str(),
++					format.website.c_str());
++		}
++
++		printf("\n%zu import formats available\n", formats.size());
++		return AssimpCmdError::Success;
++	}
++
+ #ifndef ASSIMP_BUILD_NO_EXPORT
+ 	// assimp listexport
+ 	// List all export file formats supported by Assimp (not the file extensions, just the format identifiers!)

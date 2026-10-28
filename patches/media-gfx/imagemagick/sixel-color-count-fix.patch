@@ -1,0 +1,17 @@
+diff --git a/coders/sixel.c b/coders/sixel.c
+index e10c4d0c0..736c38b68 100644
+--- a/coders/sixel.c
++++ b/coders/sixel.c
+@@ -1,3 +1,4 @@
++/* Vibe coded by Codex */
+ /*
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ %                                                                             %
+@@ -1241,6 +1242,7 @@ static Image *ReadSIXELImage(const ImageInfo *image_info,
+     {
+       Quantum index = (Quantum) pixels[y*(ssize_t) image->columns + x];
+       SetPixelIndex(image,index,q);
++      SetPixelViaPixelInfo(image,image->colormap+(ssize_t) index,q);
+       if (has_alpha != MagickFalse)
+         {
+           /*

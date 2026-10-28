@@ -13,3 +13,5 @@ RESTRICT="mirror test"
 
 DEPEND="media-libs/libansilove"
 RDEPEND=${DEPEND}
+
+PATCHES=( "${FILESDIR}/ansilove-text.patch" )

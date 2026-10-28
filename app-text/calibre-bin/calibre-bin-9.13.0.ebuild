@@ -29,6 +29,9 @@ src_install() {
 	${D}/opt/calibre-${PV}/calibre_postinstall --root=${D}/usr
 	rm ${D}/opt/calibre-${PV}/calibre{*install,-complete}
 
+	# oct 2026, this removal is needed because it links to qtbase with wayland support, which we don't compile in on my systems qtbase
+	rm -rf ${D}/opt/calibre-${PV}/plugins/wayland-shell-integration
+
 	cat <<- EOF > ${T}/calibre.symlink
 		#!/bin/sh
 

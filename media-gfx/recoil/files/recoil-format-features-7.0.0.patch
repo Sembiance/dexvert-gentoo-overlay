@@ -1,0 +1,2395 @@
+From 1805aab53e6fde15c53e866b7d091ec1ab191225 Mon Sep 17 00:00:00 2001
+From: Codex <codex@local>
+Date: Thu, 22 Oct 2026 09:04:59 -0400
+Subject: [PATCH] Port format listing and forced decoding features to RECOIL
+ 7.0.0
+
+Applies to the pristine recoil-7.0.0_p20261020 source tree with patch -p1. Build with make recoil2png; run regression coverage with make check-format-features (Python 3 required).
+
+Preserve upstream decoder, MIT license and platform metadata changes. Add format catalog generation to Linux, macOS and Windows builds. Fix extensionless companion lookup, dotted-path handling, empty format-list entries and format-ID lifetime.
+---
+ .gitignore                    |   1 +
+ Makefile                      |  13 +-
+ formats-list.h.xsl            |  43 +++
+ formats.xml                   | 224 +++++------
+ osx/Makefile                  |   8 +-
+ recoil.fu                     | 700 ++++++++++++++++++++++++++++------
+ recoil2png.1                  |  19 +-
+ recoil2png.c                  | 274 ++++++++++++-
+ tests/format-api.c            |  29 ++
+ tests/test-format-features.py | 143 +++++++
+ win32/Makefile                |   8 +-
+ 11 files changed, 1229 insertions(+), 233 deletions(-)
+ create mode 100644 formats-list.h.xsl
+ create mode 100644 tests/format-api.c
+ create mode 100644 tests/test-format-features.py
+
+diff --git a/.gitignore b/.gitignore
+index 230fb73..8c0ede3 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -2,6 +2,7 @@
+ *.so
+ /MANIFEST
+ /formats.h
++/formats-list.h
+ /recoil2png
+ /file-recoil
+ /recoil-mime.xml
+diff --git a/Makefile b/Makefile
+index e1631e8..34bd3f8 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,3 +1,4 @@
++# Vibe coded by Codex
+ PREFIX = /usr/local
+ XNVIEW = /opt/XnView
+ MAGICK_CFLAGS = $(and $(filter 7.%,$(firstword $(shell MagickCore-config --version))),-DMAGICK7) `MagickCore-config --cflags --ldflags` -I. -I$(MAGICK_INCLUDE_PATH)
+@@ -11,9 +12,14 @@ INSTALL_DATA ?= $(INSTALL) -m 644
+ 
+ all: recoil2png recoil-mime.xml
+ 
+-recoil2png: recoil2png.c pngsave.c pngsave.h recoil-stdio.c recoil-stdio.h recoil.c recoil.h
++recoil2png: recoil2png.c pngsave.c pngsave.h recoil-stdio.c recoil-stdio.h recoil.c recoil.h formats-list.h
+ 	$(CC) $(CFLAGS) recoil2png.c pngsave.c recoil-stdio.c recoil.c -lpng -lz -o $@
+ 
++check-format-features: recoil2png
++	CC="$(CC)" python3 tests/test-format-features.py
++
++.PHONY: check-format-features
++
+ file-recoil: file-recoil.c recoil-stdio.c recoil-stdio.h recoil.c recoil.h formats.h
+ 	$(CC) $(CFLAGS) `gimptool-2.0 --cflags` file-recoil.c recoil-stdio.c recoil.c -o $@ `gimptool-2.0 --libs`
+ 
+@@ -26,6 +32,9 @@ imagemagick/recoil.so: imagemagick/recoilmagick.c recoil.c recoil.h formats.h
+ formats.h: formats.h.xsl formats.xml
+ 	xsltproc -o $@ formats.h.xsl formats.xml
+ 
++formats-list.h: formats-list.h.xsl formats.xml
++	xsltproc -o $@ formats-list.h.xsl formats.xml
++
+ # http://www.cmcrossroads.com/article/rules-multiple-outputs-gnu-make
+ %.c %.h: %.fu altirrantsc.pal altirrapal.pal atari8.fnt c16.pal c64.fnt zx81.fnt
+ 	$(FUT) -o $*.c $<
+@@ -34,7 +43,7 @@ benchmark: benchmark.c recoil-stdio.c recoil-stdio.h recoil.c recoil.h
+ 	$(CC) $(CFLAGS) benchmark.c recoil-stdio.c recoil.c -o $@
+ 
+ clean:
+-	rm -f recoil2png file-recoil file-recoil3 imagemagick/recoil.so formats.h recoil-mime.xml benchmark Xrecoil.usr
++	rm -f recoil2png file-recoil file-recoil3 imagemagick/recoil.so formats.h formats-list.h recoil-mime.xml benchmark Xrecoil.usr
+ 
+ install: install-thumbnailer
+ 
+diff --git a/formats-list.h.xsl b/formats-list.h.xsl
+new file mode 100644
+index 0000000..0c57bdf
+--- /dev/null
++++ b/formats-list.h.xsl
+@@ -0,0 +1,43 @@
++<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
++	<!-- Vibe coded by Codex -->
++	<xsl:output method="text" />
++	<xsl:template match="/formats">
++		<xsl:text>/* Generated automatically from formats.xml and formats-list.h.xsl. Do not edit. */&#10;/* Vibe coded by Codex */&#10;&#10;</xsl:text>
++		<xsl:text>typedef struct {&#10;</xsl:text>
++		<xsl:text>&#9;const char *ext;&#10;</xsl:text>
++		<xsl:text>&#9;const char *formatId;&#10;</xsl:text>
++		<xsl:text>&#9;const char *platform;&#10;</xsl:text>
++		<xsl:text>&#9;const char *name;&#10;</xsl:text>
++		<xsl:text>} RecoilFormatInfo;&#10;&#10;</xsl:text>
++		<xsl:text>static const RecoilFormatInfo recoil_formats[] = {&#10;</xsl:text>
++		<xsl:for-each select="platform/format/ext">
++			<xsl:sort select="../../@name" />
++			<xsl:sort select="." />
++			<xsl:text>&#9;{ "</xsl:text>
++			<xsl:value-of select="." />
++			<xsl:text>", "</xsl:text>
++			<xsl:choose>
++				<xsl:when test="@formatId">
++					<xsl:value-of select="@formatId" />
++				</xsl:when>
++				<xsl:otherwise>
++					<xsl:value-of select="." />
++				</xsl:otherwise>
++			</xsl:choose>
++			<xsl:text>", "</xsl:text>
++			<xsl:value-of select="../../@name" />
++			<xsl:text>", "</xsl:text>
++			<xsl:choose>
++				<xsl:when test="../@name">
++					<xsl:value-of select="../@name" />
++				</xsl:when>
++				<xsl:otherwise>
++					<xsl:value-of select="." />
++				</xsl:otherwise>
++			</xsl:choose>
++			<xsl:text>" },&#10;</xsl:text>
++		</xsl:for-each>
++		<xsl:text>};&#10;&#10;</xsl:text>
++		<xsl:text>static const int recoil_format_count = sizeof(recoil_formats) / sizeof(recoil_formats[0]);&#10;</xsl:text>
++	</xsl:template>
++</xsl:stylesheet>
+diff --git a/formats.xml b/formats.xml
+index 8d1894b..7104c65 100644
+--- a/formats.xml
++++ b/formats.xml
+@@ -5,13 +5,13 @@
+ 		<format name="TVPaint" colors="16777216"><ext>DEEP</ext></format>
+ 		<format name="Turbo Rascal Syntax Error" width="320" maxHeight="256"><ext>FLF</ext></format>
+ 		<format name="Hold-And-Modify 6" colors="4096">
+-			<ext>HAM</ext>
++			<ext formatId="HAM.Iff">HAM</ext>
+ 			<ext>HAM6</ext>
+ 		</format>
+ 		<format name="Hold-And-Modify 8" colors="16777216"><ext>HAM8</ext></format>
+ 		<format name="Interchange File Format">
+ 			<ext>IFF</ext>
+-			<ext>256</ext>
++			<ext formatId="256.Iff">256</ext>
+ 		</format>
+ 		<format name="Icon" colors="8"><ext>INFO</ext></format>
+ 		<format name="Interleaved Bitmap">
+@@ -19,7 +19,7 @@
+ 			<ext>ILBM</ext>
+ 		</format>
+ 		<format name="Multi-palette" colors="4096">
+-			<ext>DHR</ext>
++			<ext formatId="DHR.Iff">DHR</ext>
+ 			<ext>DR</ext>
+ 			<ext>MP</ext>
+ 			<ext>BEAM</ext>
+@@ -45,7 +45,7 @@
+ 			<companionExt>GFX</companionExt>
+ 		</format>
+ 		<format name="Turbo Rascal Syntax Error" maxWidth="160" maxHeight="200" colors="16"><ext>FLF</ext></format>
+-		<format name="8x8 font" colors="2"><ext>FNT</ext></format>
++		<format name="8x8 font" colors="2"><ext formatId="FNT.AmstradFnt">FNT</ext></format>
+ 		<format name="HinterGrundBild" width="512" height="256" colors="2"><ext>HGB</ext></format>
+ 		<format name="Perfect Pix" maxWidth="384" maxHeight="272" frames="2">
+ 			<ext skip="uwp">PPH</ext>
+@@ -64,40 +64,48 @@
+ 	</platform>
+ 	<platform name="Apple II" href="https://en.wikipedia.org/wiki/Apple_II">
+ 		<format name="High Resolution" width="280" height="192" colors="2"><ext>HGR</ext></format>
+-		<format name="Sprites" colors="2"><ext>SPR</ext></format>
++		<format name="Sprites" colors="2"><ext formatId="SPR.AppleSpr">SPR</ext></format>
+ 	</platform>
+ 	<platform name="Apple IIe" href="https://en.wikipedia.org/wiki/Apple_IIe">
+ 		<format name="Double High-Resolution" width="560" height="192" colors="2">
+ 			<ext>DHGR</ext>
+-			<ext>DHR</ext>
++			<ext formatId="DHR.AppleIIDhr">DHR</ext>
+ 		</format>
+ 	</platform>
+ 	<platform name="Apple IIGS" href="https://en.wikipedia.org/wiki/Apple_IIGS">
+-		<format name="3201" width="320" height="200" colors="3200"><ext>3201</ext></format>
++		<format name="3201" width="320" height="200" colors="3200"><ext>3201</ext><ext formatId="SH3.3201">SH3</ext><ext formatId="SH3.3201">3200</ext></format>
+ 		<format name="Multi-palette" height="200" colors="3200"><ext>32K</ext></format>
+ 		<format name="Apple Preferred Format" colors="256">
+ 			<ext>GS</ext>
+ 			<ext>IIGS</ext>
+-			<ext>PNT</ext>
+-			<ext>SHR</ext>
++			<ext formatId="PNT.ApfShr">PNT</ext>
++			<ext formatId="SHR.ApfShr">SHR</ext>
++			<ext formatId="SH3.ApfShr">SH3</ext>
++			<ext formatId="SH3.ApfShr">3200</ext>
+ 		</format>
+-		<format name="Paintworks" width="320" height="396" colors="16"><ext>PNT</ext></format>
++		<format name="Paintworks" width="320" height="396" colors="16"><ext formatId="PNT.Paintworks">PNT</ext></format>
+ 		<format width="320" height="200" colors="3200">
+-			<ext>SH3</ext>
+-			<ext>3200</ext>
++			<ext formatId="SH3.Sh3">SH3</ext>
++			<ext formatId="SH3.Sh3">3200</ext>
++			<ext formatId="SHR.Sh3">SHR</ext>
++		</format>
++		<format width="320" height="200" colors="256">
++			<ext formatId="SHR.AppleIIShr">SHR</ext>
++			<ext formatId="SH3.AppleIIShr">SH3</ext>
++			<ext formatId="SH3.AppleIIShr">3200</ext>
++			<ext formatId="PNT.AppleIIShr">PNT</ext>
+ 		</format>
+-		<format width="320" height="200" colors="256"><ext>SHR</ext></format>
+ 	</platform>
+ 	<platform name="Apple Macintosh" href="https://en.wikipedia.org/wiki/Macintosh_128K">
+ 		<format name="MacPaint" width="576" height="720" colors="2">
+ 			<ext>MAC</ext>
+-			<ext>PNT</ext>
++			<ext formatId="PNT.Mac">PNT</ext>
+ 			<ext skip="uwp">PNTG</ext>
+ 		</format>
+ 	</platform>
+ 	<platform name="Atari 8-bit" href="https://en.wikipedia.org/wiki/Atari_8-bit_family">
+ 		<format name="Paint 256" width="80" height="96" colors="256">
+-			<ext>256</ext>
++			<ext formatId="256.256">256</ext>
+ 			<ext>AP2</ext>
+ 		</format>
+ 		<format name="AtariTools-800 4 missiles"><ext>4MI</ext></format>
+@@ -129,10 +137,10 @@
+ 		<format name="Apac3 Linker-Viewer (SFDN compressed)" width="80" height="192" colors="256" frames="2"><ext skip="uwp">APP</ext></format>
+ 		<format name="Any Point, Any Color (SFDN compressed)" width="80" height="96" colors="256"><ext>APS</ext></format>
+ 		<format name="Ascii-Art Editor" maxWidth="64" maxHeight="24" unit="characters" colors="2">
+-			<!-- I only see up to 40x21 in the editor, but the sample file SIANO.ART is bigger --><ext>ART</ext>
++			<!-- I only see up to 40x21 in the editor, but the sample file SIANO.ART is bigger --><ext formatId="ART.AsciiArtEditor">ART</ext>
+ 		</format>
+-		<format name="Artist by David Eaton" width="160" height="80" colors="4"><ext fake="true">ART</ext></format>
+-		<format colors="2"><ext>ART</ext></format><!-- not sure if Atari 8-bit -->
++		<format name="Artist by David Eaton" width="160" height="80" colors="4"><ext fake="true" formatId="ART.Atari8Artist">ART</ext></format>
++		<format colors="2"><ext formatId="ART.MonoArt">ART</ext></format><!-- not sure if Atari 8-bit -->
+ 		<format name="ASCII maker" width="40" height="24" unit="characters" colors="2"><ext>ASC</ext></format>
+ 		<format width="160" height="192" grayscale="16">
+ 			<ext>BG9</ext>
+@@ -153,7 +161,7 @@
+ 		<format name="The Last Word font" colors="2"><ext>F80</ext></format>
+ 		<format name="Floor Designer" width="64" height="40" grayscale="16"><ext>FGE</ext></format>
+ 		<format name="Atari FontMaker" colors="2"><ext>FN2</ext></format>
+-		<format name="8x8 font" colors="2"><ext>FNT</ext></format>
++		<format name="8x8 font" colors="2"><ext formatId="FNT.Atari8Fnt">FNT</ext></format>
+ 		<format name="Fun with Art" width="160" height="192" colors="128"><ext>FWA</ext></format>
+ 		<format name="Graphics 10" width="80" maxHeight="240" colors="9"><ext>G10</ext></format>
+ 		<format name="Graphics 11" width="80" maxHeight="240" colors="16"><ext>G11</ext></format>
+@@ -185,17 +193,17 @@
+ 		<format name="Hard Interlace Picture" width="160" height="200" grayscale="30" frames="2"><ext>HIP</ext></format>
+ 		<format name="Grass' Slideshow" width="160" height="192" colors="4"><ext>HPM</ext></format>
+ 		<format name="Hard Interlace Picture (SFDN compressed)" width="160" height="200" grayscale="30" frames="2"><ext>HPS</ext></format>
+-		<format width="256" height="239" colors="3" frames="2"><ext>HR</ext></format>
++		<format width="256" height="239" colors="3" frames="2"><ext formatId="HR.Atari8Hr">HR</ext></format>
+ 		<format name="Interlace Character Editor font" frames="2"><ext>ICE</ext></format>
+-		<format name="ICE CIN" width="160" height="192" colors="80" frames="2"><ext>ICN</ext></format>
++		<format name="ICE CIN" width="160" height="192" colors="80" frames="2"><ext formatId="ICN.Atari8Ice">ICN</ext></format>
+ 		<format name="Interlace Graphics Editor" width="128" height="96" colors="16" frames="2"><ext>IGE</ext></format>
+ 		<format name="Interlace Logo Designer" width="128" height="128" colors="7" frames="2"><ext>ILD</ext></format>
+ 		<format name="APACVIEW (SFDN compressed)" width="80" height="192" colors="256" frames="2"><ext>ILS</ext></format>
+ 		<format name="ICE MIN" width="160" height="192" colors="80" frames="2"><ext>IMN</ext></format>
+ 		<format name="ING 15" width="160" height="200" colors="7" frames="2"><ext>ING</ext></format>
+-		<format name="InterPainter" width="160" height="200" colors="7" frames="2"><ext>INP</ext></format>
++		<format name="InterPainter" width="160" height="200" colors="7" frames="2"><ext>INP</ext><ext formatId="INT.Inp">INT</ext></format>
+ 		<format name="InterPainter (SFDN compressed)" width="160" height="200" colors="7" frames="2"><ext fd="yes">INS</ext></format>
+-		<format name="INT95a" maxWidth="160" maxHeight="239" colors="16" frames="2"><ext>INT</ext></format>
++		<format name="INT95a" maxWidth="160" maxHeight="239" colors="16" frames="2"><ext formatId="INT.Int">INT</ext></format>
+ 		<format name="ICE PCIN+" width="160" height="192" colors="45" frames="2"><ext>IP2</ext></format>
+ 		<format name="ICE PCIN" width="160" height="192" colors="35" frames="2"><ext>IPC</ext></format>
+ 		<format name="Super IRG 2" width="160" height="192" colors="25" frames="2"><ext>IR2</ext></format>
+@@ -211,9 +219,9 @@
+ 			<companionExt optional="true">COL</companionExt>
+ 		</format>
+ 		<format width="56" height="60" colors="2"><ext fd="yes" skip="uwp">KFX</ext></format>
+-		<format name="Envision"><ext skip="uwp">MAP</ext></format>
+-		<format name="EnvisionPC"><ext skip="uwp">MAP</ext></format>
+-		<format name="XL-Paint MAX" width="160" height="192" frames="2"><ext skip="uwp">MAX</ext></format>
++		<format name="Envision"><ext skip="uwp" formatId="MAP.Envision">MAP</ext></format>
++		<format name="EnvisionPC"><ext skip="uwp" formatId="MAP.EnvisionPC">MAP</ext></format>
++		<format name="XL-Paint MAX" width="160" height="192" frames="2"><ext skip="uwp" formatId="MAX.Atari8Max">MAX</ext></format>
+ 		<format name="Mad Designer" width="512" height="256" colors="2"><ext>MBG</ext></format>
+ 		<format name="Graph2Font" maxWidth="336" height="240" colors="256"><ext>MCH</ext></format>
+ 		<format name="Multi Color Map" width="160" height="240" colors="8"><ext>MCM</ext></format>
+@@ -246,14 +254,14 @@
+ 		<format name="Koala MicroIllustrator" width="160" height="192" colors="4"><ext>PIC</ext></format>
+ 		<format name="PIC v2" maxWidth="320" height="192"><ext>PIC</ext></format>
+ 		<format name="Visualizer" width="160" height="79" colors="4"><ext>PIC</ext></format>
+-		<format width="160" height="192" colors="4"><ext>PIX</ext></format>
++		<format width="160" height="192" colors="4"><ext formatId="PIX.Atari8Pix">PIX</ext></format>
+ 		<format name="AtariTools-800 player" width="8" height="240" colors="2"><ext fd="yes">PLA</ext></format>
+ 		<format name="Plama 256 (SFDN compressed)" width="80" height="96" colors="256"><ext fd="yes">PLS</ext></format>
+ 		<format name="PMG Designer by Henryk Karpowicz"><ext fd="yes" skip="uwp">PMD</ext></format>
+ 		<format name="Print Shop" width="88" height="52" colors="2"><ext fd="yes">PSF</ext></format>
+ 		<format name="Vidig Paint" width="80" height="192" colors="16"><ext>RAP</ext></format>
+-		<format name="XL-Paint MAX" width="160" height="192" colors="16" frames="2"><ext skip="uwp">RAW</ext></format>
+-		<format name="ColorViewSquash" maxWidth="160" maxHeight="192" frames="3"><ext skip="uwp">RGB</ext></format>
++		<format name="XL-Paint MAX" width="160" height="192" colors="16" frames="2"><ext skip="uwp" formatId="RAW.Atari8Raw">RAW</ext></format>
++		<format name="ColorViewSquash" maxWidth="160" maxHeight="192" frames="3"><ext skip="uwp" formatId="RGB.Atari8Rgb">RGB</ext></format>
+ 		<format name="Rocky Interlace Picture" maxWidth="320" maxHeight="239" maxFrames="2"><ext>RIP</ext></format>
+ 		<format name="Rambrandt" width="160" height="96" colors="99"><!-- 99 = 4 colors + 95 DLI changes --><ext>RM0</ext></format>
+ 		<format name="Rambrandt" width="80" height="192" colors="256"><ext>RM1</ext></format>
+@@ -263,14 +271,14 @@
+ 		<format name="Mamut" width="160" height="96" colors="4"><ext>RYS</ext></format>
+ 		<format name="Standard Graphics 3" width="40" height="24" colors="4"><ext>SG3</ext></format>
+ 		<format name="Semi-Graphic logos Editor" width="40" height="24" unit="characters" colors="2"><ext>SGE</ext></format>
+-		<format name="SAMAR Hi-res Interlace with Map of Colours" width="320" height="192" frames="2"><ext>SHC</ext></format>
++		<format name="SAMAR Hi-res Interlace with Map of Colours" width="320" height="192" frames="2"><ext formatId="SHC.Shc">SHC</ext></format>
+ 		<format name="Blazing Paddles shape table" colors="2"><ext>SHP</ext></format>
+ 		<format name="Movie Maker shapes" width="160" height="96" colors="4"><ext>SHP</ext></format>
+-		<format name="Super-IRG Font" colors="4" frames="2"><ext>SIF</ext></format>
++		<format name="Super-IRG Font" colors="4" frames="2"><ext formatId="SIF.Atari8Sif">SIF</ext></format>
+ 		<format name="Sketch-PadDles" width="160" height="192" colors="2"><ext>SKP</ext></format>
+-		<format name="The Graphics Magician Picture Painter" width="160" height="192" colors="128"><ext fd="yes">SPC</ext></format>
+-		<format name="Mad Studio sprite" width="8" maxHeight="40" colors="2"><ext>SPR</ext></format>
+-		<format name="SprEd" colors="128"><ext>SPR</ext></format>
++		<format name="The Graphics Magician Picture Painter" width="160" height="192" colors="128"><ext fd="yes" formatId="SPC.Atari8Spc">SPC</ext></format>
++		<format name="Mad Studio sprite" width="8" maxHeight="40" colors="2"><ext formatId="SPR.Atari8Spr">SPR</ext></format>
++		<format name="SprEd" colors="128"><ext formatId="SPR.SprEd">SPR</ext></format>
+ 		<format name="16x16 font" colors="2"><ext>SXS</ext></format>
+ 		<format name="Taquart Interlace Picture" maxWidth="160" maxHeight="119" frames="2"><ext>TIP</ext></format>
+ 		<format name="Mad Studio ANTIC 4 tile" maxWidth="16" maxHeight="40" colors="5"><ext>TL4</ext></format>
+@@ -295,9 +303,9 @@
+ 		<format width="240" height="64" colors="2"><ext>PGF</ext></format>
+ 	</platform>
+ 	<platform name="Atari ST/STE" href="https://en.wikipedia.org/wiki/Atari_ST">
+-		<format name="Art Director" width="320" height="200" colors="16"><ext>ART</ext></format>
+-		<format name="GFA Artist" width="320" height="200" colors="512"><ext>ART</ext></format>
+-		<format name="Palette Master" width="320" height="200" colors="512"><ext>ART</ext></format>
++		<format name="Art Director" width="320" height="200" colors="16"><ext formatId="ART.ArtDirector">ART</ext></format>
++		<format name="GFA Artist" width="320" height="200" colors="512"><ext formatId="ART.GfaArtist">ART</ext></format>
++		<format name="Palette Master" width="320" height="200" colors="512"><ext formatId="ART.PaletteMaster">ART</ext></format>
+ 		<format name="ColorSTar" width="320" height="200" colors="16"><ext>BIL</ext></format>
+ 		<format name="DEGAS Elite block" colors="16"><ext>BL1</ext></format>
+ 		<format name="DEGAS Elite block" colors="4"><ext>BL2</ext></format>
+@@ -319,7 +327,7 @@
+ 		<format name="ComputerEyes" width="640" height="200" colors="32768"><ext>CE2</ext></format>
+ 		<format name="ComputerEyes" width="640" height="400" grayscale="192"><ext>CE3</ext></format>
+ 		<format name="Cyber Paint Cell" maxWidth="320" maxHeight="200" colors="16"><ext>CEL</ext></format>
+-		<format name="Public Painter" width="640" maxHeight="800" colors="2"><ext>CMP</ext></format>
++		<format name="Public Painter" width="640" maxHeight="800" colors="2"><ext formatId="CMP.StCmp">CMP</ext></format>
+ 		<format name="Atari Image Manager" maxWidth="256" maxHeight="256" colors="16777216"><ext>COL</ext></format>
+ 		<format name="Picworks" width="640" height="400" colors="2"><ext>CP3</ext></format>
+ 		<format name="Canvas (compressed)"><ext skip="uwp">CPT</ext></format>
+@@ -331,7 +339,7 @@
+ 		<format name="PaintShop" width="640" height="800" colors="2"><ext>DA4</ext></format>
+ 		<format name="Doodle" width="640" height="400" colors="2">
+ 			<ext>DOO</ext>
+-			<ext name="MonoSTar"><!-- also: The ArtiST -->ART</ext>
++			<ext name="MonoSTar" formatId="ART.Doo"><!-- also: The ArtiST -->ART</ext>
+ 		</format>
+ 		<format width="416" height="273" colors="136" frames="2">
+ 			<ext>DU1</ext>
+@@ -340,8 +348,8 @@
+ 		<format width="832" height="273" colors="10" frames="2"><ext>DU2</ext></format>
+ 		<format name="EZ-Art Professional" width="320" height="200" colors="16"><ext>EZA</ext></format>
+ 		<format name="Turbo Rascal Syntax Error" width="320" height="200"><ext>FLF</ext></format>
+-		<format name="8x16 font" colors="2"><ext>FNT</ext></format>
+-		<format name="GDOS font" colors="2"><ext>FNT</ext></format>
++		<format name="8x16 font" colors="2"><ext formatId="FNT.StFnt">FNT</ext></format>
++		<format name="GDOS font" colors="2"><ext formatId="FNT.GdosFnt">FNT</ext></format>
+ 		<format name="Canvas (raster)" maxWidth="640" height="200"><ext>FUL</ext></format>
+ 		<format name="DeskPic"><ext>GFB</ext></format>
+ 		<format name="Grafix"><ext>GRX</ext></format>
+@@ -350,10 +358,10 @@
+ 		<format name="Imagic" width="320" height="200" colors="16"><ext>IC1</ext></format>
+ 		<format name="Imagic" width="640" height="200" colors="4"><ext>IC2</ext></format>
+ 		<format name="Imagic" width="640" height="400" colors="2"><ext>IC3</ext></format>
+-		<format name="DEGAS Elite icon" colors="2"><ext>ICN</ext></format>
+-		<format name="Interchange File Format"><ext>IFF</ext></format>
++		<format name="DEGAS Elite icon" colors="2"><ext formatId="ICN.StIcn">ICN</ext></format>
++		<format name="Interchange File Format"><ext>IFF</ext><ext formatId="NEO.Iff">NEO</ext></format>
+ 		<format name="Atari Image Manager" maxWidth="256" maxHeight="256" grayscale="256"><ext>IM</ext></format>
+-		<format name="GEM Bit Image"><ext fd="yes" skip="uwp">IMG</ext></format>
++		<format name="GEM Bit Image"><ext fd="yes" skip="uwp" formatId="IMG.StImg">IMG</ext></format>
+ 		<format name="Fullscreen Construction Kit" width="448" height="272" colors="16"><ext>KID</ext></format>
+ 		<format name="Dali (compressed)" width="320" height="200" colors="16"><ext>LPK</ext></format>
+ 		<format name="Dali (compressed)" width="640" height="200" colors="4"><ext>MPK</ext></format>
+@@ -362,10 +370,10 @@
+ 			<ext skip="uwp">MUR</ext>
+ 			<companionExt>PAL</companionExt>
+ 		</format>
+-		<format name="NEOchrome"><ext>NEO</ext></format>
+-		<format name="NEOchrome Master" colors="512"><ext>NEO</ext></format>
++		<format name="NEOchrome"><ext formatId="NEO.Neo">NEO</ext></format>
++		<format name="NEOchrome Master" colors="512"><ext formatId="NEO.Neo">NEO</ext></format>
+ 		<format name="NEOchrome Master" width="320" height="200" colors="512">
+-			<ext>NEO</ext>
++			<ext formatId="NEO.Neo">NEO</ext>
+ 			<companionExt>RST</companionExt>
+ 		</format>
+ 		<format name="ColorSTar object" maxWidth="320" maxHeight="200" colors="16"><ext fd="yes" skip="uwp">OBJ</ext></format>
+@@ -380,10 +388,10 @@
+ 		<format name="Tobias Richter Fullscreen Slideshow" width="352" height="278" frames="2"><ext>PCI</ext></format>
+ 		<format name="PhotoChrome" width="320" height="199" maxFrames="2"><ext>PCS</ext></format>
+ 		<format name="Paintworks" width="320" height="400" colors="16"><ext>PG0</ext></format>
+-		<format name="Graphics Processor" width="320" height="200" colors="16"><ext>PG1</ext></format>
+-		<format name="Paintworks" width="640" height="400" colors="4"><ext>PG1</ext></format>
+-		<format name="Graphics Processor" width="640" height="200" colors="4"><ext>PG2</ext></format>
+-		<format name="Paintworks" width="640" height="800" colors="2"><ext>PG2</ext></format>
++		<format name="Graphics Processor" width="320" height="200" colors="16"><ext formatId="PG.GraphicsProcessor">PG1</ext></format>
++		<format name="Paintworks" width="640" height="400" colors="4"><ext formatId="PG.Sc">PG1</ext></format>
++		<format name="Graphics Processor" width="640" height="200" colors="4"><ext formatId="PG.GraphicsProcessor">PG2</ext></format>
++		<format name="Paintworks" width="640" height="800" colors="2"><ext formatId="PG.Sc">PG2</ext></format>
+ 		<format name="Graphics Processor" width="640" height="400" colors="2"><ext>PG3</ext></format>
+ 		<format name="DEGAS" maxWidth="416" maxHeight="560" colors="16"><ext>PI1</ext></format>
+ 		<format name="DEGAS" width="640" height="200" colors="4"><ext>PI2</ext></format>
+@@ -393,9 +401,9 @@
+ 		</format>
+ 		<format name="PaintPro ST"><ext>PIC</ext></format>
+ 		<format width="320" height="200" colors="256" frames="2"><ext>PL4</ext></format>
+-		<format name="Pablo Paint 1.1" width="320" height="200" colors="16"><ext>PPP</ext></format>
++		<format name="Pablo Paint 1.1" width="320" height="200" colors="16"><ext formatId="PPP.StPpp">PPP</ext></format>
+ 		<format name="PaintShop (compressed)" maxWidth="640" maxHeight="400" colors="2"><ext>PSC</ext></format>
+-		<format name="RGB Intermediate" width="320" height="200" colors="4096" frames="3"><ext skip="uwp">RGB</ext></format>
++		<format name="RGB Intermediate" width="320" height="200" colors="4096" frames="3"><ext skip="uwp" formatId="RGB.StRgb">RGB</ext></format>
+ 		<format name="ZZ_ROUGH" width="320" height="200" colors="16"><ext>RGH</ext></format>
+ 		<format name="Paintworks" width="320" height="200" colors="16">
+ 			<ext>CL0</ext>
+@@ -407,12 +415,12 @@
+ 		</format>
+ 		<format name="Paintworks" width="640" height="400" colors="2">
+ 			<ext>CL2</ext>
+-			<ext>SC2</ext>
++			<ext formatId="SC2.Sc">SC2</ext>
+ 		</format>
+ 		<format name="Dali" width="320" height="200" colors="16"><ext>SD0</ext></format>
+ 		<format name="Dali" width="640" height="200" colors="4"><ext>SD1</ext></format>
+ 		<format name="Dali" width="640" height="400" colors="2"><ext>SD2</ext></format>
+-		<format name="Spectrum 512 (compressed)" width="320" height="199" colors="4096"><ext fd="yes">SPC</ext></format>
++		<format name="Spectrum 512 (compressed)" width="320" height="199" colors="4096"><ext fd="yes" formatId="SPC.StSpc">SPC</ext></format>
+ 		<format name="Spectrum 512 (smooshed)" width="320" height="199" colors="512"><ext>SPS</ext></format>
+ 		<format name="Spectrum 512" width="320" height="199" colors="4096"><ext>SPU</ext></format>
+ 		<format name="Spectrum 512 (enhanced)" width="320" height="199" colors="29791" frames="2"><ext>SPU</ext></format>
+@@ -435,7 +443,7 @@
+ 		<format name="Extended GEM Bit Image"><ext>XIMG</ext></format>
+ 	</platform>
+ 	<platform name="Atari TT" href="https://en.wikipedia.org/wiki/Atari_TT030">
+-		<format width="320" height="480" colors="256"><ext>PI4</ext></format>
++		<format width="320" height="480" colors="256"><ext formatId="PI4.StPi">PI4</ext></format>
+ 		<format width="640" height="480" colors="16"><ext>PI5</ext></format>
+ 		<format width="1280" height="960" colors="2"><ext>PI6</ext></format>
+ 	</platform>
+@@ -459,26 +467,26 @@
+ 		<format name="DelmPaint" width="640" height="480" colors="256"><ext>DPH</ext></format>
+ 		<format name="TmS Cranach Paint/Studio"><ext>ESM</ext></format>
+ 		<format name="Falcon True Color" width="384" height="240" colors="65536"><ext>FTC</ext></format>
+-		<format name="Funny Paint"><ext>FUN</ext></format>
++		<format name="Funny Paint"><ext formatId="FUN.FalconFun">FUN</ext></format>
+ 		<format name="GodPaint" colors="65536"><ext>GOD</ext></format>
+-		<format name="Print-Technik" grayscale="128"><ext>HIR</ext></format>
++		<format name="Print-Technik" grayscale="128"><ext formatId="HIR.FalconHir">HIR</ext></format>
+ 		<format name="ICDRAW icon" width="32" height="32" colors="16"><ext>IB3</ext></format>
+ 		<format name="ICDRAW icon" width="32" height="32" colors="16"><ext>IBI</ext></format>
+ 		<format name="InShape"><ext>IIM</ext></format>
+ 		<format name="Fuckpaint" maxWidth="640" maxHeight="480" colors="256">
+-			<ext>PI4</ext>
++			<ext formatId="PI4.Fuckpaint">PI4</ext>
+ 			<ext>PI7</ext>
+ 			<ext>PI9</ext>
+ 		</format>
+-		<format name="PixArt"><ext>PIX</ext></format>
++		<format name="PixArt"><ext formatId="PIX.FalconPix">PIX</ext></format>
+ 		<format name="Prism Paint">
+-			<ext>PNT</ext>
++			<ext formatId="PNT.FalconPnt">PNT</ext>
+ 			<ext>TPI</ext>
+ 		</format>
+ 		<format name="RAG-D"><ext>RAG</ext></format>
+ 		<format name="Music Compile 2" colors="256"><ext fake="true" skip="uwp">RAGC</ext></format>
+ 		<format name="IMG Scan" maxWidth="640" maxHeight="400" grayscale="256">
+-			<ext skip="uwp">RAW</ext>
++			<ext skip="uwp" formatId="RAW.Rw">RAW</ext>
+ 			<ext>RWH</ext>
+ 			<ext>RWL</ext>
+ 		</format>
+@@ -519,7 +527,7 @@
+ 		</format>
+ 		<format name="Art Studio" width="320" height="200" colors="16">
+ 			<ext>AAS</ext>
+-			<ext>ART</ext>
++			<ext formatId="ART.Iph">ART</ext>
+ 		</format>
+ 		<format name="AFLI-editor" width="296" height="200" colors="16"><ext>AFL</ext></format>
+ 		<format name="Amica Paint" width="160" height="200" colors="16"><ext>AMI</ext></format>
+@@ -530,7 +538,7 @@
+ 		</format>
+ 		<format name="FLI Graph" width="148" height="200" colors="16">
+ 			<ext>BML</ext>
+-			<ext>FLI</ext>
++			<ext formatId="FLI.Bml">FLI</ext>
+ 			<ext>FLG</ext>
+ 		</format>
+ 		<format name="Printfox" width="320" height="200" colors="2"><ext>BS</ext></format>
+@@ -539,7 +547,7 @@
+ 		<format name="Commodore Grafix" colors="16"><ext>CGX</ext></format>
+ 		<format name="Cheese" width="160" height="200" colors="16"><ext>CHE</ext></format>
+ 		<format name="Centauri Logo-Editor" width="160" height="200" colors="4"><ext>CLE</ext></format>
+-		<format name="GoDot clip" maxWidth="320" maxHeight="200" colors="16"><ext>CLP</ext></format>
++		<format name="GoDot clip" maxWidth="320" maxHeight="200" colors="16"><ext formatId="CLP.GodotClp">CLP</ext></format>
+ 		<format name="CharPad" colors="16"><ext>CTM</ext></format>
+ 		<format name="Create with Garfield" width="160" height="200" colors="16"><ext>CWG</ext></format>
+ 		<format name="Doodle" width="320" height="200" colors="16">
+@@ -574,11 +582,11 @@
+ 			<ext>FFLI</ext>
+ 		</format>
+ 		<format name="Turbo Rascal Syntax Error" colors="16"><ext>FLF</ext></format>
+-		<format name="FLI" width="148" height="200" colors="16"><ext>FLI</ext></format>
++		<format name="FLI" width="148" height="200" colors="16"><ext formatId="FLI.Fli">FLI</ext></format>
+ 		<format name="Flimatic" maxWidth="296" height="200" colors="16"><ext>FLM</ext></format>
+ 		<format name="Fuckpaint" width="320" height="200" frames="2"><ext>FP</ext></format>
+ 		<format name="Funpaint" width="296" height="200" frames="2">
+-			<ext>FUN</ext>
++			<ext formatId="FUN.C64Fun">FUN</ext>
+ 			<ext>FP2</ext>
+ 		</format>
+ 		<format name="FLI Profi" width="160" height="200" colors="16"><ext>FPR</ext></format>
+@@ -595,12 +603,12 @@
+ 		</format>
+ 		<format name="Gunpaint" width="296" height="200" frames="2">
+ 			<ext>GUN</ext>
+-			<ext>IFL</ext>
++			<ext formatId="IFL.Gun">IFL</ext>
+ 		</format>
+ 		<format name="Hires-Bitmap" width="320" height="200" colors="2">
+ 			<ext>HBM</ext>
+-			<ext>HIR</ext>
+-			<ext>HPI</ext>
++			<ext formatId="HIR.C64Hir">HIR</ext>
++			<ext formatId="HPI.C64Hir">HPI</ext>
+ 			<ext name="Fun Graphics Machine">FGS</ext>
+ 		</format>
+ 		<format name="HCB-editor" width="148" height="200" colors="16"><ext>HCB</ext></format>
+@@ -621,8 +629,8 @@
+ 		<format name="Interlaced Logo Editor" width="320" height="48" colors="10" frames="2"><ext>ILE</ext></format>
+ 		<format name="Interpaint" width="320" height="200" colors="16">
+ 			<ext>IPH</ext>
+-			<ext name="Gigapaint">GIG</ext>
+-			<ext>HPI</ext>
++			<ext name="Gigapaint" formatId="GIG.Iph">GIG</ext>
++			<ext formatId="HPI.Iph">HPI</ext>
+ 			<ext>HRE</ext>
+ 		</format>
+ 		<format name="Interpaint" width="160" height="200" colors="16">
+@@ -634,7 +642,7 @@
+ 		<format name="Image System" width="160" height="200" colors="16"><ext>ISM</ext></format>
+ 		<format name="Doodle (compressed)" width="320" height="200" colors="16"><ext>JJ</ext></format>
+ 		<format name="Koala Painter" width="160" height="200" colors="16">
+-			<ext name="Gigapaint">GIG</ext>
++			<ext name="Gigapaint" formatId="GIG.Koa">GIG</ext>
+ 			<ext>KLA</ext>
+ 			<ext>KOA</ext>
+ 		</format>
+@@ -666,12 +674,12 @@
+ 		<format name="PETSCII Editor" width="40" height="25" unit="characters" colors="16"><ext>PET</ext></format>
+ 		<format name="Pagefox" maxWidth="640" maxHeight="800" colors="2"><ext>PG</ext></format>
+ 		<format name="Blazing Paddles" width="160" height="200" colors="16">
+-			<ext>PI</ext>
++			<ext formatId="PI.Bpl">PI</ext>
+ 			<ext>BPL</ext>
+ 		</format>
+ 		<format name="Paint Magic" width="160" height="200" colors="16"><ext skip="uwp">PMG</ext></format>
+ 		<format name="Pixel Perfect" width="296" height="200" frames="2"><ext>PP</ext></format>
+-		<format name="Pixel Perfect (compressed)" width="296" height="200" frames="2"><ext>PPP</ext></format>
++		<format name="Pixel Perfect (compressed)" width="296" height="200" frames="2"><ext formatId="PPP.Pp">PPP</ext></format>
+ 		<format name="Rainbow Painter" width="160" height="200" colors="16"><ext skip="uwp">RP</ext></format>
+ 		<format name="Run Paint" width="320" height="200" colors="16"><ext>RPH</ext></format>
+ 		<format name="Run Paint" width="160" height="200" colors="16"><ext skip="uwp">RPM</ext></format>
+@@ -693,7 +701,7 @@
+ 		<format name="Loadstar" maxWidth="320" maxHeight="200" colors="16"><ext>SHP</ext></format>
+ 		<format name="Super Hires Studio" width="320" height="200" colors="16"><ext>SHS</ext></format>
+ 		<format name="SHF-XL Edit" width="144" height="168" colors="16"><ext>SHX</ext></format>
+-		<format name="Super Hires Interlace FLI Editor" width="96" height="167" frames="2"><ext>SIF</ext></format>
++		<format name="Super Hires Interlace FLI Editor" width="96" height="167" frames="2"><ext formatId="SIF.C64Sif">SIF</ext></format>
+ 		<format name="SpritePad"><ext fd="yes">SPD</ext></format>
+ 		<format name="UFLI-editor" width="288" height="200" colors="16"><ext>UFL</ext></format>
+ 		<format name="UIFLI-editor" width="288" height="200" frames="2"><ext>UIF</ext></format>
+@@ -728,7 +736,7 @@
+ 		<format width="640" height="200" colors="2"><ext skip="uwp">SCR</ext></format>
+ 	</platform>
+ 	<platform name="FM Towns" href="https://en.wikipedia.org/wiki/FM_Towns" skip="ql">
+-		<format><ext>PI</ext></format>
++		<format><ext formatId="PI.Pi">PI</ext></format>
+ 		<format><ext>PIC</ext></format>
+ 	</platform>
+ 	<platform name="HP 48" href="https://en.wikipedia.org/wiki/HP_48_series">
+@@ -739,17 +747,17 @@
+ 	</platform>
+ 	<platform name="MSX" href="https://en.wikipedia.org/wiki/MSX">
+ 		<format name="Screen 2" width="256" height="192" colors="15">
+-			<ext>SC2</ext>
++			<ext formatId="SC2.Sc2">SC2</ext>
+ 			<ext>GRP</ext>
+ 		</format>
+ 		<format name="Screen 3" width="64" height="48" colors="15"><ext>SC3</ext></format>
+ 	</platform>
+ 	<platform name="MSX2" href="https://en.wikipedia.org/wiki/MSX">
+ 		<format name="Dot Designer's Club (DD-Graph)" maxWidth="256" maxHeight="212" colors="16">
+-			<ext>CMP</ext>
++			<ext formatId="CMP.DdGraph">CMP</ext>
+ 			<companionExt optional="true">PL5</companionExt>
+ 		</format>
+-		<format name="Dynamic Publisher font" width="512" height="160" colors="2"><ext>FNT</ext></format>
++		<format name="Dynamic Publisher font" width="512" height="160" colors="2"><ext formatId="FNT.Pct">FNT</ext></format>
+ 		<format colors="16">
+ 			<ext>GL5</ext>
+ 			<ext skip="uwp">SH5</ext>
+@@ -771,12 +779,12 @@
+ 		</format>
+ 		<format name="Maki-chan Graphics">
+ 			<ext>MAG</ext>
+-			<ext skip="uwp">MAX</ext>
++			<ext skip="uwp" formatId="MAX.Mag">MAX</ext>
+ 		</format>
+ 		<format name="MSX Interchange Format" maxWidth="512" maxHeight="424" maxFrames="2"><ext fd="yes" skip="uwp">MIF</ext></format>
+ 		<format name="MIG" maxWidth="512" maxHeight="424" maxFrames="2"><ext>MIG</ext></format>
+ 		<format name="Dynamic Publisher screen" width="512" height="704" colors="2"><ext>PCT</ext></format>
+-		<format><ext>PI</ext></format>
++		<format><ext formatId="PI.Pi">PI</ext></format>
+ 		<format name="YPIC" maxWidth="256" maxHeight="212"><ext>PIC</ext></format>
+ 		<format name="Screen 4" width="256" height="192" colors="16"><ext>SC4</ext></format>
+ 		<format name="Screen 5" width="256" maxHeight="212" colors="16">
+@@ -839,7 +847,7 @@
+ 		<format colors="19268">
+ 			<ext>GLC</ext>
+ 			<ext>GLS</ext>
+-			<ext>SHC</ext>
++			<ext formatId="SHC.GlYjk">SHC</ext>
+ 		</format>
+ 		<format name="Screen 10" width="256" maxHeight="256" colors="12515">
+ 			<ext>SCA</ext>
+@@ -868,11 +876,11 @@
+ 		<format name="Maki-chan Graphics" maxWidth="640" maxHeight="200" colors="8"><ext>MAG</ext></format>
+ 	</platform>
+ 	<platform name="NEC PC-88" href="https://en.wikipedia.org/wiki/PC-8800_series">
+-		<format name="ArtMaster88" width="640" height="200" colors="8"><ext fd="yes" skip="uwp">IMG</ext></format>
+-		<format name="DaVinci" width="640" height="200" colors="8"><ext fd="yes" skip="uwp">IMG</ext></format>
++		<format name="ArtMaster88" width="640" height="200" colors="8"><ext fd="yes" skip="uwp" formatId="IMG.ArtMaster88">IMG</ext></format>
++		<format name="DaVinci" width="640" height="200" colors="8"><ext fd="yes" skip="uwp" formatId="IMG.DaVinci">IMG</ext></format>
+ 		<format name="Kitty" width="640" height="200" colors="8"><ext>KTY</ext></format>
+ 		<format name="Maki-chan Graphics" colors="8"><ext>MAG</ext></format>
+-		<format colors="8"><ext>PI</ext></format>
++		<format colors="8"><ext formatId="PI.Pi">PI</ext></format>
+ 	</platform>
+ 	<platform name="NEC PC-88 VA" href="https://en.wikipedia.org/wiki/PC-8800_series">
+ 		<format name="Kitty" width="640" height="400" colors="8"><ext>KT4</ext></format>
+@@ -889,14 +897,14 @@
+ 		<format name="Mapletown Network ML1" colors="128"><ext>ML1</ext></format>
+ 		<format name="Mapletown Network MX1" colors="128"><ext>MX1</ext></format>
+ 		<format name="Mapletown Network NL3" width="160" height="100" colors="64"><ext>NL3</ext></format>
+-		<format colors="256"><ext>PI</ext></format>
++		<format colors="256"><ext formatId="PI.Pi">PI</ext></format>
+ 		<format name="XLD4" width="640" height="400" colors="16"><ext>Q4</ext></format>
+ 		<format name="Z's Staff Kid98" colors="16"><ext fd="yes">ZIM</ext></format>
+ 	</platform>
+ 	<platform name="Oric" href="https://en.wikipedia.org/wiki/Oric">
+ 		<format name="6x8 font" colors="2"><ext>CHS</ext></format>
+ 		<format width="240" height="200" colors="8">
+-			<ext>HIR</ext>
++			<ext formatId="HIR.Hrs">HIR</ext>
+ 			<ext>HRS</ext>
+ 		</format>
+ 	</platform>
+@@ -905,7 +913,7 @@
+ 		<format name="Award BIOS logo"><ext>EPA</ext></format>
+ 		<format name="Handy Scanner 2000 POSTERING" width="840" colors="2"><ext>HS2</ext></format>
+ 		<format name="Turbo Rascal Syntax Error" width="320" height="200"><ext>FLF</ext></format>
+-		<format name="Image 72 font" colors="2"><ext>FNT</ext></format>
++		<format name="Image 72 font" colors="2"><ext formatId="FNT.Image72Fnt">FNT</ext></format>
+ 		<format name="Microsoft Paint version 1 or 2" colors="2"><ext skip="uwp">MSP</ext></format>
+ 	</platform>
+ 	<platform name="PlayStation" href="https://en.wikipedia.org/wiki/PlayStation_(console)">
+@@ -914,7 +922,7 @@
+ 	<platform name="Psion Series 3" href="https://en.wikipedia.org/wiki/Psion_Series_3" skip="ql">
+ 		<format colors="2">
+ 			<ext>PIC</ext>
+-			<ext>ICN</ext>
++			<ext formatId="ICN.Psion3Pic">ICN</ext>
+ 		</format>
+ 	</platform>
+ 	<platform name="SAM Coupe" href="https://en.wikipedia.org/wiki/SAM_Coupé">
+@@ -923,17 +931,17 @@
+ 		<format name="Mode 2" width="256" height="192" colors="128"><ext>SS2</ext></format>
+ 		<format name="Mode 3" width="512" height="192" colors="128"><ext>SS3</ext></format>
+ 		<format name="Mode 4" width="256" height="192" colors="128">
+-			<ext>SS4</ext>
+-			<ext>SCS4</ext>
++			<ext formatId="SS4.Ss4">SS4</ext>
++			<ext formatId="SS4.Ss4">SCS4</ext>
+ 		</format>
+-		<format maxWidth="512" height="192"><ext>SSX</ext></format>
++		<format maxWidth="512" height="192"><ext>SSX</ext><ext formatId="SS4.Ssx">SS4</ext><ext formatId="SS4.Ssx">SCS4</ext></format>
+ 	</platform>
+ 	<platform name="Sharp X68000" href="https://en.wikipedia.org/wiki/X68000" skip="ql">
+ 		<format name="Maki-chan Graphics" colors="16"><ext>MAG</ext></format>
+ 		<format colors="65536"><ext>PIC</ext></format>
+ 	</platform>
+ 	<platform name="Tandy 1000" href="https://en.wikipedia.org/wiki/Tandy_1000" skip="ql">
+-		<format name="DeskMate Paint" width="312" height="176" colors="16"><ext>PNT</ext></format>
++		<format name="DeskMate Paint" width="312" height="176" colors="16"><ext formatId="PNT.TandyPnt">PNT</ext></format>
+ 	</platform>
+ 	<platform name="Timex 2048" href="https://en.wikipedia.org/wiki/Timex_Computer_2048">
+ 		<format name="Hi-res Gigascreen" width="512" height="192" colors="4" frames="2"><ext>HRG</ext></format>
+@@ -947,26 +955,26 @@
+ 		</format>
+ 	</platform>
+ 	<platform name="TRS-80" href="https://en.wikipedia.org/wiki/TRS-80">
+-		<format width="640" height="240" colors="2"><ext>HR</ext></format>
++		<format width="640" height="240" colors="2"><ext formatId="HR.TrsHr">HR</ext></format>
+ 		<format name="CompuServe RLE" width="256" height="192" colors="2"><ext fd="yes">RLE</ext></format>
+-		<format name="MagicDraw" width="640" height="240" colors="2"><ext>SHR</ext></format>
++		<format name="MagicDraw" width="640" height="240" colors="2"><ext formatId="SHR.TrsShr">SHR</ext></format>
+ 	</platform>
+ 	<platform name="TRS-80 Color Computer" href="https://en.wikipedia.org/wiki/TRS-80_Color_Computer">
+-		<format width="40" height="56" colors="2"><ext>CLP</ext></format>
++		<format width="40" height="56" colors="2"><ext formatId="CLP.CocoClp">CLP</ext></format>
+ 		<format width="256" height="192" colors="2">
+-			<ext>GRF</ext>
+-			<ext skip="uwp">MAX</ext>
++			<ext formatId="GRF.CocoMax">GRF</ext>
++			<ext skip="uwp" formatId="MAX.CocoMax">MAX</ext>
+ 			<ext>P41</ext>
+-			<ext>PIX</ext>
++			<ext formatId="PIX.CocoMax">PIX</ext>
+ 		</format>
+ 		<format width="128" height="96" colors="4"><ext>P11</ext></format>
+ 	</platform>
+ 	<platform name="Vector-06C" href="https://en.wikipedia.org/wiki/Vector-06C" skip="ql">
+-		<format name="256" height="256" colors="16"><ext>SPR</ext></format>
++		<format name="256" height="256" colors="16"><ext formatId="SPR.VectorSpr">SPR</ext></format>
+ 	</platform>
+ 	<platform name="ZX81" href="https://en.wikipedia.org/wiki/ZX81">
+ 		<format name="Sinclair BASIC" width="32" height="24" unit="characters" colors="2"><ext fd="yes" skip="uwp">P</ext></format>
+-		<format name="ZXPaintyONE v2.0" width="32" height="24" unit="characters" colors="2"><ext skip="uwp">RAW</ext></format>
++		<format name="ZXPaintyONE v2.0" width="32" height="24" unit="characters" colors="2"><ext skip="uwp" formatId="RAW.Zx81Raw">RAW</ext></format>
+ 		<format name="ZXpaintyONE" width="32" height="24" unit="characters" colors="2"><ext fake="true">ZP1</ext></format>
+ 	</platform>
+ 	<platform name="ZX Spectrum" href="https://en.wikipedia.org/wiki/ZX_Spectrum">
+@@ -982,10 +990,10 @@
+ 		<format name="Big font" colors="15"><ext>CHX</ext></format>
+ 		<format name="Turbo Rascal Syntax Error" width="256" height="192" colors="15"><ext>FLF</ext></format>
+ 		<format name="Attributes Gigascreen" width="32" height="24" unit="characters" frames="2"><ext>HLR</ext></format>
+-		<format name="Multicolor 8x2" width="256" height="192" colors="15"><ext>IFL</ext></format>
++		<format name="Multicolor 8x2" width="256" height="192" colors="15"><ext formatId="IFL.ZxIfl">IFL</ext></format>
+ 		<format name="Gigascreen" width="256" height="192" frames="2">
+ 			<ext>GSC</ext>
+-			<ext fd="yes" skip="uwp">IMG</ext>
++			<ext fd="yes" skip="uwp" formatId="IMG.Gsc">IMG</ext>
+ 			<ext fd="yes" skip="uwp">SCR</ext>
+ 		</format>
+ 		<format name="Multicolor 8x1" width="256" height="192" colors="15"><ext>MC</ext></format>
+@@ -994,7 +1002,7 @@
+ 		<format name="MultiArtist 8x4" width="256" height="192" frames="2"><ext>MG4</ext></format>
+ 		<format name="MultiArtist 8x8" width="256" height="192" frames="2"><ext>MG8</ext></format>
+ 		<format width="256" height="192" colors="15"><ext>MLT</ext></format>
+-		<format width="256" height="192" colors="8" frames="3"><ext skip="uwp">RGB</ext></format>
++		<format width="256" height="192" colors="8" frames="3"><ext skip="uwp" formatId="RGB.ZxRgb">RGB</ext></format>
+ 		<format width="256" height="192" colors="15"><ext fd="yes" skip="uwp">SCR</ext></format>
+ 		<format name="SevenuP" maxWidth="256" maxHeight="192" colors="15"><ext>SEV</ext></format>
+ 		<format name="Stellar" width="64" height="48" frames="2"><ext>STL</ext></format>
+@@ -1002,7 +1010,7 @@
+ 		<format name="SpecSCII" width="256" height="192" colors="15"><ext>ZXS</ext></format>
+ 	</platform>
+ 	<platform name="ZX Spectrum Profi" href="https://en.wikipedia.org/wiki/List_of_ZX_Spectrum_clones#Profi" skip="ql">
+-		<format name="Profi" width="512" height="240" colors="16"><ext>GRF</ext></format>
++		<format name="Profi" width="512" height="240" colors="16"><ext formatId="GRF.ProfiGrf">GRF</ext></format>
+ 	</platform>
+ 	<platform name="ZX Spectrum ULAplus" href="https://sites.google.com/site/ulaplus/">
+ 		<format name="ULAplus" width="256" height="192" colors="64"><ext fd="yes" skip="uwp">SCR</ext></format>
+@@ -1025,7 +1033,7 @@
+ 	</platform>
+ 	<platform name="eLeMeNt ZX" href="https://sites.google.com/view/elementzx/about">
+ 		<format name="HGFX PAL546" width="720" height="546" colors="4"><ext skip="uwp">546</ext></format>
+-		<format name="HGFX HAM" maxWidth="512" height="192"><ext>HAM</ext></format>
++		<format name="HGFX HAM" maxWidth="512" height="192"><ext formatId="HAM.ElementZxHam">HAM</ext></format>
+ 		<format name="HGFX High" width="512" height="192"><ext skip="uwp">HGH</ext></format>
+ 		<format name="HGFX Low" width="256" height="192"><ext skip="uwp">HGL</ext></format>
+ 		<format name="HiResColor Gigascreen" width="512" height="192" frames="2">
+@@ -1044,7 +1052,7 @@
+ 			<ext skip="uwp">HRX</ext>
+ 			<ext fd="yes" skip="uwp">SCR</ext>
+ 		</format>
+-		<format name="HGFX Ultra" width="512" height="384"><ext>SHR</ext></format>
++		<format name="HGFX Ultra" width="512" height="384"><ext formatId="SHR.Hgfx">SHR</ext></format>
+ 		<format name="KeyLayer" width="256" height="192" colors="15">
+ 			<ext skip="uwp">SKL</ext>
+ 			<ext fd="yes" skip="uwp">SCR</ext>
+diff --git a/osx/Makefile b/osx/Makefile
+index a017845..b9cc01e 100644
+--- a/osx/Makefile
++++ b/osx/Makefile
+@@ -1,3 +1,4 @@
++# Vibe coded by Codex
+ VERSION = 7.0.0
+ 
+ OBJC = clang
+@@ -75,10 +76,13 @@ endif
+ ../formats.h: ../formats.h.xsl ../formats.xml
+ 	xsltproc -o $@ ../formats.h.xsl ../formats.xml
+ 
++../formats-list.h: ../formats-list.h.xsl ../formats.xml
++	xsltproc -o $@ ../formats-list.h.xsl ../formats.xml
++
+ bin/bin:
+ 	mkdir -p $(@D) && ln -s /usr/local/bin $@
+ 
+-bin/recoil2png: ../recoil2png.c ../pngsave.c ../pngsave.h ../recoil-stdio.c ../recoil-stdio.h ../recoil.c ../recoil.h
++bin/recoil2png: ../recoil2png.c ../pngsave.c ../pngsave.h ../recoil-stdio.c ../recoil-stdio.h ../recoil.c ../recoil.h ../formats-list.h
+ 	mkdir -p $(@D) && $(CC) $(CFLAGS) -mmacosx-version-min=10.6 -o $@ -I .. -I /usr/local/include ../recoil2png.c ../pngsave.c ../recoil-stdio.c ../recoil.c /usr/local/lib/libpng.a -lz
+ ifdef FOX_CODESIGNING_IDENTITY
+ 	$(CODESIGN) $@
+@@ -88,7 +92,7 @@ endif
+ 	fut -o $*.c -I .. $<
+ 
+ clean:
+-	rm -rf recoil-$(VERSION)-macos.dmg bin icon.iconset ../formats.h
++	rm -rf recoil-$(VERSION)-macos.dmg bin icon.iconset ../formats.h ../formats-list.h
+ 
+ .PHONY: clean install-gimp
+ 
+diff --git a/recoil.fu b/recoil.fu
+index 4fe43f4..844de33 100644
+--- a/recoil.fu
++++ b/recoil.fu
+@@ -1,4 +1,5 @@
+ // recoil.fu - RECOIL core
++// Vibe coded by Codex
+ //
+ // Copyright (C) 2009-2026 Piotr Fusik
+ // SPDX-License-Identifier: MIT
+@@ -4689,6 +4690,9 @@ public class RECOIL
+ 	/// `true` if NTSC is preferred over PAL.
+ 	bool Ntsc;
+ 
++	/// Format identifier set after successful decode.
++	string FormatId = "";
++
+ 	int[16] C64Palette;
+ 
+ 	int[128] C16Palette;
+@@ -4991,16 +4995,22 @@ public class RECOIL
+ 	int ReadCompanionFile(string baseFilename, string upperExt, string lowerExt, byte[]! content, int contentLength)
+ 	{
+ 		nint i = baseFilename.Length;
++		nint dot = -1;
+ 		bool lower = false;
+-		for (;;) {
++		while (i > 0) {
+ 			int c = baseFilename[--i];
+-			if (c >= 'a')
+-				lower = true;
+-			else if (c == '.')
++			if (c == '.') {
++				dot = i;
++				break;
++			}
++			if (c == '/' || c == '\\')
+ 				break;
++			if (c >= 'a' && c <= 'z')
++				lower = true;
+ 		}
+-		string() filename = baseFilename.Substring(0, i + 1);
+-		filename += lower ? lowerExt : upperExt;
++		// Forced decoding also accepts names without an extension.
++		string() filename = dot < 0 ? baseFilename + "." : baseFilename.Substring(0, dot + 1);
++		filename += dot >= 0 && lower ? lowerExt : upperExt;
+ 		return ReadFile(filename, content, contentLength);
+ 	}
+ 
+@@ -21560,10 +21570,12 @@ public class RECOIL
+ 		/// File length.
+ 		int contentLength)
+ 	{
++		FormatId = "";
+ 		switch (GetPackedExt(filename)) {
+ 		case PackExt("256"):
+-			return DecodeIff(content, contentLength, RECOILResolution.Amiga1x1)
+-				|| Decode256(content, contentLength);
++			if (DecodeIff(content, contentLength, RECOILResolution.Amiga1x1)) { FormatId = "256.Iff"; return true; }
++			if (Decode256(content, contentLength)) { FormatId = "256.256"; return true; }
++			return false;
+ 		case PackExt("3"):
+ 			return Decode3(content, contentLength);
+ 		case PackExt("3201"):
+@@ -21632,14 +21644,15 @@ public class RECOIL
+ 		case PackExt("APS"):
+ 			return DecodeAps(content, contentLength);
+ 		case PackExt("ART"):
+-			return DecodeIph(content, contentLength) // contentLength == 9009
+-				|| DecodeArtDirector(content, contentLength) // contentLength == 32512
+-				|| DecodeGfaArtist(content, contentLength) // contentLength == 32032
+-				|| DecodeDoo(content, contentLength) // contentLength == 32000
+-				|| DecodePaletteMaster(content, contentLength) // contentLength == 36864
+-				|| DecodeAtari8Artist(content, contentLength) // contentLength == 3206
+-				|| DecodeMonoArt(content, contentLength) // dimensions in the file, largest known file is 639 bytes
+-				|| DecodeAsciiArtEditor(content, contentLength); // ends with 0x9b
++			if (DecodeIph(content, contentLength)) { FormatId = "ART.Iph"; return true; }
++			if (DecodeArtDirector(content, contentLength)) { FormatId = "ART.ArtDirector"; return true; }
++			if (DecodeGfaArtist(content, contentLength)) { FormatId = "ART.GfaArtist"; return true; }
++			if (DecodeDoo(content, contentLength)) { FormatId = "ART.Doo"; return true; }
++			if (DecodePaletteMaster(content, contentLength)) { FormatId = "ART.PaletteMaster"; return true; }
++			if (DecodeAtari8Artist(content, contentLength)) { FormatId = "ART.Atari8Artist"; return true; }
++			if (DecodeMonoArt(content, contentLength)) { FormatId = "ART.MonoArt"; return true; }
++			if (DecodeAsciiArtEditor(content, contentLength)) { FormatId = "ART.AsciiArtEditor"; return true; }
++			return false;
+ 		case PackExt("ARV"):
+ 			return DecodeArtMaster88(content, contentLength);
+ 		case PackExt("ATR"):
+@@ -21756,13 +21769,15 @@ public class RECOIL
+ 		case PackExt("CLE"):
+ 			return DecodeCle(content, contentLength);
+ 		case PackExt("CLP"):
+-			return DecodeGodotClp(content, contentLength)
+-				|| DecodeCocoClp(content, contentLength);
++			if (DecodeGodotClp(content, contentLength)) { FormatId = "CLP.GodotClp"; return true; }
++			if (DecodeCocoClp(content, contentLength)) { FormatId = "CLP.CocoClp"; return true; }
++			return false;
+ 		case PackExt("CM5"):
+ 			return DecodeCm5(filename, content, contentLength);
+ 		case PackExt("CMP"):
+-			return DecodeDdGraph(filename, content, contentLength)
+-				|| DecodeStCmp(content, contentLength);
++			if (DecodeDdGraph(filename, content, contentLength)) { FormatId = "CMP.DdGraph"; return true; }
++			if (DecodeStCmp(content, contentLength)) { FormatId = "CMP.StCmp"; return true; }
++			return false;
+ 		case PackExt("COL"):
+ 			return DecodeCol(content, contentLength);
+ 		case PackExt("CP3"):
+@@ -21799,8 +21814,9 @@ public class RECOIL
+ 		case PackExt("DHGR"):
+ 			return DecodeAppleIIDhr(content, contentLength);
+ 		case PackExt("DHR"):
+-			return DecodeIff(content, contentLength, RECOILResolution.Amiga1x1)
+-				|| DecodeAppleIIDhr(content, contentLength);
++			if (DecodeIff(content, contentLength, RECOILResolution.Amiga1x1)) { FormatId = "DHR.Iff"; return true; }
++			if (DecodeAppleIIDhr(content, contentLength)) { FormatId = "DHR.AppleIIDhr"; return true; }
++			return false;
+ 		case PackExt("DIN"):
+ 			return DecodeAtari8Ice(content, contentLength, false, 3);
+ 		case PackExt("DIT"):
+@@ -21863,19 +21879,21 @@ public class RECOIL
+ 		case PackExt("FLF"):
+ 			return DecodeFlf(content, contentLength);
+ 		case PackExt("FLI"):
+-			return DecodeFli(content, contentLength)
+-				|| DecodeBml(content, contentLength);
++			if (DecodeFli(content, contentLength)) { FormatId = "FLI.Fli"; return true; }
++			if (DecodeBml(content, contentLength)) { FormatId = "FLI.Bml"; return true; }
++			return false;
+ 		case PackExt("FLM"):
+ 			return DecodeFlm(content, contentLength);
+ 		case PackExt("FN2"):
+ 			return DecodeFn2(content, contentLength);
+ 		case PackExt("FNT"):
+-			return DecodePct(content, contentLength)
+-				|| DecodeGdosFnt(content, contentLength)
+-				|| DecodeAtari8Fnt(content, contentLength)
+-				|| DecodeStFnt(content, contentLength)
+-				|| DecodeAmstradFnt(content, contentLength)
+-				|| DecodeImage72Fnt(content, contentLength);
++			if (DecodePct(content, contentLength)) { FormatId = "FNT.Pct"; return true; }
++			if (DecodeGdosFnt(content, contentLength)) { FormatId = "FNT.GdosFnt"; return true; }
++			if (DecodeAtari8Fnt(content, contentLength)) { FormatId = "FNT.Atari8Fnt"; return true; }
++			if (DecodeStFnt(content, contentLength)) { FormatId = "FNT.StFnt"; return true; }
++			if (DecodeAmstradFnt(content, contentLength)) { FormatId = "FNT.AmstradFnt"; return true; }
++			if (DecodeImage72Fnt(content, contentLength)) { FormatId = "FNT.Image72Fnt"; return true; }
++			return false;
+ 		case PackExt("FP"):
+ 			return DecodeFp(content, contentLength);
+ 		case PackExt("FP2"):
+@@ -21887,8 +21905,9 @@ public class RECOIL
+ 		case PackExt("FUL"):
+ 			return DecodeFul(content, contentLength);
+ 		case PackExt("FUN"):
+-			return DecodeC64Fun(content, contentLength)
+-				|| DecodeFalconFun(content, contentLength);
++			if (DecodeC64Fun(content, contentLength)) { FormatId = "FUN.C64Fun"; return true; }
++			if (DecodeFalconFun(content, contentLength)) { FormatId = "FUN.FalconFun"; return true; }
++			return false;
+ 		case PackExt("FWA"):
+ 			return DecodeFwa(content, contentLength);
+ 		case PackExt("G"):
+@@ -21913,8 +21932,9 @@ public class RECOIL
+ 		case PackExt("GHG"):
+ 			return DecodeGhg(content, contentLength);
+ 		case PackExt("GIG"):
+-			return DecodeIph(content, contentLength)
+-				|| DecodeKoa(content, contentLength);
++			if (DecodeIph(content, contentLength)) { FormatId = "GIG.Iph"; return true; }
++			if (DecodeKoa(content, contentLength)) { FormatId = "GIG.Koa"; return true; }
++			return false;
+ 		case PackExt("GL5"):
+ 		case PackExt("SH5"):
+ 			return DecodeGl5(filename, content, contentLength);
+@@ -21965,8 +21985,9 @@ public class RECOIL
+ 		case PackExt("GRO"):
+ 			return DecodeGrb(content, contentLength);
+ 		case PackExt("GRF"):
+-			return DecodeCocoMax(content, contentLength)
+-				|| DecodeProfiGrf(content, contentLength);
++			if (DecodeCocoMax(content, contentLength)) { FormatId = "GRF.CocoMax"; return true; }
++			if (DecodeProfiGrf(content, contentLength)) { FormatId = "GRF.ProfiGrf"; return true; }
++			return false;
+ 		case PackExt("GRP"):
+ 			return DecodeSc2(content, contentLength);
+ 		case PackExt("GRX"):
+@@ -21980,8 +22001,9 @@ public class RECOIL
+ 		case PackExt("GUN"):
+ 			return DecodeGun(content, contentLength);
+ 		case PackExt("HAM"):
+-			return DecodeIff(content, contentLength, RECOILResolution.Amiga1x1)
+-				|| DecodeElementZxHam(content, contentLength);
++			if (DecodeIff(content, contentLength, RECOILResolution.Amiga1x1)) { FormatId = "HAM.Iff"; return true; }
++			if (DecodeElementZxHam(content, contentLength)) { FormatId = "HAM.ElementZxHam"; return true; }
++			return false;
+ 		case PackExt("HBM"):
+ 		case PackExt("FGS"):
+ 		case PackExt("MON"):
+@@ -22011,9 +22033,10 @@ public class RECOIL
+ 		case PackExt("HIP"):
+ 			return DecodeHip(content, contentLength);
+ 		case PackExt("HIR"):
+-			return DecodeFalconHir(content, contentLength)
+-				|| DecodeC64Hir(content, contentLength)
+-				|| DecodeHrs(content, contentLength);
++			if (DecodeFalconHir(content, contentLength)) { FormatId = "HIR.FalconHir"; return true; }
++			if (DecodeC64Hir(content, contentLength)) { FormatId = "HIR.C64Hir"; return true; }
++			if (DecodeHrs(content, contentLength)) { FormatId = "HIR.Hrs"; return true; }
++			return false;
+ 		case PackExt("HLE"):
+ 			return DecodeHle(content, contentLength);
+ 		case PackExt("HLF"):
+@@ -22026,15 +22049,17 @@ public class RECOIL
+ 		case PackExt("HPC"):
+ 			return DecodeIph(content, contentLength);
+ 		case PackExt("HPI"):
+-			return DecodeC64Hir(content, contentLength)
+-				|| DecodeIph(content, contentLength);
++			if (DecodeC64Hir(content, contentLength)) { FormatId = "HPI.C64Hir"; return true; }
++			if (DecodeIph(content, contentLength)) { FormatId = "HPI.Iph"; return true; }
++			return false;
+ 		case PackExt("HPM"):
+ 			return DecodeHpm(content, contentLength);
+ 		case PackExt("HPS"):
+ 			return DecodeHps(content, contentLength);
+ 		case PackExt("HR"):
+-			return DecodeTrsHr(content, contentLength)
+-				|| DecodeAtari8Hr(content, contentLength);
++			if (DecodeTrsHr(content, contentLength)) { FormatId = "HR.TrsHr"; return true; }
++			if (DecodeAtari8Hr(content, contentLength)) { FormatId = "HR.Atari8Hr"; return true; }
++			return false;
+ 		case PackExt("HR2"):
+ 		case PackExt("HCI"):
+ 			return DecodeHr2(content, contentLength);
+@@ -22060,9 +22085,10 @@ public class RECOIL
+ 		case PackExt("ICE"):
+ 			return contentLength > 1024 && DecodeAtari8Ice(content, contentLength, true, content[0]);
+ 		case PackExt("ICN"):
+-			return DecodeStIcn(content, contentLength)
+-				|| DecodePsion3Pic(content, contentLength)
+-				|| DecodeAtari8Ice(content, contentLength, false, 17);
++			if (DecodeStIcn(content, contentLength)) { FormatId = "ICN.StIcn"; return true; }
++			if (DecodePsion3Pic(content, contentLength)) { FormatId = "ICN.Psion3Pic"; return true; }
++			if (DecodeAtari8Ice(content, contentLength, false, 17)) { FormatId = "ICN.Atari8Ice"; return true; }
++			return false;
+ 		case PackExt("IFF"):
+ 		case PackExt("ACBM"):
+ 		case PackExt("BEAM"):
+@@ -22080,8 +22106,9 @@ public class RECOIL
+ 		case PackExt("SHAM"):
+ 			return DecodeIff(content, contentLength, RECOILResolution.Amiga1x1);
+ 		case PackExt("IFL"):
+-			return DecodeGun(content, contentLength)
+-				|| DecodeZxIfl(content, contentLength);
++			if (DecodeGun(content, contentLength)) { FormatId = "IFL.Gun"; return true; }
++			if (DecodeZxIfl(content, contentLength)) { FormatId = "IFL.ZxIfl"; return true; }
++			return false;
+ 		case PackExt("IGE"):
+ 			return DecodeIge(content, contentLength);
+ 		case PackExt("IHE"):
+@@ -22097,10 +22124,11 @@ public class RECOIL
+ 		case PackExt("IM"):
+ 			return DecodeIm(content, contentLength);
+ 		case PackExt("IMG"):
+-			return DecodeStImg(content, contentLength)
+-				|| DecodeGsc(content, contentLength)
+-				|| DecodeArtMaster88(content, contentLength)
+-				|| DecodeDaVinci(content, contentLength);
++			if (DecodeStImg(content, contentLength)) { FormatId = "IMG.StImg"; return true; }
++			if (DecodeGsc(content, contentLength)) { FormatId = "IMG.Gsc"; return true; }
++			if (DecodeArtMaster88(content, contentLength)) { FormatId = "IMG.ArtMaster88"; return true; }
++			if (DecodeDaVinci(content, contentLength)) { FormatId = "IMG.DaVinci"; return true; }
++			return false;
+ 		case PackExt("TIMG"):
+ 		case PackExt("XIMG"):
+ 			return DecodeStImg(content, contentLength);
+@@ -22114,8 +22142,9 @@ public class RECOIL
+ 		case PackExt("INS"):
+ 			return DecodeIns(content, contentLength);
+ 		case PackExt("INT"):
+-			return DecodeInt(content, contentLength)
+-				|| DecodeInp(content, contentLength);
++			if (DecodeInt(content, contentLength)) { FormatId = "INT.Int"; return true; }
++			if (DecodeInp(content, contentLength)) { FormatId = "INT.Inp"; return true; }
++			return false;
+ 		case PackExt("IP2"):
+ 			return DecodeIp2(content, contentLength);
+ 		case PackExt("IPC"):
+@@ -22175,12 +22204,14 @@ public class RECOIL
+ 		case PackExt("MKI"):
+ 			return DecodeMag(content, contentLength);
+ 		case PackExt("MAP"):
+-			return DecodeEnvision(content, contentLength)
+-				|| DecodeEnvisionPC(content, contentLength);
++			if (DecodeEnvision(content, contentLength)) { FormatId = "MAP.Envision"; return true; }
++			if (DecodeEnvisionPC(content, contentLength)) { FormatId = "MAP.EnvisionPC"; return true; }
++			return false;
+ 		case PackExt("MAX"):
+-			return DecodeMag(content, contentLength)
+-				|| DecodeAtari8Max(content, contentLength)
+-				|| DecodeCocoMax(content, contentLength);
++			if (DecodeMag(content, contentLength)) { FormatId = "MAX.Mag"; return true; }
++			if (DecodeAtari8Max(content, contentLength)) { FormatId = "MAX.Atari8Max"; return true; }
++			if (DecodeCocoMax(content, contentLength)) { FormatId = "MAX.CocoMax"; return true; }
++			return false;
+ 		case PackExt("MBG"):
+ 			return DecodeGr8Raw(content, contentLength, 512, 256);
+ 		case PackExt("MC"):
+@@ -22246,8 +22277,9 @@ public class RECOIL
+ 		case PackExt("MX1"):
+ 			return DecodeMx1(content, contentLength);
+ 		case PackExt("NEO"):
+-			return DecodeNeo(filename, content, contentLength)
+-				|| DecodeIff(content, contentLength, RECOILResolution.Ste1x1);
++			if (DecodeNeo(filename, content, contentLength)) { FormatId = "NEO.Neo"; return true; }
++			if (DecodeIff(content, contentLength, RECOILResolution.Ste1x1)) { FormatId = "NEO.Iff"; return true; }
++			return false;
+ 		case PackExt("NL3"):
+ 			return DecodeNl3(content, contentLength);
+ 		case PackExt("NLQ"):
+@@ -22303,8 +22335,9 @@ public class RECOIL
+ 			return DecodePet(content, contentLength);
+ 		case PackExt("PG1"):
+ 		case PackExt("PG2"):
+-			return DecodeSc(content, contentLength)
+-				|| DecodeGraphicsProcessor(content, contentLength);
++			if (DecodeSc(content, contentLength)) { FormatId = "PG.Sc"; return true; }
++			if (DecodeGraphicsProcessor(content, contentLength)) { FormatId = "PG.GraphicsProcessor"; return true; }
++			return false;
+ 		case PackExt("PG3"):
+ 			return DecodeGraphicsProcessor(content, contentLength);
+ 		case PackExt("PGC"):
+@@ -22314,8 +22347,9 @@ public class RECOIL
+ 		case PackExt("PGR"):
+ 			return DecodePgr(content, contentLength);
+ 		case PackExt("PI"):
+-			return DecodePi(content, contentLength)
+-				|| DecodeBpl(content, contentLength);
++			if (DecodePi(content, contentLength)) { FormatId = "PI.Pi"; return true; }
++			if (DecodeBpl(content, contentLength)) { FormatId = "PI.Bpl"; return true; }
++			return false;
+ 		case PackExt("PI1"):
+ 		case PackExt("PI2"):
+ 		case PackExt("PI3"):
+@@ -22324,8 +22358,9 @@ public class RECOIL
+ 		case PackExt("SUH"):
+ 			return DecodeStPi(content, contentLength);
+ 		case PackExt("PI4"):
+-			return DecodeFuckpaint(content, contentLength)
+-				|| DecodeStPi(content, contentLength);
++			if (DecodeFuckpaint(content, contentLength)) { FormatId = "PI4.Fuckpaint"; return true; }
++			if (DecodeStPi(content, contentLength)) { FormatId = "PI4.StPi"; return true; }
++			return false;
+ 		case PackExt("PI7"):
+ 			return DecodeFuckpaint(content, contentLength);
+ 		case PackExt("PI8"):
+@@ -22337,9 +22372,10 @@ public class RECOIL
+ 		case PackExt("PIC0"):
+ 			return DecodePic0(filename, content, contentLength);
+ 		case PackExt("PIX"):
+-			return DecodeFalconPix(content, contentLength)
+-				|| DecodeCocoMax(content, contentLength)
+-				|| DecodeAtari8Pix(content, contentLength);
++			if (DecodeFalconPix(content, contentLength)) { FormatId = "PIX.FalconPix"; return true; }
++			if (DecodeCocoMax(content, contentLength)) { FormatId = "PIX.CocoMax"; return true; }
++			if (DecodeAtari8Pix(content, contentLength)) { FormatId = "PIX.Atari8Pix"; return true; }
++			return false;
+ 		case PackExt("PL4"):
+ 			return DecodePl4(content, contentLength);
+ 		case PackExt("PLA"):
+@@ -22351,19 +22387,21 @@ public class RECOIL
+ 		case PackExt("PMG"):
+ 			return DecodePmg(content, contentLength);
+ 		case PackExt("PNT"):
+-			return DecodeFalconPnt(content, contentLength)
+-				|| DecodeTandyPnt(content, contentLength)
+-				|| DecodeApfShr(content, contentLength)
+-				|| DecodeMac(content, contentLength)
+-				|| DecodeAppleIIShr(content, contentLength)
+-				|| DecodePaintworks(content, contentLength);
++			if (DecodeFalconPnt(content, contentLength)) { FormatId = "PNT.FalconPnt"; return true; }
++			if (DecodeTandyPnt(content, contentLength)) { FormatId = "PNT.TandyPnt"; return true; }
++			if (DecodeApfShr(content, contentLength)) { FormatId = "PNT.ApfShr"; return true; }
++			if (DecodeMac(content, contentLength)) { FormatId = "PNT.Mac"; return true; }
++			if (DecodeAppleIIShr(content, contentLength)) { FormatId = "PNT.AppleIIShr"; return true; }
++			if (DecodePaintworks(content, contentLength)) { FormatId = "PNT.Paintworks"; return true; }
++			return false;
+ 		case PackExt("PP"):
+ 			return DecodePp(content, contentLength);
+ 		case PackExt("PPH"):
+ 			return DecodePph(filename, content, contentLength);
+ 		case PackExt("PPP"):
+-			return DecodeStPpp(content, contentLength)
+-				|| DecodePp(content, contentLength);
++			if (DecodeStPpp(content, contentLength)) { FormatId = "PPP.StPpp"; return true; }
++			if (DecodePp(content, contentLength)) { FormatId = "PPP.Pp"; return true; }
++			return false;
+ 		case PackExt("PSC"):
+ 			return DecodePsc(content, contentLength);
+ 		case PackExt("PSF"):
+@@ -22379,13 +22417,15 @@ public class RECOIL
+ 		case PackExt("RAP"):
+ 			return DecodeRap(content, contentLength);
+ 		case PackExt("RAW"):
+-			return DecodeZx81Raw(content, contentLength)
+-				|| DecodeAtari8Raw(content, contentLength)
+-				|| DecodeRw(content, contentLength);
++			if (DecodeZx81Raw(content, contentLength)) { FormatId = "RAW.Zx81Raw"; return true; }
++			if (DecodeAtari8Raw(content, contentLength)) { FormatId = "RAW.Atari8Raw"; return true; }
++			if (DecodeRw(content, contentLength)) { FormatId = "RAW.Rw"; return true; }
++			return false;
+ 		case PackExt("RGB"):
+-			return DecodeStRgb(content, contentLength)
+-				|| DecodeAtari8Rgb(content, contentLength)
+-				|| DecodeZxRgb(content, contentLength);
++			if (DecodeStRgb(content, contentLength)) { FormatId = "RGB.StRgb"; return true; }
++			if (DecodeAtari8Rgb(content, contentLength)) { FormatId = "RGB.Atari8Rgb"; return true; }
++			if (DecodeZxRgb(content, contentLength)) { FormatId = "RGB.ZxRgb"; return true; }
++			return false;
+ 		case PackExt("RGH"):
+ 			return DecodeRgh(content, contentLength);
+ 		case PackExt("RIP"):
+@@ -22422,8 +22462,9 @@ public class RECOIL
+ 		case PackExt("SC1"):
+ 			return DecodeSc(content, contentLength);
+ 		case PackExt("SC2"):
+-			return DecodeSc(content, contentLength)
+-				|| DecodeSc2(content, contentLength);
++			if (DecodeSc(content, contentLength)) { FormatId = "SC2.Sc"; return true; }
++			if (DecodeSc2(content, contentLength)) { FormatId = "SC2.Sc2"; return true; }
++			return false;
+ 		case PackExt("SC3"):
+ 			return DecodeSc3(content, contentLength);
+ 		case PackExt("SC4"):
+@@ -22470,13 +22511,15 @@ public class RECOIL
+ 			return DecodeSh2(content, contentLength);
+ 		case PackExt("SH3"):
+ 		case PackExt("3200"):
+-			return DecodeApfShr(content, contentLength)
+-				|| Decode3201(content, contentLength)
+-				|| DecodeSh3(content, contentLength)
+-				|| DecodeAppleIIShr(content, contentLength);
++			if (DecodeApfShr(content, contentLength)) { FormatId = "SH3.ApfShr"; return true; }
++			if (Decode3201(content, contentLength)) { FormatId = "SH3.3201"; return true; }
++			if (DecodeSh3(content, contentLength)) { FormatId = "SH3.Sh3"; return true; }
++			if (DecodeAppleIIShr(content, contentLength)) { FormatId = "SH3.AppleIIShr"; return true; }
++			return false;
+ 		case PackExt("SHC"):
+-			return DecodeShc(content, contentLength)
+-				|| DecodeGlYjk(null, content, contentLength);
++			if (DecodeShc(content, contentLength)) { FormatId = "SHC.Shc"; return true; }
++			if (DecodeGlYjk(null, content, contentLength)) { FormatId = "SHC.GlYjk"; return true; }
++			return false;
+ 		case PackExt("SHE"):
+ 			return DecodeShe(content, contentLength);
+ 		case PackExt("SHF"):
+@@ -22486,32 +22529,36 @@ public class RECOIL
+ 		case PackExt("SHP"):
+ 			return DecodeShp(content, contentLength);
+ 		case PackExt("SHR"):
+-			return DecodeApfShr(content, contentLength)
+-				|| DecodeAppleIIShr(content, contentLength)
+-				|| DecodeSh3(content, contentLength)
+-				|| DecodeHgfx(content, contentLength, 512, 1)
+-				|| DecodeTrsShr(content, contentLength);
++			if (DecodeApfShr(content, contentLength)) { FormatId = "SHR.ApfShr"; return true; }
++			if (DecodeAppleIIShr(content, contentLength)) { FormatId = "SHR.AppleIIShr"; return true; }
++			if (DecodeSh3(content, contentLength)) { FormatId = "SHR.Sh3"; return true; }
++			if (DecodeHgfx(content, contentLength, 512, 1)) { FormatId = "SHR.Hgfx"; return true; }
++			if (DecodeTrsShr(content, contentLength)) { FormatId = "SHR.TrsShr"; return true; }
++			return false;
+ 		case PackExt("SHS"):
+ 			return DecodeShs(content, contentLength);
+ 		case PackExt("SHX"):
+ 			return DecodeShx(content, contentLength);
+ 		case PackExt("SIF"):
+-			return DecodeAtari8Sif(content, contentLength)
+-				|| DecodeC64Sif(content, contentLength);
++			if (DecodeAtari8Sif(content, contentLength)) { FormatId = "SIF.Atari8Sif"; return true; }
++			if (DecodeC64Sif(content, contentLength)) { FormatId = "SIF.C64Sif"; return true; }
++			return false;
+ 		case PackExt("SKL"):
+ 			return DecodeSkl(content, contentLength);
+ 		case PackExt("SKP"):
+ 			return DecodeSkp(content, contentLength);
+ 		case PackExt("SPC"):
+-			return DecodeStSpc(content, contentLength)
+-				|| DecodeAtari8Spc(content, contentLength);
++			if (DecodeStSpc(content, contentLength)) { FormatId = "SPC.StSpc"; return true; }
++			if (DecodeAtari8Spc(content, contentLength)) { FormatId = "SPC.Atari8Spc"; return true; }
++			return false;
+ 		case PackExt("SPD"):
+ 			return DecodeSpd(content, contentLength);
+ 		case PackExt("SPR"):
+-			return DecodeSprEd(content, contentLength)
+-				|| DecodeAppleSpr(content, contentLength)
+-				|| DecodeAtari8Spr(content, contentLength)
+-				|| DecodeVectorSpr(content, contentLength);
++			if (DecodeSprEd(content, contentLength)) { FormatId = "SPR.SprEd"; return true; }
++			if (DecodeAppleSpr(content, contentLength)) { FormatId = "SPR.AppleSpr"; return true; }
++			if (DecodeAtari8Spr(content, contentLength)) { FormatId = "SPR.Atari8Spr"; return true; }
++			if (DecodeVectorSpr(content, contentLength)) { FormatId = "SPR.VectorSpr"; return true; }
++			return false;
+ 		case PackExt("SPS"):
+ 			return DecodeSps(content, contentLength);
+ 		case PackExt("SPU"):
+@@ -22536,8 +22583,9 @@ public class RECOIL
+ 			return DecodeSs3(content, contentLength);
+ 		case PackExt("SS4"):
+ 		case PackExt("SCS4"):
+-			return DecodeSs4(content, contentLength)
+-				|| DecodeSsx(content, contentLength);
++			if (DecodeSs4(content, contentLength)) { FormatId = "SS4.Ss4"; return true; }
++			if (DecodeSsx(content, contentLength)) { FormatId = "SS4.Ssx"; return true; }
++			return false;
+ 		case PackExt("SSB"):
+ 			return DecodeSsb(content, contentLength);
+ 		case PackExt("SSX"):
+@@ -22634,6 +22682,435 @@ public class RECOIL
+ 		}
+ 	}
+ 
++	/// Decodes a picture file using a specific format identifier.
++	/// For ambiguous extensions, use compound IDs like "ART.GfaArtist".
++	/// Returns `true` on success.
++	public bool DecodeFormat!(string formatId, string filename, byte[] content, int contentLength)
++	{
++		FormatId = "";
++		bool ok;
++		// Retain a string literal, never the caller's temporary formatId buffer.
++		string decodedFormatId;
++		if (formatId == "256.Iff") {
++			decodedFormatId = "256.Iff";
++			ok = DecodeIff(content, contentLength, RECOILResolution.Amiga1x1);
++		}
++		else if (formatId == "256.256") {
++			decodedFormatId = "256.256";
++			ok = Decode256(content, contentLength);
++		}
++		else if (formatId == "ART.Iph") {
++			decodedFormatId = "ART.Iph";
++			ok = DecodeIph(content, contentLength);
++		}
++		else if (formatId == "ART.ArtDirector") {
++			decodedFormatId = "ART.ArtDirector";
++			ok = DecodeArtDirector(content, contentLength);
++		}
++		else if (formatId == "ART.GfaArtist") {
++			decodedFormatId = "ART.GfaArtist";
++			ok = DecodeGfaArtist(content, contentLength);
++		}
++		else if (formatId == "ART.Doo") {
++			decodedFormatId = "ART.Doo";
++			ok = DecodeDoo(content, contentLength);
++		}
++		else if (formatId == "ART.PaletteMaster") {
++			decodedFormatId = "ART.PaletteMaster";
++			ok = DecodePaletteMaster(content, contentLength);
++		}
++		else if (formatId == "ART.Atari8Artist") {
++			decodedFormatId = "ART.Atari8Artist";
++			ok = DecodeAtari8Artist(content, contentLength);
++		}
++		else if (formatId == "ART.MonoArt") {
++			decodedFormatId = "ART.MonoArt";
++			ok = DecodeMonoArt(content, contentLength);
++		}
++		else if (formatId == "ART.AsciiArtEditor") {
++			decodedFormatId = "ART.AsciiArtEditor";
++			ok = DecodeAsciiArtEditor(content, contentLength);
++		}
++		else if (formatId == "CLP.GodotClp") {
++			decodedFormatId = "CLP.GodotClp";
++			ok = DecodeGodotClp(content, contentLength);
++		}
++		else if (formatId == "CLP.CocoClp") {
++			decodedFormatId = "CLP.CocoClp";
++			ok = DecodeCocoClp(content, contentLength);
++		}
++		else if (formatId == "CMP.DdGraph") {
++			decodedFormatId = "CMP.DdGraph";
++			ok = DecodeDdGraph(filename, content, contentLength);
++		}
++		else if (formatId == "CMP.StCmp") {
++			decodedFormatId = "CMP.StCmp";
++			ok = DecodeStCmp(content, contentLength);
++		}
++		else if (formatId == "DHR.Iff") {
++			decodedFormatId = "DHR.Iff";
++			ok = DecodeIff(content, contentLength, RECOILResolution.Amiga1x1);
++		}
++		else if (formatId == "DHR.AppleIIDhr") {
++			decodedFormatId = "DHR.AppleIIDhr";
++			ok = DecodeAppleIIDhr(content, contentLength);
++		}
++		else if (formatId == "FLI.Fli") {
++			decodedFormatId = "FLI.Fli";
++			ok = DecodeFli(content, contentLength);
++		}
++		else if (formatId == "FLI.Bml") {
++			decodedFormatId = "FLI.Bml";
++			ok = DecodeBml(content, contentLength);
++		}
++		else if (formatId == "FNT.Pct") {
++			decodedFormatId = "FNT.Pct";
++			ok = DecodePct(content, contentLength);
++		}
++		else if (formatId == "FNT.GdosFnt") {
++			decodedFormatId = "FNT.GdosFnt";
++			ok = DecodeGdosFnt(content, contentLength);
++		}
++		else if (formatId == "FNT.Atari8Fnt") {
++			decodedFormatId = "FNT.Atari8Fnt";
++			ok = DecodeAtari8Fnt(content, contentLength);
++		}
++		else if (formatId == "FNT.StFnt") {
++			decodedFormatId = "FNT.StFnt";
++			ok = DecodeStFnt(content, contentLength);
++		}
++		else if (formatId == "FNT.AmstradFnt") {
++			decodedFormatId = "FNT.AmstradFnt";
++			ok = DecodeAmstradFnt(content, contentLength);
++		}
++		else if (formatId == "FNT.Image72Fnt") {
++			decodedFormatId = "FNT.Image72Fnt";
++			ok = DecodeImage72Fnt(content, contentLength);
++		}
++		else if (formatId == "FUN.C64Fun") {
++			decodedFormatId = "FUN.C64Fun";
++			ok = DecodeC64Fun(content, contentLength);
++		}
++		else if (formatId == "FUN.FalconFun") {
++			decodedFormatId = "FUN.FalconFun";
++			ok = DecodeFalconFun(content, contentLength);
++		}
++		else if (formatId == "GIG.Iph") {
++			decodedFormatId = "GIG.Iph";
++			ok = DecodeIph(content, contentLength);
++		}
++		else if (formatId == "GIG.Koa") {
++			decodedFormatId = "GIG.Koa";
++			ok = DecodeKoa(content, contentLength);
++		}
++		else if (formatId == "GRF.CocoMax") {
++			decodedFormatId = "GRF.CocoMax";
++			ok = DecodeCocoMax(content, contentLength);
++		}
++		else if (formatId == "GRF.ProfiGrf") {
++			decodedFormatId = "GRF.ProfiGrf";
++			ok = DecodeProfiGrf(content, contentLength);
++		}
++		else if (formatId == "HAM.Iff") {
++			decodedFormatId = "HAM.Iff";
++			ok = DecodeIff(content, contentLength, RECOILResolution.Amiga1x1);
++		}
++		else if (formatId == "HAM.ElementZxHam") {
++			decodedFormatId = "HAM.ElementZxHam";
++			ok = DecodeElementZxHam(content, contentLength);
++		}
++		else if (formatId == "HIR.FalconHir") {
++			decodedFormatId = "HIR.FalconHir";
++			ok = DecodeFalconHir(content, contentLength);
++		}
++		else if (formatId == "HIR.C64Hir") {
++			decodedFormatId = "HIR.C64Hir";
++			ok = DecodeC64Hir(content, contentLength);
++		}
++		else if (formatId == "HIR.Hrs") {
++			decodedFormatId = "HIR.Hrs";
++			ok = DecodeHrs(content, contentLength);
++		}
++		else if (formatId == "HPI.C64Hir") {
++			decodedFormatId = "HPI.C64Hir";
++			ok = DecodeC64Hir(content, contentLength);
++		}
++		else if (formatId == "HPI.Iph") {
++			decodedFormatId = "HPI.Iph";
++			ok = DecodeIph(content, contentLength);
++		}
++		else if (formatId == "HR.TrsHr") {
++			decodedFormatId = "HR.TrsHr";
++			ok = DecodeTrsHr(content, contentLength);
++		}
++		else if (formatId == "HR.Atari8Hr") {
++			decodedFormatId = "HR.Atari8Hr";
++			ok = DecodeAtari8Hr(content, contentLength);
++		}
++		else if (formatId == "ICN.StIcn") {
++			decodedFormatId = "ICN.StIcn";
++			ok = DecodeStIcn(content, contentLength);
++		}
++		else if (formatId == "ICN.Psion3Pic") {
++			decodedFormatId = "ICN.Psion3Pic";
++			ok = DecodePsion3Pic(content, contentLength);
++		}
++		else if (formatId == "ICN.Atari8Ice") {
++			decodedFormatId = "ICN.Atari8Ice";
++			ok = DecodeAtari8Ice(content, contentLength, false, 17);
++		}
++		else if (formatId == "IFL.Gun") {
++			decodedFormatId = "IFL.Gun";
++			ok = DecodeGun(content, contentLength);
++		}
++		else if (formatId == "IFL.ZxIfl") {
++			decodedFormatId = "IFL.ZxIfl";
++			ok = DecodeZxIfl(content, contentLength);
++		}
++		else if (formatId == "IMG.StImg") {
++			decodedFormatId = "IMG.StImg";
++			ok = DecodeStImg(content, contentLength);
++		}
++		else if (formatId == "IMG.Gsc") {
++			decodedFormatId = "IMG.Gsc";
++			ok = DecodeGsc(content, contentLength);
++		}
++		else if (formatId == "IMG.ArtMaster88") {
++			decodedFormatId = "IMG.ArtMaster88";
++			ok = DecodeArtMaster88(content, contentLength);
++		}
++		else if (formatId == "IMG.DaVinci") {
++			decodedFormatId = "IMG.DaVinci";
++			ok = DecodeDaVinci(content, contentLength);
++		}
++		else if (formatId == "INT.Int") {
++			decodedFormatId = "INT.Int";
++			ok = DecodeInt(content, contentLength);
++		}
++		else if (formatId == "INT.Inp") {
++			decodedFormatId = "INT.Inp";
++			ok = DecodeInp(content, contentLength);
++		}
++		else if (formatId == "MAP.Envision") {
++			decodedFormatId = "MAP.Envision";
++			ok = DecodeEnvision(content, contentLength);
++		}
++		else if (formatId == "MAP.EnvisionPC") {
++			decodedFormatId = "MAP.EnvisionPC";
++			ok = DecodeEnvisionPC(content, contentLength);
++		}
++		else if (formatId == "MAX.Mag") {
++			decodedFormatId = "MAX.Mag";
++			ok = DecodeMag(content, contentLength);
++		}
++		else if (formatId == "MAX.Atari8Max") {
++			decodedFormatId = "MAX.Atari8Max";
++			ok = DecodeAtari8Max(content, contentLength);
++		}
++		else if (formatId == "MAX.CocoMax") {
++			decodedFormatId = "MAX.CocoMax";
++			ok = DecodeCocoMax(content, contentLength);
++		}
++		else if (formatId == "NEO.Neo") {
++			decodedFormatId = "NEO.Neo";
++			ok = DecodeNeo(filename, content, contentLength);
++		}
++		else if (formatId == "NEO.Iff") {
++			decodedFormatId = "NEO.Iff";
++			ok = DecodeIff(content, contentLength, RECOILResolution.Ste1x1);
++		}
++		else if (formatId == "PG.Sc") {
++			decodedFormatId = "PG.Sc";
++			ok = DecodeSc(content, contentLength);
++		}
++		else if (formatId == "PG.GraphicsProcessor") {
++			decodedFormatId = "PG.GraphicsProcessor";
++			ok = DecodeGraphicsProcessor(content, contentLength);
++		}
++		else if (formatId == "PI.Pi") {
++			decodedFormatId = "PI.Pi";
++			ok = DecodePi(content, contentLength);
++		}
++		else if (formatId == "PI.Bpl") {
++			decodedFormatId = "PI.Bpl";
++			ok = DecodeBpl(content, contentLength);
++		}
++		else if (formatId == "PI4.Fuckpaint") {
++			decodedFormatId = "PI4.Fuckpaint";
++			ok = DecodeFuckpaint(content, contentLength);
++		}
++		else if (formatId == "PI4.StPi") {
++			decodedFormatId = "PI4.StPi";
++			ok = DecodeStPi(content, contentLength);
++		}
++		else if (formatId == "PIX.FalconPix") {
++			decodedFormatId = "PIX.FalconPix";
++			ok = DecodeFalconPix(content, contentLength);
++		}
++		else if (formatId == "PIX.CocoMax") {
++			decodedFormatId = "PIX.CocoMax";
++			ok = DecodeCocoMax(content, contentLength);
++		}
++		else if (formatId == "PIX.Atari8Pix") {
++			decodedFormatId = "PIX.Atari8Pix";
++			ok = DecodeAtari8Pix(content, contentLength);
++		}
++		else if (formatId == "PNT.FalconPnt") {
++			decodedFormatId = "PNT.FalconPnt";
++			ok = DecodeFalconPnt(content, contentLength);
++		}
++		else if (formatId == "PNT.TandyPnt") {
++			decodedFormatId = "PNT.TandyPnt";
++			ok = DecodeTandyPnt(content, contentLength);
++		}
++		else if (formatId == "PNT.ApfShr") {
++			decodedFormatId = "PNT.ApfShr";
++			ok = DecodeApfShr(content, contentLength);
++		}
++		else if (formatId == "PNT.Mac") {
++			decodedFormatId = "PNT.Mac";
++			ok = DecodeMac(content, contentLength);
++		}
++		else if (formatId == "PNT.AppleIIShr") {
++			decodedFormatId = "PNT.AppleIIShr";
++			ok = DecodeAppleIIShr(content, contentLength);
++		}
++		else if (formatId == "PNT.Paintworks") {
++			decodedFormatId = "PNT.Paintworks";
++			ok = DecodePaintworks(content, contentLength);
++		}
++		else if (formatId == "PPP.StPpp") {
++			decodedFormatId = "PPP.StPpp";
++			ok = DecodeStPpp(content, contentLength);
++		}
++		else if (formatId == "PPP.Pp") {
++			decodedFormatId = "PPP.Pp";
++			ok = DecodePp(content, contentLength);
++		}
++		else if (formatId == "RAW.Zx81Raw") {
++			decodedFormatId = "RAW.Zx81Raw";
++			ok = DecodeZx81Raw(content, contentLength);
++		}
++		else if (formatId == "RAW.Atari8Raw") {
++			decodedFormatId = "RAW.Atari8Raw";
++			ok = DecodeAtari8Raw(content, contentLength);
++		}
++		else if (formatId == "RAW.Rw") {
++			decodedFormatId = "RAW.Rw";
++			ok = DecodeRw(content, contentLength);
++		}
++		else if (formatId == "RGB.StRgb") {
++			decodedFormatId = "RGB.StRgb";
++			ok = DecodeStRgb(content, contentLength);
++		}
++		else if (formatId == "RGB.Atari8Rgb") {
++			decodedFormatId = "RGB.Atari8Rgb";
++			ok = DecodeAtari8Rgb(content, contentLength);
++		}
++		else if (formatId == "RGB.ZxRgb") {
++			decodedFormatId = "RGB.ZxRgb";
++			ok = DecodeZxRgb(content, contentLength);
++		}
++		else if (formatId == "SC2.Sc") {
++			decodedFormatId = "SC2.Sc";
++			ok = DecodeSc(content, contentLength);
++		}
++		else if (formatId == "SC2.Sc2") {
++			decodedFormatId = "SC2.Sc2";
++			ok = DecodeSc2(content, contentLength);
++		}
++		else if (formatId == "SH3.ApfShr") {
++			decodedFormatId = "SH3.ApfShr";
++			ok = DecodeApfShr(content, contentLength);
++		}
++		else if (formatId == "SH3.3201") {
++			decodedFormatId = "SH3.3201";
++			ok = Decode3201(content, contentLength);
++		}
++		else if (formatId == "SH3.Sh3") {
++			decodedFormatId = "SH3.Sh3";
++			ok = DecodeSh3(content, contentLength);
++		}
++		else if (formatId == "SH3.AppleIIShr") {
++			decodedFormatId = "SH3.AppleIIShr";
++			ok = DecodeAppleIIShr(content, contentLength);
++		}
++		else if (formatId == "SHC.Shc") {
++			decodedFormatId = "SHC.Shc";
++			ok = DecodeShc(content, contentLength);
++		}
++		else if (formatId == "SHC.GlYjk") {
++			decodedFormatId = "SHC.GlYjk";
++			ok = DecodeGlYjk(null, content, contentLength);
++		}
++		else if (formatId == "SHR.ApfShr") {
++			decodedFormatId = "SHR.ApfShr";
++			ok = DecodeApfShr(content, contentLength);
++		}
++		else if (formatId == "SHR.AppleIIShr") {
++			decodedFormatId = "SHR.AppleIIShr";
++			ok = DecodeAppleIIShr(content, contentLength);
++		}
++		else if (formatId == "SHR.Sh3") {
++			decodedFormatId = "SHR.Sh3";
++			ok = DecodeSh3(content, contentLength);
++		}
++		else if (formatId == "SHR.Hgfx") {
++			decodedFormatId = "SHR.Hgfx";
++			ok = DecodeHgfx(content, contentLength, 512, 1);
++		}
++		else if (formatId == "SHR.TrsShr") {
++			decodedFormatId = "SHR.TrsShr";
++			ok = DecodeTrsShr(content, contentLength);
++		}
++		else if (formatId == "SIF.Atari8Sif") {
++			decodedFormatId = "SIF.Atari8Sif";
++			ok = DecodeAtari8Sif(content, contentLength);
++		}
++		else if (formatId == "SIF.C64Sif") {
++			decodedFormatId = "SIF.C64Sif";
++			ok = DecodeC64Sif(content, contentLength);
++		}
++		else if (formatId == "SPC.StSpc") {
++			decodedFormatId = "SPC.StSpc";
++			ok = DecodeStSpc(content, contentLength);
++		}
++		else if (formatId == "SPC.Atari8Spc") {
++			decodedFormatId = "SPC.Atari8Spc";
++			ok = DecodeAtari8Spc(content, contentLength);
++		}
++		else if (formatId == "SPR.SprEd") {
++			decodedFormatId = "SPR.SprEd";
++			ok = DecodeSprEd(content, contentLength);
++		}
++		else if (formatId == "SPR.AppleSpr") {
++			decodedFormatId = "SPR.AppleSpr";
++			ok = DecodeAppleSpr(content, contentLength);
++		}
++		else if (formatId == "SPR.Atari8Spr") {
++			decodedFormatId = "SPR.Atari8Spr";
++			ok = DecodeAtari8Spr(content, contentLength);
++		}
++		else if (formatId == "SPR.VectorSpr") {
++			decodedFormatId = "SPR.VectorSpr";
++			ok = DecodeVectorSpr(content, contentLength);
++		}
++		else if (formatId == "SS4.Ss4") {
++			decodedFormatId = "SS4.Ss4";
++			ok = DecodeSs4(content, contentLength);
++		}
++		else if (formatId == "SS4.Ssx") {
++			decodedFormatId = "SS4.Ssx";
++			ok = DecodeSsx(content, contentLength);
++		}
++		else {
++			return false;
++		}
++		if (ok)
++			FormatId = decodedFormatId;
++		return ok;
++	}
++
+ 	/// Returns decoded image width.
+ 	public int GetWidth() => Width;
+ 
+@@ -22644,6 +23121,11 @@ public class RECOIL
+ 	/// Each pixel is a 24-bit integer 0xRRGGBB.
+ 	public int[] GetPixels() => Pixels;
+ 
++	/// Returns the format identifier of the last successfully decoded image.
++	/// For unambiguous extensions, returns an empty string (use the file extension).
++	/// For ambiguous extensions, returns "EXT.SubFormat" (e.g. "ART.GfaArtist").
++	public string GetFormatId() => FormatId;
++
+ 	/// Returns the computer family of the decoded file format.
+ 	public string GetPlatform()
+ 	{
+diff --git a/recoil2png.1 b/recoil2png.1
+index 085c404..1ecdf70 100644
+--- a/recoil2png.1
++++ b/recoil2png.1
+@@ -1,5 +1,6 @@
+ .TH RECOIL2PNG 1 "Oct 20, 2026" "Retro Computer Image Library"
+ .SH NAME
++.\" Vibe coded by Codex
+ recoil2png \- convert retro computer images to PNG
+ .SH SYNOPSIS
+ .B recoil2png
+@@ -21,7 +22,8 @@ NEC PC-80/88/98, Oric, Psion Series 3, SAM Coupe, Sharp X68000, Tandy 1000,
+ Timex 2048, TRS-80, TRS-80 Color Computer, Vector-06C, ZX81 and ZX Spectrum.
+ See https://recoil.sourceforge.net/ for the full list of formats.
+ 
+-Input files must have the filename extension that matches the format.
++Input files must have the filename extension that matches the format,
++unless a format is explicitly selected with \fB\-\-format\fR.
+ 
+ Some pictures are composed of multiple files \- they must share their
+ filename and only differ by their extensions.  You should only pass
+@@ -41,6 +43,21 @@ an extension of "act" or "pal".
+ C64 and C16 palette files must be text files in the VICE Palette format
+ with the extension "vpl".
+ .TP
++\fB\-\-list\fR
++List supported extensions, format identifiers, format names and platforms.
++.TP
++\fB\-\-verbose\fR
++Print the selected format identifier and platform for each decoded file.
++.TP
++\fB\-\-format\fR=\fIID[,ID...]\fR
++Try only the specified formats, even if the input file has a different or
++missing extension. Use an extension (case insensitive), or an exact compound
++identifier from \fB\-\-list\fR, such as \fBFNT.Atari8Fnt\fR.
++Formats matching the input extension are tried first; the remaining formats
++are then tried in list order. Empty entries and unknown identifiers are errors.
++This option applies to subsequent input files until another
++\fB\-\-format\fR option is given. Place \fB\-\-verbose\fR before input files too.
++.TP
+ \fB\-h\fR, \fB\-\-help\fR
+ Display help message and exit.
+ .TP
+diff --git a/recoil2png.c b/recoil2png.c
+index b24c584..f04833d 100644
+--- a/recoil2png.c
++++ b/recoil2png.c
+@@ -1,4 +1,5 @@
+ // recoil2png.c - command-line converter of retro computer pictures to the PNG format
++// Vibe coded by Codex
+ //
+ // Copyright (C) 2009-2021 Piotr Fusik
+ // SPDX-License-Identifier: MIT
+@@ -6,13 +7,17 @@
+ // This file is part of RECOIL (Retro Computer Image Library),
+ // see https://recoil.sourceforge.net
+ 
++#include <ctype.h>
++#include <limits.h>
+ #include <stdbool.h>
+ #include <stdint.h>
+ #include <stdio.h>
++#include <stdlib.h>
+ #include <string.h>
+ 
+ #include "recoil-stdio.h"
+ #include "pngsave.h"
++#include "formats-list.h"
+ 
+ static void print_help(void)
+ {
+@@ -23,11 +28,84 @@ static void print_help(void)
+ 		"         --pal           Emulate PAL video standard if applicable (default)\n"
+ 		"         --ntsc          Emulate NTSC video standard if applicable\n"
+ 		"-p FILE  --palette=FILE  Load Atari 8-bit, C64 or C16/C116/Plus4 palette\n"
++		"         --list          List all supported formats\n"
++		"         --verbose       Print the format identifier after conversion\n"
++		"         --format=ID[,ID...]  Force decoding as specific format(s)\n"
+ 		"-h       --help          Display this information\n"
+ 		"-v       --version       Display version information\n"
+ 	);
+ }
+ 
++static void print_formats(void)
++{
++	printf("%-10s %-24s %-40s %s\n", "EXT", "FORMAT_ID", "FORMAT", "PLATFORM");
++	printf("%-10s %-24s %-40s %s\n", "---", "---------", "------", "--------");
++	for (int i = 0; i < recoil_format_count; i++)
++		printf("%-10s %-24s %-40s %s\n", recoil_formats[i].ext, recoil_formats[i].formatId, recoil_formats[i].name, recoil_formats[i].platform);
++}
++
++static bool equals_ignore_case(const char *left, const char *right)
++{
++	while (*left != '\0' && *right != '\0') {
++		if (tolower((unsigned char) *left) != tolower((unsigned char) *right))
++			return false;
++		left++;
++		right++;
++	}
++	return *left == *right;
++}
++
++static bool equals_n_ignore_case(const char *left, const char *right, int length)
++{
++	for (int i = 0; i < length; i++)
++		if (tolower((unsigned char) left[i]) != tolower((unsigned char) right[i]))
++			return false;
++	return true;
++}
++
++static char *duplicate_string(const char *value)
++{
++	size_t length = strlen(value) + 1;
++	char *copy = (char *) malloc(length);
++	if (copy != NULL)
++		memcpy(copy, value, length);
++	return copy;
++}
++
++static bool is_valid_format(const char *fmt)
++{
++	for (int i = 0; i < recoil_format_count; i++) {
++		if (equals_ignore_case(recoil_formats[i].ext, fmt))
++			return true;
++		if (strcmp(recoil_formats[i].formatId, fmt) == 0)
++			return true;
++	}
++	return false;
++}
++
++static const char *get_file_ext(const char *filename)
++{
++	const char *dot = NULL;
++	for (const char *p = filename; *p != '\0'; p++) {
++		if (*p == '/' || *p == '\\')
++			dot = NULL;
++		else if (*p == '.')
++			dot = p + 1;
++	}
++	return dot;
++}
++
++static const char *lookup_format_id(const char *ext)
++{
++	if (ext == NULL)
++		return NULL;
++	for (int i = 0; i < recoil_format_count; i++) {
++		if (equals_ignore_case(recoil_formats[i].ext, ext))
++			return recoil_formats[i].formatId;
++	}
++	return NULL;
++}
++
+ static bool load_palette(RECOIL *recoil, const char *filename)
+ {
+ 	FILE *fp = fopen(filename, "rb");
+@@ -45,21 +123,165 @@ static bool load_palette(RECOIL *recoil, const char *filename)
+ 	return true;
+ }
+ 
+-static bool process_file(RECOIL *recoil, const char *input_file, const char *output_file)
++static bool read_file(const char *input_file, uint8_t **out_content, int *out_length)
++{
++	FILE *fp = fopen(input_file, "rb");
++	if (fp == NULL)
++		return false;
++	if (fseek(fp, 0, SEEK_END) != 0) {
++		fclose(fp);
++		return false;
++	}
++	long content_length = ftell(fp);
++	if (content_length <= 0 || content_length > INT_MAX || fseek(fp, 0, SEEK_SET) != 0) {
++		fclose(fp);
++		return false;
++	}
++	uint8_t *content = (uint8_t *) malloc(content_length);
++	if (content == NULL) {
++		fclose(fp);
++		return false;
++	}
++	size_t bytes_read = fread(content, 1, (size_t) content_length, fp);
++	bool ok = bytes_read == (size_t) content_length && !ferror(fp);
++	fclose(fp);
++	if (!ok) {
++		free(content);
++		return false;
++	}
++	*out_content = content;
++	*out_length = (int) content_length;
++	return true;
++}
++
++static bool try_single_format(RECOIL *recoil, const char *input_file, const char *fmt, uint8_t *content, int content_length)
++{
++	if (strchr(fmt, '.') != NULL)
++		return RECOIL_DecodeFormat(recoil, fmt, input_file, content, content_length);
++
++	/* Simple extension - construct fake filename, preserving original case style
++	 * so that ReadCompanionFile picks the right case for companion extensions */
++	char fake_filename[FILENAME_MAX];
++	const char *ext = get_file_ext(input_file);
++	size_t stem_length = ext == NULL ? strlen(input_file) : (size_t) (ext - input_file - 1);
++	size_t format_length = strlen(fmt);
++	if (stem_length + 1 + format_length >= sizeof(fake_filename))
++		return false;
++	bool orig_lower = false;
++	if (ext != NULL)
++		for (const char *p = ext; *p != '\0'; p++)
++			if (*p >= 'a' && *p <= 'z')
++				orig_lower = true;
++	memcpy(fake_filename, input_file, stem_length);
++	fake_filename[stem_length] = '.';
++	for (size_t j = 0; j < format_length; j++)
++		fake_filename[stem_length + 1 + j] = orig_lower
++			? tolower((unsigned char) fmt[j]) : toupper((unsigned char) fmt[j]);
++	fake_filename[stem_length + 1 + format_length] = '\0';
++	return RECOIL_Decode(recoil, fake_filename, content, content_length);
++}
++
++static bool fmt_matches_ext(const char *fmt, const char *file_ext)
++{
++	if (file_ext == NULL)
++		return false;
++	const char *dot = strchr(fmt, '.');
++	if (dot == NULL)
++		return equals_ignore_case(fmt, file_ext);
++	int len = dot - fmt;
++	return strlen(file_ext) == (size_t) len && equals_n_ignore_case(fmt, file_ext, len);
++}
++
++static bool decode_file(RECOIL *recoil, const char *input_file, const char *format_list, char *matched_fmt, int matched_fmt_size)
+ {
+-	if (!RECOILStdio_Load(recoil, input_file)) {
++	matched_fmt[0] = '\0';
++
++	if (format_list == NULL)
++		return RECOILStdio_Load(recoil, input_file);
++
++	uint8_t *content;
++	int content_length;
++	if (!read_file(input_file, &content, &content_length))
++		return false;
++
++	char *list_copy = duplicate_string(format_list);
++	if (list_copy == NULL) { free(content); return false; }
++
++	int count = 1;
++	for (const char *p = list_copy; *p; p++)
++		if (*p == ',') count++;
++
++	const char **fmts = malloc(count * sizeof(const char *));
++	if (fmts == NULL) { free(list_copy); free(content); return false; }
++
++	int n = 0;
++	for (char *tok = strtok(list_copy, ","); tok && n < count; tok = strtok(NULL, ","))
++		fmts[n++] = tok;
++
++	const char *file_ext = get_file_ext(input_file);
++	bool ok = false;
++
++	/* First pass: try formats whose extension matches the filename */
++	for (int i = 0; i < n && !ok; i++) {
++		if (fmt_matches_ext(fmts[i], file_ext)) {
++			if (try_single_format(recoil, input_file, fmts[i], content, content_length)) {
++				snprintf(matched_fmt, matched_fmt_size, "%s", fmts[i]);
++				ok = true;
++			}
++		}
++	}
++
++	/* Second pass: try remaining formats */
++	for (int i = 0; i < n && !ok; i++) {
++		if (!fmt_matches_ext(fmts[i], file_ext)) {
++			if (try_single_format(recoil, input_file, fmts[i], content, content_length)) {
++				snprintf(matched_fmt, matched_fmt_size, "%s", fmts[i]);
++				ok = true;
++			}
++		}
++	}
++
++	free(fmts);
++	free(list_copy);
++	free(content);
++	return ok;
++}
++
++static bool process_file(RECOIL *recoil, const char *input_file, const char *output_file, const char *format_list, bool verbose)
++{
++	char matched_fmt[64];
++	if (!decode_file(recoil, input_file, format_list, matched_fmt, sizeof(matched_fmt))) {
+ 		fprintf(stderr, "recoil2png: %s: file decoding error\n", input_file);
+ 		return false;
+ 	}
+ 
++	if (verbose) {
++		if (matched_fmt[0] != '\0') {
++			/* Format was explicitly specified - use the safe copy */
++			printf("%s: %s (%s)\n", input_file, matched_fmt, RECOIL_GetPlatform(recoil));
++		} else {
++			/* Auto-detected - GetFormatId points to string literals (safe) */
++			const char *fmt_id = RECOIL_GetFormatId(recoil);
++			if (fmt_id[0] != '\0') {
++				printf("%s: %s (%s)\n", input_file, fmt_id, RECOIL_GetPlatform(recoil));
++			} else {
++				const char *ext = get_file_ext(input_file);
++				const char *canonical = lookup_format_id(ext);
++				printf("%s: %s (%s)\n", input_file, canonical != NULL ? canonical : (ext != NULL ? ext : "???"), RECOIL_GetPlatform(recoil));
++			}
++		}
++	}
++
+ 	if (output_file == NULL) {
+ 		static char output_default[FILENAME_MAX];
+-		int i;
+-		int dotp = 0;
+-		for (i = 0; input_file[i] != '\0' && i < FILENAME_MAX - 5; i++)
+-			if ((output_default[i] = input_file[i]) == '.')
+-				dotp = i;
+-		strcpy(output_default + (dotp == 0 ? i : dotp), ".png");
++		const char *ext = get_file_ext(input_file);
++		size_t stem_length = ext == NULL ? strlen(input_file) : (size_t) (ext - input_file - 1);
++		if (stem_length + sizeof(".png") > sizeof(output_default)) {
++			fprintf(stderr, "recoil2png: output filename too long: %s\n", input_file);
++			return false;
++		}
++		memcpy(output_default, input_file, stem_length);
++		strcpy(output_default + stem_length, ".png");
+ 		output_file = output_default;
+ 	}
+ 	FILE *fp = fopen(output_file, "wb");
+@@ -78,12 +300,14 @@ int main(int argc, char **argv)
+ 		return 1;
+ 	}
+ 	const char *output_file = NULL;
++	const char *format_ext = NULL;
++	bool verbose = false;
+ 	bool ok = true;
+ 	bool no_input_files = true;
+ 	for (int i = 1; i < argc; i++) {
+ 		const char *arg = argv[i];
+ 		if (arg[0] != '-') {
+-			ok &= process_file(recoil, arg, output_file);
++			ok &= process_file(recoil, arg, output_file, format_ext, verbose);
+ 			no_input_files = false;
+ 			output_file = NULL;
+ 		}
+@@ -103,6 +327,38 @@ int main(int argc, char **argv)
+ 			if (!load_palette(recoil, arg + 10))
+ 				return 1;
+ 		}
++		else if (strcmp(arg, "--list") == 0) {
++			print_formats();
++			no_input_files = false;
++		}
++		else if (strcmp(arg, "--verbose") == 0) {
++			verbose = true;
++		}
++		else if (strncmp(arg, "--format=", 9) == 0) {
++			format_ext = arg + 9;
++			size_t length = strlen(format_ext);
++			if (length == 0 || format_ext[0] == ',' || format_ext[length - 1] == ','
++				|| strstr(format_ext, ",,") != NULL) {
++				fprintf(stderr, "recoil2png: --format requires nonempty comma-separated IDs (use --list to see supported formats)\n");
++				return 1;
++			}
++			char *validate_copy = duplicate_string(format_ext);
++			if (validate_copy == NULL) {
++				fprintf(stderr, "recoil2png: out of memory\n");
++				return 1;
++			}
++			bool valid = true;
++			for (char *tok = strtok(validate_copy, ","); tok; tok = strtok(NULL, ",")) {
++				if (!is_valid_format(tok)) {
++					fprintf(stderr, "recoil2png: unknown format: %s (use --list to see supported formats)\n", tok);
++					valid = false;
++					break;
++				}
++			}
++			free(validate_copy);
++			if (!valid)
++				return 1;
++		}
+ 		else if ((arg[1] == 'h' && arg[2] == '\0')
+ 			|| strcmp(arg, "--help") == 0) {
+ 			print_help();
+diff --git a/tests/format-api.c b/tests/format-api.c
+new file mode 100644
+index 0000000..988d535
+--- /dev/null
++++ b/tests/format-api.c
+@@ -0,0 +1,29 @@
++/* Vibe coded by Codex */
++#include <assert.h>
++#include <stdint.h>
++#include <string.h>
++
++#include "recoil.h"
++
++int main(void)
++{
++	RECOIL *recoil = RECOIL_New();
++	assert(recoil != NULL);
++	uint8_t font[1024] = { 0 };
++	char format[] = "FNT.Atari8Fnt";
++	assert(RECOIL_DecodeFormat(recoil, format, "font.bin", font, sizeof(font)));
++	memset(format, 'X', sizeof(format) - 1);
++	assert(strcmp(RECOIL_GetFormatId(recoil), "FNT.Atari8Fnt") == 0);
++	assert(RECOIL_GetWidth(recoil) == 256 && RECOIL_GetHeight(recoil) == 32);
++	assert(!RECOIL_DecodeFormat(recoil, "invalid", "font.bin", font, sizeof(font)));
++	assert(strcmp(RECOIL_GetFormatId(recoil), "") == 0);
++	assert(RECOIL_Decode(recoil, "font.fnt", font, sizeof(font)));
++	assert(strcmp(RECOIL_GetFormatId(recoil), "FNT.Atari8Fnt") == 0);
++	assert(!RECOIL_Decode(recoil, "font.unknown", font, sizeof(font)));
++	assert(strcmp(RECOIL_GetFormatId(recoil), "") == 0);
++	uint8_t neo[32128] = { 0 };
++	assert(RECOIL_DecodeFormat(recoil, "NEO.Neo", "picture", neo, sizeof(neo)));
++	assert(strcmp(RECOIL_GetFormatId(recoil), "NEO.Neo") == 0);
++	RECOIL_Delete(recoil);
++	return 0;
++}
+diff --git a/tests/test-format-features.py b/tests/test-format-features.py
+new file mode 100644
+index 0000000..87a45aa
+--- /dev/null
++++ b/tests/test-format-features.py
+@@ -0,0 +1,143 @@
++#!/usr/bin/env python3
++# Vibe coded by Codex
++"""Run after make recoil2png; use only the standard library and local fixtures."""
++
++import os
++from pathlib import Path
++import re
++import shlex
++import struct
++import subprocess
++import tempfile
++import unittest
++import xml.etree.ElementTree as ET
++
++
++ROOT = Path(__file__).resolve().parents[1]
++BINARY = ROOT / "recoil2png"
++
++
++class FormatFeatures(unittest.TestCase):
++    def setUp(self):
++        self.directory = tempfile.TemporaryDirectory(prefix="recoil-formats-")
++        self.addCleanup(self.directory.cleanup)
++        self.temp = Path(self.directory.name)
++        self.font = self.temp / "font.fnt"
++        self.font.write_bytes((ROOT / "atari8.fnt").read_bytes())
++
++    def cli(self, *args, success=True):
++        result = subprocess.run(
++            [str(BINARY), *map(str, args)], cwd=self.temp,
++            capture_output=True, text=True, timeout=30,
++        )
++        self.assertEqual(result.returncode, 0 if success else 1, result.stderr)
++        return result
++
++    def convert(self, source, formats=None, output="out.png"):
++        args = ["--verbose", "-o", self.temp / output]
++        if formats is not None:
++            args.append("--format=" + formats)
++        result = self.cli(*args, source)
++        png = (self.temp / output).read_bytes()
++        self.assertEqual(png[:8], b"\x89PNG\r\n\x1a\n")
++        return result.stdout, png
++
++    def test_help_and_version(self):
++        version = ET.parse(ROOT / "formats.xml").getroot().get("version")
++        self.assertEqual(self.cli("--version").stdout.strip(), "recoil2png " + version)
++        help_text = self.cli("--help").stdout
++        for option in ("--list", "--verbose", "--format=ID[,ID...]"):
++            self.assertIn(option, help_text)
++
++    def test_catalog_and_core_ids_agree(self):
++        catalog = ET.parse(ROOT / "formats.xml")
++        entries = catalog.findall("platform/format/ext")
++        listed = self.cli("--list").stdout.splitlines()
++        self.assertEqual(len(listed), len(entries) + 2)
++        expected = {(e.text, e.get("formatId", e.text)) for e in entries}
++        self.assertEqual({tuple(line.split()[:2]) for line in listed[2:]}, expected)
++        ids = {e.get("formatId") for e in entries if e.get("formatId")}
++        core = (ROOT / "recoil.fu").read_text()
++        self.assertEqual(ids, set(re.findall(r'formatId == "([^"]+)"', core)))
++        self.assertEqual(ids, set(re.findall(r'FormatId = "([^"]+)"', core)))
++
++    def test_auto_and_forced_pixels_match(self):
++        auto, reference = self.convert(self.font)
++        self.assertIn("FNT.Atari8Fnt (Atari 8-bit)", auto)
++        for fmt in ("FNT.Atari8Fnt", "FNT", "fnt", "FNT.Image72Fnt,FNT.Atari8Fnt"):
++            with self.subTest(fmt=fmt):
++                _, actual = self.convert(self.font, fmt)
++                self.assertEqual(actual, reference)
++        self.assertEqual(struct.unpack(">II", reference[16:24]), (256, 32))
++
++    def test_forcing_ignores_missing_or_wrong_extension(self):
++        _, reference = self.convert(self.font)
++        for name in ("picture.bin", "a.b/picture", "a.b/picture.FNT"):
++            source = self.temp / name
++            source.parent.mkdir(exist_ok=True)
++            source.write_bytes(self.font.read_bytes())
++            for fmt in ("FNT", "FNT.Atari8Fnt"):
++                with self.subTest(name=name, fmt=fmt):
++                    _, actual = self.convert(source, fmt)
++                    self.assertEqual(actual, reference)
++
++    def test_matching_extension_is_tried_first(self):
++        # Both decoders accept 1024 bytes, so order is observable in verbose output.
++        source = self.temp / "font.ch8"
++        source.write_bytes(self.font.read_bytes())
++        stdout, _ = self.convert(source, "FNT.Atari8Fnt,CH8")
++        self.assertIn(": CH8 (ZX Spectrum)", stdout)
++
++    def test_companion_case_and_dotted_directory(self):
++        # Mode 5 requires a GFX companion. Its case follows the input extension.
++        for name, companion in (("a.b/upper.CM5", "GFX"),
++                                ("a.b/lower.cm5", "gfx"),
++                                ("a.b/extensionless", "GFX")):
++            source = self.temp / name
++            source.parent.mkdir(exist_ok=True)
++            source.write_bytes(bytes([0x40]) * 2049)
++            source.with_suffix("." + companion).write_bytes(bytes(18432))
++            with self.subTest(name=name):
++                _, png = self.convert(source, "CM5")
++                self.assertEqual(struct.unpack(">II", png[16:24]), (288, 256))
++
++    def test_default_output_in_dotted_directory(self):
++        source = self.temp / "a.b/picture"
++        source.parent.mkdir()
++        source.write_bytes(self.font.read_bytes())
++        self.cli("--format=FNT.Atari8Fnt", source)
++        self.assertTrue(source.with_suffix(".png").is_file())
++
++    def test_compound_format_without_extension(self):
++        source = self.temp / "picture"
++        source.write_bytes(bytes(32128))  # Valid NEOchrome; optionally reads RST.
++        stdout, png = self.convert(source.name, "NEO.Neo")
++        self.assertIn("NEO.Neo", stdout)
++        self.assertEqual(struct.unpack(">II", png[16:24]), (320, 200))
++
++    def test_invalid_lists_and_decoder_failures(self):
++        for i, fmt in enumerate(("", ",", "FNT,", ",FNT", "FNT,,CH8", "not-a-format")):
++            with self.subTest(fmt=fmt):
++                output = self.temp / ("invalid-%d.png" % i)
++                result = self.cli("--format=" + fmt, "-o", output, self.font, success=False)
++                self.assertIn("recoil2png:", result.stderr)
++                self.assertFalse(output.exists())
++        self.cli("--format=FNT.AmstradFnt", self.font, success=False)
++        self.cli("--format=FNT", "missing", success=False)
++        empty = self.temp / "empty"
++        empty.touch()
++        self.cli("--format=FNT.Atari8Fnt", empty, success=False)
++
++    def test_core_api_lifetime_and_reset(self):
++        executable = self.temp / "format-api"
++        subprocess.run([
++            *shlex.split(os.environ.get("CC", "cc")), "-std=c99", "-O0",
++            "-I", str(ROOT), str(ROOT / "tests/format-api.c"),
++            str(ROOT / "recoil.c"), "-o", str(executable),
++        ], check=True, capture_output=True, text=True)
++        result = subprocess.run([str(executable)], capture_output=True, text=True)
++        self.assertEqual(result.returncode, 0, result.stderr)
++
++
++if __name__ == "__main__":
++    unittest.main(verbosity=2)
+diff --git a/win32/Makefile b/win32/Makefile
+index bee462f..3c326c4 100644
+--- a/win32/Makefile
++++ b/win32/Makefile
+@@ -1,3 +1,4 @@
++# Vibe coded by Codex
+ VERSION = 7.0.0
+ 
+ FUT = fut
+@@ -36,7 +37,7 @@ WINBOTH_BIN = $(WIN64_BIN) i686/IM_MOD_RL_recoil_.dll i686/Xrecoil.usr i686/thum
+ 
+ all: $(WIN32_BIN) $(WIN64_BIN)
+ 
+-%/recoil2png.exe: ../recoil2png.c ../pngsave.c ../pngsave.h ../recoil-stdio.c ../recoil-stdio.h ../recoil.c ../recoil.h
++%/recoil2png.exe: ../recoil2png.c ../pngsave.c ../pngsave.h ../recoil-stdio.c ../recoil-stdio.h ../recoil.c ../recoil.h ../formats-list.h
+ 	$(DO)$(DO_CC) -static -lpng16 -lz
+ 
+ %/file-recoil.exe: ../file-recoil3.c ../recoil-stdio.c ../recoil-stdio.h ../recoil.c ../recoil.h
+@@ -81,6 +82,9 @@ BoundsCheck.exe: BoundsCheck.cs paint.net/RECOIL.cs
+ ../formats.h: ../formats.h.xsl ../formats.xml
+ 	$(DO)$(XSLTPROC)
+ 
++../formats-list.h: ../formats-list.h.xsl ../formats.xml
++	$(DO)$(XSLTPROC)
++
+ # http://www.cmcrossroads.com/article/rules-multiple-outputs-gnu-make
+ %.c %.h: %.fu ../atari8.fnt ../altirrapal.pal ../c16.pal ../c64.fnt ../zx81.fnt
+ 	$(DO)$(FUT) -o $*.c -I .. $<
+@@ -171,7 +175,7 @@ mac:
+ clean:
+ 	$(RM) i686/recoil2png.exe i686/recoilwin.exe $(WINBOTH_BIN) i686/recoilwin-res.o x86_64/recoilwin-res.o BoundsCheck.exe BoundsCheck.pdb recoil.ico LICENSE.txt \
+ 		i686/recoil.wixobj x86_64/recoil.wixobj setup/formats.wxi setup/dialog.jpg setup/banner.jpg signed-msi signed \
+-		paint.net/RecoilFileTypeFactory.cs paint.net/RECOIL.cs ../formats.h
++		paint.net/RecoilFileTypeFactory.cs paint.net/RECOIL.cs ../formats.h ../formats-list.h
+ 
+ .PHONY: all clean bounds-examples install-gimp install-magick install-xnview install-paint.net ../MANIFEST srcdist dist deb64 deb64-gimp3 rpm64 mac ../../recoil-$(VERSION).tar.gz
+ 

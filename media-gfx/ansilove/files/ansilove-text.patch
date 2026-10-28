@@ -1,0 +1,512 @@
+# Vibe coded by Codex
+Subject: [PATCH] Add -x ASCII text output to stdout
+
+Apply from the ansilove source root with patch -p1.
+Based on Ansilove 4.2.2. Build and install the accompanying libansilove patch first.
+Usage: ansilove -x input.ans > output.txt
+Includes documentation and regression tests.
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index bcd0381..32ccf0e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,3 +1,4 @@
++# Vibe coded by Codex
+ cmake_minimum_required(VERSION 3.10)
+ 
+ set(CMAKE_C_STANDARD 99)
+@@ -37,7 +38,7 @@ find_path(ANSILOVE_INCLUDE_DIRS ansilove.h)
+ find_library(ANSILOVE_LIBRARIES NAMES ansilove REQUIRED)
+ include_directories(${ANSILOVE_INCLUDE_DIRS})
+ 
+-set(SRC src/ansilove.c src/types.c src/strtolower.c src/sauce.c)
++set(SRC src/ansilove.c src/types.c src/strtolower.c src/sauce.c src/text.c)
+ 
+ if(NOT HAVE_PLEDGE)
+   set(SRC ${SRC} compat/pledge.c)
+@@ -65,3 +66,10 @@ add_test(tundra ansilove ${PROJECT_SOURCE_DIR}/tests/bs-alove.tnd)
+ add_test(xbin ansilove ${PROJECT_SOURCE_DIR}/tests/bs-alove.xb)
+ add_test(retina ansilove -r ${PROJECT_SOURCE_DIR}/tests/bs-alove.ans)
+ add_test(sauce ansilove -s ${PROJECT_SOURCE_DIR}/tests/sauce.txt)
++
++# Python is optional and used only for text-export regression tests.
++find_package(Python3 COMPONENTS Interpreter QUIET)
++if(Python3_Interpreter_FOUND)
++  add_test(NAME text COMMAND ${Python3_EXECUTABLE}
++    ${PROJECT_SOURCE_DIR}/tests/text.py $<TARGET_FILE:ansilove>)
++endif()
+diff --git a/README.md b/README.md
+index d092b37..ff13dd5 100644
+--- a/README.md
++++ b/README.md
+@@ -130,7 +130,7 @@ Even more:
+ ## Synopsis
+ 
+ ```
+-     ansilove [-dhiqrsv] [-b bits] [-c columns] [-f font] [-m mode] [-o file]
++     ansilove [-dhiqrsvx] [-b bits] [-c columns] [-f font] [-m mode] [-o file]
+               [-R factor] [-t type] file
+ ```
+ 
+@@ -175,6 +175,9 @@ Even more:
+      -S          If available, use SAUCE info for render options (ex: width).
+ 
+      -v          Show version information.
++
++     -x          Write searchable ASCII text to stdout instead of a PNG.
++                 No status messages are printed; errors go to stderr.
+ ```
+ 
+ There are certain cases where you need to set options for proper
+@@ -322,3 +325,27 @@ GitHub: https://github.com/ansilove/ansilove
+ [22]: https://github.com/ByteProject
+ [23]: https://github.com/bricas
+ [24]: https://github.com/fcambus
++
++## Plain-text extraction
++
++With the matching libansilove text-export patch installed:
++
++    ansilove -x file.ans > file.txt
++
++`-x` exports the final character layout using the same decoders as PNG output.
++Only printable ASCII (bytes 32 through 126) and line feeds are emitted. Extended
++characters and control glyphs become spaces, so neighboring words stay separate.
++Characters whose foreground equals their background also become spaces. Leading
++and trailing blank rows and trailing spaces are removed; internal spacing remains.
++No PNG, progress messages, timing, or SAUCE metadata are written. `-q` is unnecessary.
++
++Supported inputs are ANSI, PCBoard, BIN, ADF, IDF, Tundra, and XBin. IDF, Tundra,
++and XBin signatures are recognized regardless of filename extension. Valid SAUCE
++width hints are used automatically; `-c` overrides them. `-t` can force the format.
++`-x` cannot be combined with `-o` or `-s`; redirect stdout to save a file.
++
++The output reflects the final image, so animations ending in a clear screen yield
++empty text. It is not OCR: lettering drawn with blocks or remapped custom-font
++characters cannot be recovered as words. Avatar is unsupported. ANSI positioning
++and erasure retain the existing renderer's behavior. An extraction is limited to
++64 MiB of character-grid storage.
+diff --git a/man/ansilove.1 b/man/ansilove.1
+index d3ddb16..1e20ea8 100644
+--- a/man/ansilove.1
++++ b/man/ansilove.1
+@@ -1,3 +1,4 @@
++.\" Vibe coded by Codex
+ .\"
+ .\" Copyright (c) 2011-2026, Stefan Vogt, Brian Cassidy, and Frederic Cambus
+ .\" All rights reserved.
+@@ -32,7 +33,7 @@
+ .Nd ANSI / ASCII art to PNG converter
+ .Sh SYNOPSIS
+ .Nm
+-.Op Fl dhiqrsSv
++.Op Fl dhiqrsSvx
+ .Op Fl b Ar bits
+ .Op Fl c Ar columns
+ .Op Fl f Ar font
+@@ -172,8 +173,27 @@ Show SAUCE record without generating output.
+ If available, use SAUCE info for render options (ex: width).
+ .It Fl v
+ Show version information.
++.It Fl x
++Write the final rendered character layout as ASCII text to standard output.
++Extended characters, control glyphs, and characters with equal foreground and
++background colors become spaces.
++Trailing spaces and outer blank rows are removed.
++SAUCE metadata and status messages are omitted; errors go to standard error.
++SAUCE width hints are used automatically unless overridden with
++.Fl c .
++Cannot be combined with
++.Fl o
++or
++.Fl s .
++Animations ending in a cleared display produce empty text.
++Custom font glyphs and lettering drawn with blocks are not recognized as words.
++Avatar is unsupported.
+ .El
+ .Sh EXAMPLES
++To extract searchable ASCII text:
++.Pp
++.Dl $ ansilove -x file.ans > file.txt
++.Pp
+ To render a file with iCE colors enabled:
+ .Pp
+ .Dl $ ansilove -i file.ans
+diff --git a/src/ansilove.c b/src/ansilove.c
+index 98c0192..30524a8 100644
+--- a/src/ansilove.c
++++ b/src/ansilove.c
+@@ -10,6 +10,7 @@
+  * See LICENSE file for details.
+  *
+  * SPDX-License-Identifier: BSD-2-Clause
++ * Vibe coded by Codex
+  */
+ 
+ #include <sys/time.h>
+@@ -35,6 +36,7 @@
+ #include "sauce.h"
+ #include "strtolower.h"
+ #include "types.h"
++#include "text.h"
+ 
+ /* prototypes */
+ static void synopsis(void);
+@@ -44,9 +46,10 @@ static void
+ synopsis(void)
+ {
+ 	fprintf(stdout, "SYNOPSIS\n"
+-	    "     ansilove [-dhiqrsSv] [-b bits] [-c columns] [-f font]"
++	    "     ansilove [-dhiqrsSvx] [-b bits] [-c columns] [-f font]"
+ 	    " [-m mode] [-o file]\n"
+-	    "              [-R factor] [-t type] file\n");
++	    "              [-R factor] [-t type] file\n"
++	    "     -x  Write ASCII text to stdout instead of creating a PNG.\n");
+ }
+ 
+ static void
+@@ -66,6 +69,7 @@ main(int argc, char *argv[])
+ 	bool justDisplaySAUCE = false;
+ 	bool fileHasSAUCE = false;
+ 	bool useSAUCEInfo = false;
++	bool extractText = false;
+ 
+ 	int opt;
+ 
+@@ -100,7 +104,7 @@ main(int argc, char *argv[])
+ 	if (ansilove_init(&ctx, &options) == -1)
+ 		errx(EXIT_FAILURE, "%s", ansilove_error(&ctx));
+ 
+-	while ((opt = getopt(argc, argv, "b:c:df:him:o:qrR:sSt:v")) != -1) {
++	while ((opt = getopt(argc, argv, "b:c:df:him:o:qrR:sSt:vx")) != -1) {
+ 		switch (opt) {
+ 		case 'b':
+ 			options.bits = strtonum(optarg, 8, 9, &errstr);
+@@ -162,6 +166,9 @@ main(int argc, char *argv[])
+ 		case 't':
+ 			type = strtolower(optarg);
+ 			break;
++		case 'x':
++			extractText = true;
++			break;
+ 		case 'v':
+ 			version();
+ 			return EXIT_SUCCESS;
+@@ -171,10 +178,22 @@ main(int argc, char *argv[])
+ 	if (optind < argc) {
+ 		input = argv[optind];
+ 	} else {
++		if (extractText)
++			errx(EXIT_FAILURE, "-x requires an input file.");
+ 		synopsis();
+ 		return EXIT_SUCCESS;
+ 	}
+ 
++	if (extractText) {
++		if (output || justDisplaySAUCE)
++			errx(EXIT_FAILURE, "-x cannot be combined with -o or -s.");
++		if (optind + 1 != argc)
++			errx(EXIT_FAILURE, "-x accepts exactly one input file.");
++		if (messages)
++			fclose(messages);
++		return text_output(input, type, &options);
++	}
++
+ 	/* if -q flag was not set, default to stdout */
+ 	if (!messages)
+ 		messages = stdout;
+diff --git a/src/text.c b/src/text.c
+new file mode 100644
+index 0000000..f1bd85b
+--- /dev/null
++++ b/src/text.c
+@@ -0,0 +1,160 @@
++/* Vibe coded by Codex
++ * ASCII stdout export. SPDX-License-Identifier: BSD-2-Clause
++ */
++#include <sys/stat.h>
++#include <ansilove.h>
++#include <err.h>
++#include <stdint.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include "config.h"
++#include "strtolower.h"
++#include "text.h"
++#include "types.h"
++
++static uint32_t
++little16(const uint8_t *p)
++{
++	return (uint32_t)p[0] | (uint32_t)p[1] << 8;
++}
++
++static uint32_t
++little32(const uint8_t *p)
++{
++	return little16(p) | little16(p + 2) << 16;
++}
++
++int
++text_output(const char *input, const char *type, struct ansilove_options *options)
++{
++	struct ansilove_ctx ctx;
++	struct ansilove_options defaults;
++	struct stat st;
++	char *buffer = NULL, *extension = NULL;
++	size_t length = 0;
++	int format = 0, status = EXIT_FAILURE;
++	uint8_t data_type = 0, file_type = 0;
++	uint32_t sauce_columns = 0;
++	int (*loader)(struct ansilove_ctx *, struct ansilove_options *) = NULL;
++
++	if (type) {
++		for (size_t i = 0; i < TYPES; i++)
++			if (!strcmp(type, types[i]))
++				loader = loaders[i];
++		if (!loader) {
++			warnx("Unknown file type: %s", type);
++			return EXIT_FAILURE;
++		}
++	}
++	/* mmap cannot map an empty file; its searchable content is empty. */
++	if (stat(input, &st) == 0 && S_ISREG(st.st_mode) && !st.st_size)
++		return EXIT_SUCCESS;
++	if (ansilove_init(&ctx, &defaults) == -1)
++		return EXIT_FAILURE;
++	if (ansilove_loadfile(&ctx, input) == -1)
++		goto error;
++
++	/* Inspect the fixed footer directly: never index SAUCE or COMNT bytes. */
++	if (ctx.length >= 128 &&
++	    !memcmp(ctx.buffer + ctx.length - 128, "SAUCE", 5)) {
++		size_t end = ctx.length - 128;
++		const uint8_t *record = ctx.buffer + end;
++		size_t comments = record[104];
++		data_type = record[94];
++		file_type = record[95];
++		sauce_columns = little16(record + 96);
++		if (comments) {
++			size_t size = 5 + 64 * comments;
++			if (end < size) {
++				ctx.error = ANSILOVE_FORMAT_ERROR;
++				goto error;
++			}
++			end -= size;
++			if (memcmp(ctx.buffer + end, "COMNT", 5)) {
++				/* Some old files have a damaged comment marker. Accept
++				 * the boundary only if FileSize independently confirms it. */
++				size_t declared = little32(record + 90);
++				if (declared != end && !(declared < end &&
++				    end - declared == 1 && ctx.buffer[declared] == 26)) {
++					ctx.error = ANSILOVE_FORMAT_ERROR;
++					goto error;
++				}
++			}
++		}
++		/* The EOF separator is optional. FileSize can disambiguate a real
++		 * trailing 0x1a data byte in binary formats from a separator. */
++		if (end && ctx.buffer[end - 1] == 26 && little32(record + 90) != end)
++			end--;
++		ctx.length = end;
++	}
++
++	const char *dot = strrchr(input, '.');
++	extension = strdup(dot ? dot + 1 : "");
++	if (!extension) {
++		ctx.error = ANSILOVE_MEMORY_ERROR;
++		goto error;
++	}
++	strtolower(extension);
++	if (!loader) {
++		/* Recognize binary formats even when named .MEM or another suffix. */
++		if (ctx.length >= 5 && !memcmp(ctx.buffer, "XBIN\x1a", 5))
++			format = ANSILOVE_FILETYPE_XB;
++		else if (ctx.length >= 4 && !memcmp(ctx.buffer, "\x04" "1.4", 4))
++			format = ANSILOVE_FILETYPE_IDF;
++		else if (ctx.length >= 9 && !memcmp(ctx.buffer, "\x18" "TUNDRA24", 9))
++			format = ANSILOVE_FILETYPE_TND;
++		else {
++			for (size_t i = 0; i < TYPES; i++)
++				if (!strcmp(extension, types[i]))
++					format = filetypes[i];
++		}
++		if (!format) {
++			if (!strcmp(extension, "avt") || (data_type == 1 && file_type == 5)) {
++				warnx("Avatar text extraction is not supported.");
++				goto done;
++			}
++			if (data_type == 5)
++				format = ANSILOVE_FILETYPE_BIN;
++			else if (data_type == 6)
++				format = ANSILOVE_FILETYPE_XB;
++			else if (data_type == 1 && file_type == 4)
++				format = ANSILOVE_FILETYPE_PCB;
++			else if (data_type == 1 && file_type == 8)
++				format = ANSILOVE_FILETYPE_TND;
++			else
++				format = ANSILOVE_FILETYPE_ANS;
++		}
++		for (size_t i = 0; i < TYPES; i++)
++			if (format == filetypes[i])
++				loader = loaders[i];
++	}
++	if (!options->columns) {
++		/* SAUCE BinaryText stores half the column count in FileType. */
++		if (data_type == 5)
++			sauce_columns = (uint32_t)file_type * 2;
++		if ((data_type == 1 || data_type == 5) &&
++		    sauce_columns > 0 && sauce_columns <= 4096)
++			options->columns = sauce_columns;
++	}
++	options->diz = !strcmp(extension, "diz");
++	if (!ctx.length) {
++		status = EXIT_SUCCESS;
++		goto done;
++	}
++	if (ansilove_text(&ctx, options, loader, &buffer, &length) == -1)
++		goto error;
++	if (fwrite(buffer, 1, length, stdout) != length || fflush(stdout) == EOF) {
++		ctx.error = ANSILOVE_FILE_WRITE_ERROR;
++		goto error;
++	}
++	status = EXIT_SUCCESS;
++	goto done;
++error:
++	warnx("%s", ansilove_error(&ctx));
++done:
++	free(buffer);
++	free(extension);
++	ansilove_clean(&ctx);
++	return status;
++}
+diff --git a/src/text.h b/src/text.h
+new file mode 100644
+index 0000000..48a34d6
+--- /dev/null
++++ b/src/text.h
+@@ -0,0 +1,8 @@
++/* Vibe coded by Codex */
++#ifndef ANSILOVE_CLI_TEXT_H
++#define ANSILOVE_CLI_TEXT_H
++
++struct ansilove_options;
++int text_output(const char *, const char *, struct ansilove_options *);
++
++#endif
+diff --git a/tests/text.py b/tests/text.py
+new file mode 100644
+index 0000000..0c12de6
+--- /dev/null
++++ b/tests/text.py
+@@ -0,0 +1,109 @@
++# Vibe coded by Codex
++"""CLI contract and metadata regression tests; uses only Python's standard library."""
++import pathlib
++import struct
++import subprocess
++import sys
++import tempfile
++import unittest
++
++BINARY = str(pathlib.Path(sys.argv.pop(1)).resolve())
++
++
++def sauce(content, *, width=80, comments=0, eof=True, datatype=1, filetype=1):
++    record = bytearray(128)
++    record[:7] = b"SAUCE00"
++    record[7:42] = b"metadata_must_not_be_indexed".ljust(35)
++    struct.pack_into("<I", record, 90, len(content))
++    record[94:96] = bytes((datatype, filetype))
++    struct.pack_into("<H", record, 96, width)
++    record[104] = comments
++    trailer = b"COMNT" + b"comment_must_not_be_indexed".ljust(64) * comments if comments else b""
++    return content + (b"\x1a" if eof else b"") + trailer + record
++
++
++class TextOutput(unittest.TestCase):
++    def setUp(self):
++        self.directory = tempfile.TemporaryDirectory()
++        self.root = pathlib.Path(self.directory.name)
++        self.addCleanup(self.directory.cleanup)
++
++    def run_file(self, content, *options, name="input.ans", expected=None):
++        path = self.root / name
++        path.write_bytes(content)
++        result = subprocess.run([BINARY, "-x", *options, str(path)], capture_output=True, timeout=10)
++        if expected is not None:
++            self.assertEqual(result.returncode, 0, result.stderr)
++            self.assertEqual(result.stderr, b"")
++            self.assertEqual(result.stdout, expected)
++            self.assertTrue(all(c == 10 or 32 <= c <= 126 for c in result.stdout))
++            self.assertFalse(path.with_name(path.name + ".png").exists())
++        return result
++
++    def test_ascii_layout(self):
++        self.run_file(b"\x1b[31mLeft\xdbRight\x7fEnd\x1b[0m", expected=b"Left Right End\n")
++        self.run_file(b"old\x1b[1;1Hnew\x1b[5Cword", expected=b"new     word\n")
++        self.run_file(b"text\x1b[2J", expected=b"")
++        self.run_file(b"text", "-q", expected=b"text\n")
++        self.run_file(b"", expected=b"")
++
++    def test_sauce_comments_and_optional_eof(self):
++        for eof in (False, True):
++            for comments in (0, 1, 3):
++                with self.subTest(eof=eof, comments=comments):
++                    self.run_file(sauce(b"LAST", comments=comments, eof=eof), expected=b"LAST\n")
++        damaged = sauce(b"LAST", comments=1).replace(b"COMNT", b"\0" * 5)
++        self.run_file(damaged, expected=b"LAST\n")
++
++    def test_width_and_override(self):
++        data = sauce(b"ABCDEFGHIJKL", width=6)
++        self.run_file(data, expected=b"ABCDEF\nGHIJKL\n")
++        self.run_file(data, "-c", "4", expected=b"ABCD\nEFGH\nIJKL\n")
++        self.run_file(sauce(b"Hello", width=0), expected=b"Hello\n")
++        self.run_file(sauce(b"Hello", width=65535), expected=b"Hello\n")
++
++    def test_bad_metadata_and_arguments(self):
++        data = bytearray(sauce(b"Hello"))
++        data[-24] = 255
++        result = self.run_file(data)
++        self.assertNotEqual(result.returncode, 0)
++        self.assertEqual(result.stdout, b"")
++        for options in (("-s",), ("-o", str(self.root / "unwanted.png")), ("-t", "unknown")):
++            result = self.run_file(b"Hello", *options)
++            self.assertNotEqual(result.returncode, 0)
++            self.assertEqual(result.stdout, b"")
++        for args in (["-x"], ["-x", str(self.root / "absent.ans")]):
++            result = subprocess.run([BINARY, *args], capture_output=True, timeout=10)
++            self.assertNotEqual(result.returncode, 0)
++            self.assertEqual(result.stdout, b"")
++        result = self.run_file(b"\x16\x01\x07Hello", name="input.avt")
++        self.assertNotEqual(result.returncode, 0)
++        self.assertEqual(result.stdout, b"")
++
++    def test_binary_and_signature_detection(self):
++        pairs = b"H\x07e\x07l\x07l\x07o\x07"
++        self.run_file(sauce(pairs + b" \x07" * 5, datatype=5, filetype=5), name="input.data", expected=b"Hello\n")
++        xb = b"XBIN\x1a" + struct.pack("<HHBB", 5, 1, 16, 0) + pairs
++        self.run_file(xb, name="input.data", expected=b"Hello\n")
++        # Every XBin run-length encoding: literal, character, attribute, both.
++        for flags, encoded, expected in ((0, pairs, b"Hello\n"),
++                (4, b"\x04" + pairs, b"Hello\n"),
++                (4, b"\x44Z" + b"\x07" * 5, b"ZZZZZ\n"),
++                (4, b"\x84\x07Hello", b"Hello\n"),
++                (4, b"\xc4Z\x07", b"ZZZZZ\n")):
++            xb = b"XBIN\x1a" + struct.pack("<HHBB", 5, 1, 16, flags) + encoded
++            self.run_file(xb, name="input.data", expected=expected)
++        self.run_file(b"@X07Hello", name="input.PCB", expected=b"Hello\n")
++
++    @unittest.skipUnless(pathlib.Path("/dev/full").exists(), "requires /dev/full")
++    def test_stdout_write_failure(self):
++        path = self.root / "input.ans"
++        path.write_bytes(b"Hello")
++        with open("/dev/full", "wb") as sink:
++            result = subprocess.run([BINARY, "-x", str(path)], stdout=sink, stderr=subprocess.PIPE, timeout=10)
++        self.assertNotEqual(result.returncode, 0)
++        self.assertTrue(result.stderr)
++
++
++if __name__ == "__main__":
++    unittest.main()

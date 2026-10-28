@@ -1,0 +1,53 @@
+--- a/src/cli/main.c
++++ b/src/cli/main.c
+@@ -16,6 +16,8 @@
+     along with darktable.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ 
++// Vibe coded by Codex
++
+ /**
+  * TODO:
+  *  - make --bpp work
+@@ -95,6 +97,7 @@
+                 "                          multiple times instead of input file\n"
+                 "   --library <path> read the history stack from library database\n"
+                 "                    instead of XMP sidecar files\n"
++                "   --list-formats list supported input formats\n"
+                 "   --icc-type <type> specify icc type, default to NONE\n"
+                 "                     use --help icc-type for list of supported types\n"
+                 "   --icc-file <file> specify icc filename, default to NONE\n"
+@@ -109,6 +112,21 @@
+   // FS TODO: to add instructions for DARKTABLE_OPTIONS
+ }
+ 
++static void list_formats(void)
++{
++  printf("supported input formats:\n\n  %-10s %s\n", "extension", "type");
++  printf("  %-10s %s\n", "---------", "-------------");
++  for(const char **extension = dt_supported_extensions; *extension; extension++)
++  {
++    const dt_image_flags_t type = dt_imageio_get_type_from_extension(*extension);
++    const char *name = type & DT_IMAGE_RAW ? "RAW"
++                     : type & DT_IMAGE_HDR ? "HDR"
++                     : type & DT_IMAGE_LDR ? "LDR"
++                                           : "auto-detected";
++    printf("  .%-9s %s\n", *extension, name);
++  }
++}
++
+ static void icc_types()
+ {
+   // TODO: Can this be automated to keep in sync with colorspaces.h?
+@@ -266,6 +284,11 @@
+           printf("See %s to report bugs.\n",PACKAGE_BUGREPORT);
+           exit(0);
+       }
++      else if(!strcmp(arg[k], "--list-formats"))
++      {
++        list_formats();
++        exit(0);
++      }
+       else if(!strcmp(arg[k], "--width") && argc > k + 1)
+       {
+         k++;

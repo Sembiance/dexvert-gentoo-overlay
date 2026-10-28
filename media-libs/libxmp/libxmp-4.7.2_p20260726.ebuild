@@ -22,3 +22,8 @@ src_prepare() {
 
 	eautoreconf
 }
+
+src_install() {
+	default
+	dodoc docs/formats.txt
+}

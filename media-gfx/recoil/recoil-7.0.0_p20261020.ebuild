@@ -1,0 +1,26 @@
+EAPI=8
+
+DESCRIPTION="Retro Computer image converter"
+HOMEPAGE="https://sourceforge.net/p/recoil/code/ci/master/tree/"
+LICENSE="GPL-2"
+SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.zip"
+S="${WORKDIR}/recoil-master"
+
+SLOT="0"
+KEYWORDS="~amd64"
+RESTRICT="mirror test"
+
+DEPEND="sys-devel/fut
+	dev-libs/libxslt"
+RDEPEND="${DEPEND}"
+
+PATCHES=( "${FILESDIR}/recoil-format-features-7.0.0.patch" )
+
+src_install() {
+	dobin recoil2png
+	doman recoil2png.1
+
+	cd www
+	xsltproc -o formats.html www.xsl formats.xml
+	dodoc formats.html
+}

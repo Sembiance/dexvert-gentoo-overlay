@@ -127,3 +127,8 @@ x11-libs/libXtst abi_x86_32
 
 # More (2026-04-08)
 dev-libs/leancrypto abi_x86_32
+
+# More (2026-09-12)
+media-libs/libsdl3 abi_x86_32
+x11-libs/libXScrnSaver abi_x86_32
+virtual/libusb abi_x86_32

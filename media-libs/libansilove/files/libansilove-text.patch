@@ -1,0 +1,660 @@
+# Vibe coded by Codex
+Subject: [PATCH] Add ASCII character-grid extraction API
+
+Apply from the libansilove source root with patch -p1.
+Based on libansilove 1.4.3; also tested against 1.4.2.
+Includes documentation and regression tests.
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a5f4cc2..384fed4 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,2 +1,3 @@
++# Vibe coded by Codex
+ cmake_minimum_required(VERSION 3.10)
+ 
+@@ -28,5 +29,5 @@ find_library(GD_LIBRARIES NAMES gd REQUIRED)
+ include_directories(${GD_INCLUDE_DIRS})
+ 
+-set(SRC src/clean.c src/drawchar.c src/fonts.c src/error.c src/loadfile.c src/init.c src/output.c src/savefile.c)
++set(SRC src/clean.c src/drawchar.c src/fonts.c src/error.c src/loadfile.c src/init.c src/output.c src/savefile.c src/text.c)
+ set(LOADERS src/loaders/ansi.c src/loaders/artworx.c src/loaders/binary.c src/loaders/icedraw.c src/loaders/pcboard.c src/loaders/tundra.c src/loaders/xbin.c)
+ 
+@@ -73,2 +74,11 @@ install(FILES man/ansilove_pcboard.3 DESTINATION ${CMAKE_INSTALL_MANDIR}/man3/)
+ install(FILES man/ansilove_tundra.3 DESTINATION ${CMAKE_INSTALL_MANDIR}/man3/)
+ install(FILES man/ansilove_xbin.3 DESTINATION ${CMAKE_INSTALL_MANDIR}/man3/)
++
++install(FILES man/ansilove_text.3 DESTINATION ${CMAKE_INSTALL_MANDIR}/man3/)
++
++include(CTest)
++if(BUILD_TESTING)
++  add_executable(text-test tests/text.c)
++  target_link_libraries(text-test ansilove ${GD_LIBRARIES})
++  add_test(NAME text COMMAND text-test)
++endif()
+diff --git a/README.md b/README.md
+index f55e3e1..1a60247 100644
+--- a/README.md
++++ b/README.md
+@@ -60,4 +60,20 @@ The following formats are supported:
+ - .XB - The eXtended Binary XBin format, supporting custom character sets and palettes
+ 
++# ASCII text extraction
++
++`ansilove_text(ctx, options, loader, &buffer, &length)` runs a standard format
++loader with a text backend and returns a NUL-terminated ASCII string. Free the
++returned buffer with `free()`. Input loading and metadata removal are the same
++as for the PNG API. Existing PNG data and caller options are preserved.
++
++The result follows the final rendered cell layout, with non-ASCII/control glyphs
++and characters with equal foreground/background colors replaced by spaces.
++Trailing spaces and outer blank rows are trimmed. Only printable ASCII and LF
++are returned. This does not perform OCR or preserve previous animation frames;
++custom-font remapping and existing parser limitations still apply. Character-grid
++storage is limited to 64 MiB. See `ansilove_text(3)` for the full API contract.
++
++Run the text-backend regression tests with `ctest --test-dir build` after building.
++
+ # Documentation
+ 
+diff --git a/include/ansilove.h b/include/ansilove.h
+index dc559f7..267c872 100644
+--- a/include/ansilove.h
++++ b/include/ansilove.h
+@@ -11,4 +11,5 @@
+  *
+  * SPDX-License-Identifier: BSD-2-Clause
++ * Vibe coded by Codex
+  */
+ 
+@@ -117,4 +118,12 @@ ANSILOVE_EXTERN int	 ansilove_tundra(struct ansilove_ctx *, struct ansilove_opti
+ ANSILOVE_EXTERN int	 ansilove_xbin(struct ansilove_ctx *, struct ansilove_options *);
+ 
++/* ASCII text of the final rendered character grid. On success, the caller
++ * owns *buffer (free() it); *length excludes its terminating NUL. The loader
++ * must be one of the seven ansilove_* format renderers. PNG state and options
++ * are preserved. Metadata must be removed from ctx->length by the caller,
++ * just as for PNG rendering. Returns 0 on success, -1 on error. */
++ANSILOVE_EXTERN int ansilove_text(struct ansilove_ctx *, const struct ansilove_options *,
++    int (*)(struct ansilove_ctx *, struct ansilove_options *), char **, size_t *);
++
+ #ifdef __cplusplus
+ }
+diff --git a/man/ansilove_text.3 b/man/ansilove_text.3
+new file mode 100644
+index 0000000..db99885
+--- /dev/null
++++ b/man/ansilove_text.3
+@@ -0,0 +1,60 @@
++.\" Vibe coded by Codex
++.Dd October 25, 2026
++.Dt ANSILOVE_TEXT 3
++.Os
++.Sh NAME
++.Nm ansilove_text
++.Nd extract the final character layout as printable ASCII
++.Sh SYNOPSIS
++.In ansilove.h
++.Ft int
++.Fo ansilove_text
++.Fa "struct ansilove_ctx *ctx"
++.Fa "const struct ansilove_options *options"
++.Fa "int (*loader)(struct ansilove_ctx *, struct ansilove_options *)"
++.Fa "char **buffer"
++.Fa "size_t *length"
++.Fc
++.Sh DESCRIPTION
++The
++.Nm
++function runs one of the seven standard format loaders with an ASCII output
++backend, without generating a PNG or allocating a full pixel image.
++The caller must load the input and remove metadata from
++.Va ctx->length
++as for normal image rendering.
++The loader must be one of
++.Fn ansilove_ansi ,
++.Fn ansilove_artworx ,
++.Fn ansilove_binary ,
++.Fn ansilove_icedraw ,
++.Fn ansilove_pcboard ,
++.Fn ansilove_tundra ,
++or
++.Fn ansilove_xbin .
++.Pp
++On success,
++.Fa buffer
++receives an allocated, NUL-terminated string and
++.Fa length
++receives its size excluding the NUL.
++The caller must release the string with
++.Fn free .
++Caller options and existing PNG data are preserved.
++Output consists only of bytes 32 through 126 and line feeds.
++Other glyphs and characters whose foreground equals their background become
++spaces, preserving cell positions and overwrites.
++Trailing spaces and outer blank rows are removed.
++An entirely blank screen produces an empty string.
++The character grid is limited to 64 MiB.
++.Pp
++This is the final image's character layout, not an animation transcript or OCR.
++Cleared and overwritten text is absent. Custom fonts may remap ASCII glyphs.
++Existing loader semantics, including ANSI cursor and erasure behavior, apply.
++.Sh RETURN VALUES
++Returns 0 on success or -1 on failure, setting
++.Va ctx->error .
++On failure, valid output pointers are set to NULL and zero.
++.Sh SEE ALSO
++.Xr ansilove_ansi 3 ,
++.Xr ansilove_error 3
+diff --git a/src/drawchar.c b/src/drawchar.c
+index b215544..96a5d3d 100644
+--- a/src/drawchar.c
++++ b/src/drawchar.c
+@@ -11,4 +11,5 @@
+  *
+  * SPDX-License-Identifier: BSD-2-Clause
++ * Vibe coded by Codex
+  */
+ 
+@@ -16,10 +17,22 @@
+ 
+ #include "drawchar.h"
++#include "text.h"
+ 
+ void
+-drawchar(gdImagePtr im, const uint8_t *font_data, uint32_t bits,
++drawchar(struct ansilove_ctx *ctx, struct ansilove_options *options,
++    gdImagePtr im, const uint8_t *font_data, uint32_t bits,
+     uint32_t height, uint32_t column, uint32_t row,
+     uint32_t background, uint32_t foreground, uint8_t character)
+ {
++	if (options->mode & TEXT_MODE) {
++		struct text_context *text = (struct text_context *)ctx;
++		if (column < text->columns && row < text->rows) {
++			/* Non-ASCII glyphs still occupy a cell and erase older text. */
++			text->cells[row * (text->columns + 1) + column] =
++			    character >= 32 && character <= 126 && foreground != background ?
++			    character : ' ';
++		}
++		return;
++	}
+ 	uint32_t x, y;
+ 
+diff --git a/src/drawchar.h b/src/drawchar.h
+index 83be68b..286e702 100644
+--- a/src/drawchar.h
++++ b/src/drawchar.h
+@@ -11,4 +11,5 @@
+  *
+  * SPDX-License-Identifier: BSD-2-Clause
++ * Vibe coded by Codex
+  */
+ 
+@@ -18,6 +19,7 @@
+ #include <stdint.h>
+ #include <gd.h>
++#include "ansilove.h"
+ 
+-void drawchar(gdImagePtr, const uint8_t *, uint32_t, uint32_t, uint32_t,
++void drawchar(struct ansilove_ctx *, struct ansilove_options *, gdImagePtr, const uint8_t *, uint32_t, uint32_t, uint32_t,
+     uint32_t, uint32_t, uint32_t, uint8_t);
+ 
+diff --git a/src/loaders/ansi.c b/src/loaders/ansi.c
+index 912cba2..6277d06 100644
+--- a/src/loaders/ansi.c
++++ b/src/loaders/ansi.c
+@@ -11,4 +11,5 @@
+  *
+  * SPDX-License-Identifier: BSD-2-Clause
++ * Vibe coded by Codex
+  */
+ 
+@@ -129,5 +130,5 @@ ansilove_ansi(struct ansilove_ctx *ctx, struct ansilove_options *options)
+ 	select_font(&fontData, options->font);
+ 
+-	switch (options->mode) {
++	switch (options->mode & ~TEXT_MODE) {
+ 	case ANSILOVE_MODE_CED:
+ 		ced = true;
+@@ -543,7 +544,6 @@ ansilove_ansi(struct ansilove_ctx *ctx, struct ansilove_options *options)
+ 
+ 	/* create that damn thingy */
+-	canvas = options->truecolor ?
+-	    gdImageCreateTrueColor(width, height) :
+-	    gdImageCreate(width, height);
++	canvas = create_canvas(ctx, options, width, height, options->bits,
++	    fontData.height, options->truecolor);
+ 
+ 	if (!canvas) {
+@@ -593,5 +593,5 @@ ansilove_ansi(struct ansilove_ctx *ctx, struct ansilove_options *options)
+ 		}
+ 
+-		drawchar(canvas, fontData.font_data, options->bits,
++		drawchar(ctx, options, canvas, fontData.font_data, options->bits,
+ 		    fontData.height, column, row, background, foreground,
+ 		    character);
+diff --git a/src/loaders/artworx.c b/src/loaders/artworx.c
+index a72dd9d..4ab55c2 100644
+--- a/src/loaders/artworx.c
++++ b/src/loaders/artworx.c
+@@ -11,4 +11,5 @@
+  *
+  * SPDX-License-Identifier: BSD-2-Clause
++ * Vibe coded by Codex
+  */
+ 
+@@ -59,5 +60,6 @@ ansilove_artworx(struct ansilove_ctx *ctx, struct ansilove_options *options)
+ 	}
+ 
+-	canvas = gdImageCreate(width, height);
++	canvas = create_canvas(ctx, options, width, height,
++	    8, 16, false);
+ 
+ 	if (!canvas) {
+@@ -98,5 +100,5 @@ ansilove_artworx(struct ansilove_ctx *ctx, struct ansilove_options *options)
+ 			foreground = attribute & 15;
+ 
+-			drawchar(canvas, ctx->buffer+193, 8, 16, column, row,
++			drawchar(ctx, options, canvas, ctx->buffer+193, 8, 16, column, row,
+ 			    background, foreground, character);
+ 
+diff --git a/src/loaders/binary.c b/src/loaders/binary.c
+index 2a36383..7491f20 100644
+--- a/src/loaders/binary.c
++++ b/src/loaders/binary.c
+@@ -11,4 +11,5 @@
+  *
+  * SPDX-License-Identifier: BSD-2-Clause
++ * Vibe coded by Codex
+  */
+ 
+@@ -78,5 +79,6 @@ ansilove_binary(struct ansilove_ctx *ctx, struct ansilove_options *options)
+ 
+ 	/* allocate buffer image memory */
+-	canvas = gdImageCreate(width, height);
++	canvas = create_canvas(ctx, options, width, height,
++	    options->bits, fontData.height, false);
+ 
+ 	if (!canvas) {
+@@ -113,5 +115,5 @@ ansilove_binary(struct ansilove_ctx *ctx, struct ansilove_options *options)
+ 				background -= 8;
+ 
+-			drawchar(canvas, fontData.font_data, options->bits,
++			drawchar(ctx, options, canvas, fontData.font_data, options->bits,
+ 			    fontData.height, column, row, colors[background],
+ 			    colors[foreground], character);
+diff --git a/src/loaders/icedraw.c b/src/loaders/icedraw.c
+index 67a42c2..8698115 100644
+--- a/src/loaders/icedraw.c
++++ b/src/loaders/icedraw.c
+@@ -11,4 +11,5 @@
+  *
+  * SPDX-License-Identifier: BSD-2-Clause
++ * Vibe coded by Codex
+  */
+ 
+@@ -142,5 +143,6 @@ ansilove_icedraw(struct ansilove_ctx *ctx, struct ansilove_options *options)
+ 
+ 	/* create IDF instance */
+-	canvas = gdImageCreate(width, height);
++	canvas = create_canvas(ctx, options, width, height,
++	    8, 16, false);
+ 
+ 	/* error output */
+@@ -172,5 +174,5 @@ ansilove_icedraw(struct ansilove_ctx *ctx, struct ansilove_options *options)
+ 		foreground = attribute & 15;
+ 
+-		drawchar(canvas, ctx->buffer+(ctx->length - IDF_FONT_LENGTH - IDF_PALETTE_LENGTH),
++		drawchar(ctx, options, canvas, ctx->buffer+(ctx->length - IDF_FONT_LENGTH - IDF_PALETTE_LENGTH),
+ 		    8, 16, column, row,
+ 		    colors[background], colors[foreground], character);
+diff --git a/src/loaders/pcboard.c b/src/loaders/pcboard.c
+index faa5274..f74d0ee 100644
+--- a/src/loaders/pcboard.c
++++ b/src/loaders/pcboard.c
+@@ -11,4 +11,5 @@
+  *
+  * SPDX-License-Identifier: BSD-2-Clause
++ * Vibe coded by Codex
+  */
+ 
+@@ -205,5 +206,6 @@ ansilove_pcboard(struct ansilove_ctx *ctx, struct ansilove_options *options)
+ 
+ 	/* allocate buffer image memory */
+-	canvas = gdImageCreate(width, height);
++	canvas = create_canvas(ctx, options, width, height,
++	    options->bits, fontData.height, false);
+ 
+ 	if (!canvas) {
+@@ -219,5 +221,5 @@ ansilove_pcboard(struct ansilove_ctx *ctx, struct ansilove_options *options)
+ 	/* render PCB */
+ 	for (loop = 0; loop < structIndex; loop++) {
+-		drawchar(canvas, fontData.font_data, options->bits, fontData.height,
++		drawchar(ctx, options, canvas, fontData.font_data, options->bits, fontData.height,
+ 		    pcboard_buffer[loop].column,
+ 		    pcboard_buffer[loop].row,
+diff --git a/src/loaders/tundra.c b/src/loaders/tundra.c
+index 19f816e..deb455d 100644
+--- a/src/loaders/tundra.c
++++ b/src/loaders/tundra.c
+@@ -11,4 +11,5 @@
+  *
+  * SPDX-License-Identifier: BSD-2-Clause
++ * Vibe coded by Codex
+  */
+ 
+@@ -133,5 +134,6 @@ ansilove_tundra(struct ansilove_ctx *ctx, struct ansilove_options *options)
+ 
+ 	/* allocate buffer image memory */
+-	canvas = gdImageCreateTrueColor(width, height);
++	canvas = create_canvas(ctx, options, width, height,
++	    options->bits, fontData.height, true);
+ 
+ 	if (!canvas) {
+@@ -232,5 +234,5 @@ ansilove_tundra(struct ansilove_ctx *ctx, struct ansilove_options *options)
+ 		    character != TUNDRA_COLOR_FOREGROUND &&
+ 		    character != TUNDRA_COLOR_BOTH) {
+-			drawchar(canvas, fontData.font_data, options->bits,
++			drawchar(ctx, options, canvas, fontData.font_data, options->bits,
+ 			    fontData.height, column, row, background,
+ 			    foreground, character);
+diff --git a/src/loaders/xbin.c b/src/loaders/xbin.c
+index 0e7e8f5..a7daa90 100644
+--- a/src/loaders/xbin.c
++++ b/src/loaders/xbin.c
+@@ -11,4 +11,5 @@
+  *
+  * SPDX-License-Identifier: BSD-2-Clause
++ * Vibe coded by Codex
+  */
+ 
+@@ -84,5 +85,6 @@ ansilove_xbin(struct ansilove_ctx *ctx, struct ansilove_options *options)
+ 	}
+ 
+-	canvas = gdImageCreate(width, height);
++	canvas = create_canvas(ctx, options, width, height,
++	    8, xbin_fontsize, false);
+ 
+ 	if (!canvas) {
+@@ -224,10 +226,10 @@ ansilove_xbin(struct ansilove_ctx *ctx, struct ansilove_options *options)
+ 
+ 				if (xbin_flags & 0x10 && attribute & 8) {
+-					drawchar(canvas, high_font_data_xbin, 8, xbin_fontsize,
++					drawchar(ctx, options, canvas, high_font_data_xbin, 8, xbin_fontsize,
+ 					    column, row, colors[background],
+ 					    colors[foreground], character);
+ 				}
+ 				else {
+-					drawchar(canvas, font_data, 8, xbin_fontsize,
++					drawchar(ctx, options, canvas, font_data, 8, xbin_fontsize,
+ 					    column, row, colors[background],
+ 					    colors[foreground], character);
+@@ -257,10 +259,10 @@ ansilove_xbin(struct ansilove_ctx *ctx, struct ansilove_options *options)
+ 
+ 			if (xbin_flags & 0x10 && attribute & 8) {
+-				drawchar(canvas, high_font_data_xbin, 8, xbin_fontsize,
++				drawchar(ctx, options, canvas, high_font_data_xbin, 8, xbin_fontsize,
+ 				    column, row, colors[background],
+ 				    colors[foreground], character);
+ 			}
+ 			else {
+-				drawchar(canvas, font_data, 8, xbin_fontsize,
++				drawchar(ctx, options, canvas, font_data, 8, xbin_fontsize,
+ 				    column, row, colors[background],
+ 				    colors[foreground], character);
+diff --git a/src/output.c b/src/output.c
+index 7fbd159..79adf25 100644
+--- a/src/output.c
++++ b/src/output.c
+@@ -11,4 +11,5 @@
+  *
+  * SPDX-License-Identifier: BSD-2-Clause
++ * Vibe coded by Codex
+  */
+ 
+@@ -17,4 +18,5 @@
+ #include "ansilove.h"
+ #include "output.h"
++#include "text.h"
+ 
+ int
+@@ -22,4 +24,8 @@ output(struct ansilove_ctx *ctx, struct ansilove_options *options,
+     gdImagePtr source)
+ {
++	if (options->mode & TEXT_MODE) {
++		/* ansilove_text() owns the small palette canvas and ASCII grid. */
++		return 0;
++	}
+ 	/* Handle DOS aspect ratio */
+ 	if (options->dos) {
+diff --git a/src/output.h b/src/output.h
+index f9f5fe2..5a7920a 100644
+--- a/src/output.h
++++ b/src/output.h
+@@ -11,4 +11,5 @@
+  *
+  * SPDX-License-Identifier: BSD-2-Clause
++ * Vibe coded by Codex
+  */
+ 
+@@ -17,4 +18,5 @@
+ 
+ #include <gd.h>
++#include "text.h"
+ 
+ struct ansilove_ctx;
+diff --git a/src/text.c b/src/text.c
+new file mode 100644
+index 0000000..888cff6
+--- /dev/null
++++ b/src/text.c
+@@ -0,0 +1,97 @@
++/* Vibe coded by Codex
++ * ASCII extraction using the same character placements as the PNG loaders.
++ * SPDX-License-Identifier: BSD-2-Clause
++ */
++#include <stdlib.h>
++#include <string.h>
++#include "text.h"
++
++gdImagePtr
++create_canvas(struct ansilove_ctx *ctx, struct ansilove_options *options,
++    uint32_t width, uint32_t height, uint32_t bits, uint32_t font_height,
++    bool truecolor)
++{
++	if (!(options->mode & TEXT_MODE))
++		return truecolor ? gdImageCreateTrueColor(width, height) :
++		    gdImageCreate(width, height);
++
++	struct text_context *text = (struct text_context *)ctx;
++	if (!bits || !font_height || width < bits || height < font_height)
++		return NULL;
++	text->columns = width / bits;
++	text->rows = height / font_height;
++	size_t stride = text->columns + 1;
++	/* Include room for newlines and a terminating NUL; bound large inputs. */
++	if (text->rows > (TEXT_MAX_BYTES - 1) / stride)
++		return NULL;
++	text->cells = malloc(text->rows * stride + 1);
++	if (!text->cells)
++		return NULL;
++	memset(text->cells, ' ', text->rows * stride);
++
++	/* Retain GD's palette handling, without allocating a full pixel image. */
++	text->canvas = truecolor ? gdImageCreateTrueColor(1, 1) :
++	    gdImageCreate(1, 1);
++	return text->canvas;
++}
++
++int
++ansilove_text(struct ansilove_ctx *ctx, const struct ansilove_options *options,
++    int (*loader)(struct ansilove_ctx *, struct ansilove_options *),
++    char **buffer, size_t *length)
++{
++	if (buffer)
++		*buffer = NULL;
++	if (length)
++		*length = 0;
++	if (!ctx || !options || !buffer || !length ||
++	    (options->mode & TEXT_MODE) ||
++	    (loader != ansilove_ansi && loader != ansilove_artworx &&
++	    loader != ansilove_binary && loader != ansilove_icedraw &&
++	    loader != ansilove_pcboard && loader != ansilove_tundra &&
++	    loader != ansilove_xbin)) {
++		if (ctx)
++			ctx->error = ANSILOVE_INVALID_PARAM;
++		return -1;
++	}
++
++	struct text_context text = {0};
++	struct ansilove_options local_options = *options;
++	text.ctx = *ctx;
++	text.ctx.error = 0;
++	text.ctx.png.buffer = NULL;
++	text.ctx.png.length = 0;
++	local_options.mode |= TEXT_MODE;
++	int status = loader(&text.ctx, &local_options);
++	if (status == 0 && !text.cells) {
++		text.ctx.error = ANSILOVE_FORMAT_ERROR;
++		status = -1;
++	}
++	if (status == 0) {
++		size_t used = 0, last_nonempty = 0;
++		const size_t stride = text.columns + 1;
++		for (size_t row = 0; row < text.rows; row++) {
++			char *line = text.cells + row * stride;
++			size_t end = text.columns;
++			while (end && line[end - 1] == ' ')
++				end--;
++			/* Drop leading/trailing blank rows, retain internal spacing. */
++			if (!end && !used)
++				continue;
++			memmove(text.cells + used, line, end);
++			used += end;
++			text.cells[used++] = '\n';
++			if (end)
++				last_nonempty = used;
++		}
++		text.cells[last_nonempty] = '\0';
++		*buffer = text.cells;
++		*length = last_nonempty;
++	} else {
++		free(text.cells);
++	}
++	if (text.canvas)
++		gdImageDestroy(text.canvas);
++	ctx->error = text.ctx.error;
++	return status;
++}
+diff --git a/src/text.h b/src/text.h
+new file mode 100644
+index 0000000..314a48d
+--- /dev/null
++++ b/src/text.h
+@@ -0,0 +1,25 @@
++/* Vibe coded by Codex */
++#ifndef ANSILOVE_TEXT_INTERNAL_H
++#define ANSILOVE_TEXT_INTERNAL_H
++
++#include <gd.h>
++#include "ansilove.h"
++
++/* Private flag: only ansilove_text() may set this on its local options. */
++#define TEXT_MODE 0x80
++#define TEXT_MAX_BYTES (64U * 1024U * 1024U)
++
++/* The initial member permits passing this private context to existing loaders.
++ * No public structure layout changes, global state, or TLS are required. */
++struct text_context {
++	struct ansilove_ctx ctx;
++	gdImagePtr canvas;
++	char *cells;
++	size_t columns;
++	size_t rows;
++};
++
++gdImagePtr create_canvas(struct ansilove_ctx *, struct ansilove_options *,
++    uint32_t, uint32_t, uint32_t, uint32_t, bool);
++
++#endif
+diff --git a/tests/text.c b/tests/text.c
+new file mode 100644
+index 0000000..dea6467
+--- /dev/null
++++ b/tests/text.c
+@@ -0,0 +1,75 @@
++/* Vibe coded by Codex */
++#include <ansilove.h>
++#include <gd.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++
++#define CHECK(expr) do { if (!(expr)) { \
++	fprintf(stderr, "line %d: %s\n", __LINE__, #expr); exit(1); \
++} } while (0)
++
++static void
++check_text(const char *input, const char *expected,
++    int (*loader)(struct ansilove_ctx *, struct ansilove_options *))
++{
++	struct ansilove_ctx ctx;
++	struct ansilove_options options, before;
++	char *text = NULL;
++	size_t size = 0;
++	CHECK(ansilove_init(&ctx, &options) == 0);
++	ctx.buffer = (uint8_t *)input;
++	ctx.length = strlen(input);
++	before = options;
++	CHECK(ansilove_text(&ctx, &options, loader, &text, &size) == 0);
++	CHECK(size == strlen(expected));
++	CHECK(!strcmp(text, expected));
++	CHECK(!memcmp(&options, &before, sizeof(options)));
++	CHECK(ctx.png.buffer == NULL);
++	for (size_t i = 0; i < size; i++)
++		CHECK(text[i] == '\n' || (text[i] >= 32 && text[i] <= 126));
++	free(text);
++}
++
++int
++main(void)
++{
++	check_text("\033[31mHello\033[0m", "Hello\n", ansilove_ansi);
++	check_text("left\333right\177end", "left right end\n", ansilove_ansi);
++	check_text("A\033[3CB", "A   B\n", ansilove_ansi);
++	check_text("old\033[1;1Hnew", "new\n", ansilove_ansi);
++	check_text("A\033[1;1H\333", "", ansilove_ansi);
++	check_text("old\033[2Jnew", "new\n", ansilove_ansi);
++	check_text("old\033[2J", "", ansilove_ansi);
++	check_text("\r\n\r\n  first  \r\n\r\nsecond   \r\n\r\n",
++	    "  first\n\nsecond\n", ansilove_ansi);
++	check_text("\033[30;40mhidden\033[37mvisible", "      visible\n", ansilove_ansi);
++	check_text("@X07old@CLS@@X0FHello", "Hello\n", ansilove_pcboard);
++	check_text("left\007right", "left right\n", ansilove_ansi);
++
++	/* Existing PNG buffers and caller options survive multiple text renders. */
++	struct ansilove_ctx ctx;
++	struct ansilove_options options;
++	char *text;
++	size_t size;
++	CHECK(ansilove_init(&ctx, &options) == 0);
++	ctx.buffer = (uint8_t *)"Hello";
++	ctx.length = 5;
++	CHECK(ansilove_ansi(&ctx, &options) == 0);
++	uint8_t *png = ctx.png.buffer;
++	int png_length = ctx.png.length;
++	for (int i = 0; i < 2; i++) {
++		CHECK(ansilove_text(&ctx, &options, ansilove_ansi, &text, &size) == 0);
++		CHECK(size == 6 && !strcmp(text, "Hello\n"));
++		CHECK(ctx.png.buffer == png && ctx.png.length == png_length);
++		CHECK(!memcmp(png, "\211PNG\r\n\032\n", 8));
++		free(text);
++	}
++	CHECK(ansilove_text(&ctx, &options, NULL, &text, &size) == -1);
++	CHECK(text == NULL && size == 0 && ctx.error == ANSILOVE_INVALID_PARAM);
++	ctx.length = 0;
++	CHECK(ansilove_text(&ctx, &options, ansilove_ansi, &text, &size) == -1);
++	CHECK(text == NULL && size == 0);
++	gdFree(png);
++	return 0;
++}

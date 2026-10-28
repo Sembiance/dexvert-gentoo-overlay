@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Codex <codex@openai.com>
-Date: Sat, 8 Aug 2026 00:00:00 -0400
-Subject: [PATCH] Add headless --list-formats support
+Date: Thu, 22 Oct 2026 00:00:00 -0400
+Subject: [PATCH] Add headless --list-formats support for Scribus 1.7.4
 
 Vibe coded by Codex
 
@@ -16,39 +16,65 @@ exporter plugin metadata, and Qt reader/writer codecs.
 
 Also wait for the antiword capability probe to finish so listing text
 importers does not emit a spurious QProcess destruction warning.
+
+Rebased against scribus-1.7.4_pre20260918.tar.xz. Preserve the new
+Wayland/XCB startup default and the split core initialization API.
 ---
-diff --git a/scribus/pluginmanager.h b/scribus/pluginmanager.h
---- a/scribus/pluginmanager.h
-+++ b/scribus/pluginmanager.h
-@@ -4,6 +4,7 @@
+diff --git a/scribus/gtgettext.h b/scribus/gtgettext.h
+index 88e72a0..edde3cf 100644
+--- a/scribus/gtgettext.h
++++ b/scribus/gtgettext.h
+@@ -4,6 +4,7 @@ to the COPYING file provided with the program. Following this notice may exist
  a copyright and/or license notice that predates the release of Scribus 1.3.2
  for which a new license (GPL+exception) is in place.
  */
 +// Vibe coded by Codex
- #ifndef _PLUGIN_MANAGER_
- #define _PLUGIN_MANAGER_
+ /***************************************************************************
+  *   Copyright (C) 2004 by Riku Leino                                      *
+  *   tsoots@gmail.com                                                      *
+@@ -72,6 +73,7 @@ public:
+ 	gtGetText(ScribusDoc* doc);		 // Constructor
  
-@@ -38,7 +39,7 @@
- 	Q_OBJECT
+ 	QStringList getSupportedTypes(); // get all Fileextensions we support
++	const std::vector<ImporterData>& importers() const { return m_importers; }
+ 	ImportSetup run(); // Creates the dialog for the user to import a file based on the supported file formats.
+ 	void launchImporter(int importer,
+ 		const QString& filename,
+diff --git a/scribus/main_nix.cpp b/scribus/main_nix.cpp
+index 7ae1036..3501359 100644
+--- a/scribus/main_nix.cpp
++++ b/scribus/main_nix.cpp
+@@ -4,6 +4,7 @@ to the COPYING file provided with the program. Following this notice may exist
+ a copyright and/or license notice that predates the release of Scribus 1.3.2
+ for which a new license (GPL+exception) is in place.
+ */
++// Vibe coded by Codex
+ /***************************************************************************
+ 						main.cpp  -  description
+ 							-------------------
+@@ -69,7 +70,16 @@ int mainApp(int argc, char **argv)
  
- public:
--	PluginManager();
-+	explicit PluginManager(bool formatListingOnly = false);
- 
- 	/*! \brief Static methods for loading, unloading plugins and resolving symbols
- 	 These methods are platform independent, but each platform uses a different
-@@ -212,6 +213,7 @@
- 	 * Each plugin has its record key() -> PluginData
- 	 */
- 	PluginMap pluginMap;
-+	bool m_formatListingOnly { false };
- };
- 
+ // Fallback if the Linux OS doesn't support wayland
+ #if !defined(Q_OS_MACOS)
+-	qputenv("QT_QPA_PLATFORM", "wayland;xcb");
++	bool listFormatsRequested = false;
++	for (int i = 1; i < argc; ++i)
++	{
++		if (qstrcmp(argv[i], "--list-formats") == 0)
++		{
++			listFormatsRequested = true;
++			break;
++		}
++	}
++	qputenv("QT_QPA_PLATFORM", listFormatsRequested ? "offscreen" : "wayland;xcb");
  #endif
+ 
+ 	QImageReader::setAllocationLimit(1024);
 diff --git a/scribus/pluginmanager.cpp b/scribus/pluginmanager.cpp
+index e5349fe..a6057f3 100644
 --- a/scribus/pluginmanager.cpp
 +++ b/scribus/pluginmanager.cpp
-@@ -4,6 +4,7 @@
+@@ -4,6 +4,7 @@ to the COPYING file provided with the program. Following this notice may exist
  a copyright and/or license notice that predates the release of Scribus 1.3.2
  for which a new license (GPL+exception) is in place.
  */
@@ -56,7 +82,7 @@ diff --git a/scribus/pluginmanager.cpp b/scribus/pluginmanager.cpp
  #include "pluginmanager.h"
  #include "scplugin.h"
  #include "loadsaveplugin.h"
-@@ -36,9 +37,10 @@
+@@ -36,9 +37,10 @@ for which a new license (GPL+exception) is in place.
  #include <QLibrary>
  #endif
  
@@ -69,7 +95,7 @@ diff --git a/scribus/pluginmanager.cpp b/scribus/pluginmanager.cpp
  {
  }
  
-@@ -158,10 +160,24 @@
+@@ -158,10 +160,24 @@ int PluginManager::initPlugin(const QString& fileName)
  	pda.plugin = nullptr;
  	pda.pluginDLL = nullptr;
  	pda.enabled = false;
@@ -95,141 +121,71 @@ diff --git a/scribus/pluginmanager.cpp b/scribus/pluginmanager.cpp
  		//HACK: Always enable our only persistent plugin, scripter
  		if (pda.plugin->inherits("ScPersistentPlugin"))
  			pda.enableOnStartup = true;
-diff --git a/scribus/scribuscore.h b/scribus/scribuscore.h
---- a/scribus/scribuscore.h
-+++ b/scribus/scribuscore.h
-@@ -4,6 +4,7 @@
+diff --git a/scribus/pluginmanager.h b/scribus/pluginmanager.h
+index 4dc2e02..f311d96 100644
+--- a/scribus/pluginmanager.h
++++ b/scribus/pluginmanager.h
+@@ -4,6 +4,7 @@ to the COPYING file provided with the program. Following this notice may exist
  a copyright and/or license notice that predates the release of Scribus 1.3.2
  for which a new license (GPL+exception) is in place.
  */
 +// Vibe coded by Codex
- /***************************************************************************
-                           scribuscore.h  -  description
-                              -------------------
-@@ -66,6 +67,7 @@
- 	int runScript() {return 0;}
- 	*/
- 	int init(bool useGUI, const QList<QString>& filesToUse);
-+	int initFormats();
- 	int initScribusCore(bool showSplash, bool showFontInfo, bool showProfileInfo, const QString& newGuiLanguage);
- 	bool initialized() const {return m_scribusInitialized;}
- 	const QString& getGuiLanguage() const;
-diff --git a/scribus/scribuscore.cpp b/scribus/scribuscore.cpp
---- a/scribus/scribuscore.cpp
-+++ b/scribus/scribuscore.cpp
-@@ -4,6 +4,7 @@
+ #ifndef _PLUGIN_MANAGER_
+ #define _PLUGIN_MANAGER_
+ 
+@@ -38,7 +39,7 @@ class SCRIBUS_API PluginManager : public QObject
+ 	Q_OBJECT
+ 
+ public:
+-	PluginManager();
++	explicit PluginManager(bool formatListingOnly = false);
+ 
+ 	/*! \brief Static methods for loading, unloading plugins and resolving symbols
+ 	 These methods are platform independent, but each platform uses a different
+@@ -212,6 +213,7 @@ protected:
+ 	 * Each plugin has its record key() -> PluginData
+ 	 */
+ 	PluginMap pluginMap;
++	bool m_formatListingOnly { false };
+ };
+ 
+ #endif
+diff --git a/scribus/plugins/gettext/docim/docim.cpp b/scribus/plugins/gettext/docim/docim.cpp
+index d4ad866..d6500d0 100644
+--- a/scribus/plugins/gettext/docim/docim.cpp
++++ b/scribus/plugins/gettext/docim/docim.cpp
+@@ -4,6 +4,7 @@ to the COPYING file provided with the program. Following this notice may exist
  a copyright and/or license notice that predates the release of Scribus 1.3.2
  for which a new license (GPL+exception) is in place.
  */
 +// Vibe coded by Codex
- /***************************************************************************
-                           pageitem.h  -  description
-                              -------------------
-@@ -39,6 +40,7 @@
- #include "langmgr.h"
- #include "localemgr.h"
- #include "pluginmanager.h"
-+#include "prefsfile.h"
- #include "prefsmanager.h"
- #include "scimagecachemanager.h"
- #include "scpaths.h"
-@@ -95,6 +97,17 @@
- 	return 0;
+ 
+ #include <chrono>
+ #include <thread>
+@@ -38,8 +39,11 @@ bool hasAntiword()
+ 	{
+ 		found = true;
+ 		test->terminate();
+-		std::this_thread::sleep_for(std::chrono::milliseconds(5));
+-		test->kill();
++		if (!test->waitForFinished(100))
++		{
++			test->kill();
++			test->waitForFinished(100);
++		}
+ 	}
+ 	delete test;
+ 	searched = true;
+@@ -190,4 +194,3 @@ DocIm::~DocIm()
+ 	delete proc;
  }
  
-+int ScribusCore::initFormats()
-+{
-+	CommonStrings::languageChange();
-+	LanguageManager::instance()->languageChange();
-+	if (!m_prefsManager.prefsFile)
-+		m_prefsManager.prefsFile = new PrefsFile();
-+	pluginManager = new PluginManager(true);
-+	pluginManager->initPlugs();
-+	return EXIT_SUCCESS;
-+}
-+
- int ScribusCore::startGUI(bool showSplash, bool showFontInfo, bool showProfileInfo, const QString& newGuiLanguage)
- {
- 	auto* scribus = new ScribusMainWindow();
-diff --git a/scribus/gtgettext.h b/scribus/gtgettext.h
---- a/scribus/gtgettext.h
-+++ b/scribus/gtgettext.h
-@@ -4,6 +4,7 @@
- a copyright and/or license notice that predates the release of Scribus 1.3.2
- for which a new license (GPL+exception) is in place.
- */
-+// Vibe coded by Codex
- /***************************************************************************
-  *   Copyright (C) 2004 by Riku Leino                                      *
-  *   tsoots@gmail.com                                                      *
-@@ -72,6 +73,7 @@
- 	gtGetText(ScribusDoc* doc);		 // Constructor
- 
- 	QStringList getSupportedTypes(); // get all Fileextensions we support
-+	const std::vector<ImporterData>& importers() const { return m_importers; }
- 	ImportSetup run(); // Creates the dialog for the user to import a file based on the supported file formats.
- 	void launchImporter(int importer,
- 		const QString& filename,
-diff --git a/scribus/scribusapp.h b/scribus/scribusapp.h
---- a/scribus/scribusapp.h
-+++ b/scribus/scribusapp.h
-@@ -4,6 +4,7 @@
- a copyright and/or license notice that predates the release of Scribus 1.3.2
- for which a new license (GPL+exception) is in place.
- */
-+// Vibe coded by Codex
- /***************************************************************************
- 	begin                : May 2005
- 	copyright            : (C) 2005 by Craig Bradney
-@@ -92,6 +93,7 @@
- 		\brief If no argument specified the lang, returns the one in the locales
- 		*/
- 		void showUsage();
-+		void showFormats();
- 		/*!
- 		\author Craig Bradney
- 		\date Wed Nov 18 2004
-@@ -106,6 +108,7 @@
- 		bool m_showSplash {true};
- 		bool m_showFontInfo {false};
- 		bool m_showProfileInfo {false};
-+		bool m_listFormats {false};
- 		//! \brief If is there user given prefs file...
- 		QString m_prefsUserDir;
- 		QList<QString> m_filesToLoad;
-diff --git a/scribus/main_nix.cpp b/scribus/main_nix.cpp
---- a/scribus/main_nix.cpp
-+++ b/scribus/main_nix.cpp
-@@ -4,6 +4,7 @@
- a copyright and/or license notice that predates the release of Scribus 1.3.2
- for which a new license (GPL+exception) is in place.
- */
-+// Vibe coded by Codex
- /***************************************************************************
- 						main.cpp  -  description
- 							-------------------
-@@ -67,7 +68,16 @@
- 	emergencyActivated = false;
- 
- #if !defined(Q_OS_MACOS)
--	qputenv("QT_QPA_PLATFORM", "xcb");
-+	bool listFormatsRequested = false;
-+	for (int i = 1; i < argc; ++i)
-+	{
-+		if (qstrcmp(argv[i], "--list-formats") == 0)
-+		{
-+			listFormatsRequested = true;
-+			break;
-+		}
-+	}
-+	qputenv("QT_QPA_PLATFORM", listFormatsRequested ? "offscreen" : "xcb");
- #endif
- 
- 	QImageReader::setAllocationLimit(1024);
+-
 diff --git a/scribus/scribusapp.cpp b/scribus/scribusapp.cpp
+index 69aeeb6..0d3fdcc 100644
 --- a/scribus/scribusapp.cpp
 +++ b/scribus/scribusapp.cpp
-@@ -4,6 +4,7 @@
+@@ -4,6 +4,7 @@ to the COPYING file provided with the program. Following this notice may exist
  a copyright and/or license notice that predates the release of Scribus 1.3.2
  for which a new license (GPL+exception) is in place.
  */
@@ -237,7 +193,7 @@ diff --git a/scribus/scribusapp.cpp b/scribus/scribusapp.cpp
  /***************************************************************************
  	begin                : May 2005
  	copyright            : (C) 2005 by Craig Bradney
-@@ -28,6 +29,8 @@
+@@ -28,6 +29,8 @@ for which a new license (GPL+exception) is in place.
  #include <QFile>
  #include <QFileInfo>
  #include <QFont>
@@ -246,7 +202,7 @@ diff --git a/scribus/scribusapp.cpp b/scribus/scribusapp.cpp
  #include <QLibraryInfo>
  #include <QLocale>
  #include <QString>
-@@ -38,15 +41,20 @@
+@@ -38,15 +41,20 @@ for which a new license (GPL+exception) is in place.
  #include "scribusapp.h"
  
  #include "downloadmanager/scdlmgr.h"
@@ -267,7 +223,7 @@ diff --git a/scribus/scribusapp.cpp b/scribus/scribusapp.cpp
  
  #ifdef WITH_TESTS
  #include "tests/runtests.h"
-@@ -70,6 +78,7 @@
+@@ -70,6 +78,7 @@ for which a new license (GPL+exception) is in place.
  #define ARG_UPGRADECHECK "--upgradecheck"
  #define ARG_TESTS "--tests"
  #define ARG_PYTHONSCRIPT "--python-script"
@@ -275,7 +231,7 @@ diff --git a/scribus/scribusapp.cpp b/scribus/scribusapp.cpp
  #define CMD_OPTIONS_END "--"
  
  #define ARG_VERSION_SHORT "-v"
-@@ -139,6 +148,7 @@
+@@ -139,6 +148,7 @@ void ScribusQApp::parseCommandLine()
  #endif
  	m_showFontInfo = false;
  	m_showProfileInfo = false;
@@ -283,7 +239,7 @@ diff --git a/scribus/scribusapp.cpp b/scribus/scribusapp.cpp
  	bool neversplash = false;
  
  	//Parse for command line options
-@@ -212,6 +222,12 @@
+@@ -212,6 +222,12 @@ void ScribusQApp::parseCommandLine()
  			header = true;
  			availlangs = true;
  		}
@@ -296,7 +252,7 @@ diff --git a/scribus/scribusapp.cpp b/scribus/scribusapp.cpp
  		else if (arg == ARG_UPGRADECHECK || arg == ARG_UPGRADECHECK_SHORT)
  		{
  			header = true;
-@@ -351,6 +367,13 @@
+@@ -351,6 +367,13 @@ int ScribusQApp::init()
  	processEvents(QEventLoop::ExcludeUserInputEvents|QEventLoop::ExcludeSocketNotifiers, 1000);
  	ScCore->init(useGUI, m_filesToLoad);
  	processEvents();
@@ -310,7 +266,7 @@ diff --git a/scribus/scribusapp.cpp b/scribus/scribusapp.cpp
  	/* TODO:
  	 * When Scribus is truly able to run without GUI
  	 * we should uncomment if (useGUI)
-@@ -575,7 +598,8 @@
+@@ -575,7 +598,8 @@ void ScribusQApp::changeLabelVisibility(bool visibility)
  Helper procedure */
  static void printArgLine(QTextStream & ts, const char * smallArg, const char* fullArg, const QString& desc)
  {
@@ -320,7 +276,7 @@ diff --git a/scribus/scribusapp.cpp b/scribus/scribusapp.cpp
  	Qt::endl(ts);
  }
  
-@@ -592,6 +616,7 @@
+@@ -592,6 +616,7 @@ void ScribusQApp::showUsage()
  	printArgLine(ts, ARG_HELP_SHORT, ARG_HELP, tr("Print help (this message) and exit") );
  	printArgLine(ts, ARG_LANG_SHORT, ARG_LANG, tr("Uses xx as shortcut for a language, eg `en' or `de'") );
  	printArgLine(ts, ARG_AVAILLANG_SHORT, ARG_AVAILLANG, tr("List the currently installed interface languages") );
@@ -328,7 +284,7 @@ diff --git a/scribus/scribusapp.cpp b/scribus/scribusapp.cpp
  	printArgLine(ts, ARG_NOSPLASH_SHORT, ARG_NOSPLASH, tr("Do not show the splashscreen on startup") );
  	printArgLine(ts, ARG_NEVERSPLASH_SHORT, ARG_NEVERSPLASH, tr("Stop showing the splashscreen on startup. Writes an empty file called .neversplash in ~/.config/scribus") );
  	printArgLine(ts, ARG_PREFS_SHORT, qPrintable(QString("%1 <%2>").arg(ARG_PREFS, tr("path"))), tr("Use path for user given preferences location") );
-@@ -636,6 +661,160 @@
+@@ -636,6 +661,160 @@ void ScribusQApp::showAvailLangs()
  	ts << tr("scribus -l xx or scribus --lang xx, where xx is the language of choice.") << Qt::endl;
  }
  
@@ -489,33 +445,89 @@ diff --git a/scribus/scribusapp.cpp b/scribus/scribusapp.cpp
  void ScribusQApp::showVersion()
  {
  	std::cout << tr("Scribus Version").toLocal8Bit().data() << " " << VERSION << std::endl;
-diff --git a/scribus/plugins/gettext/docim/docim.cpp b/scribus/plugins/gettext/docim/docim.cpp
---- a/scribus/plugins/gettext/docim/docim.cpp
-+++ b/scribus/plugins/gettext/docim/docim.cpp
-@@ -4,6 +4,7 @@
+diff --git a/scribus/scribusapp.h b/scribus/scribusapp.h
+index 18fade5..f49d2a5 100644
+--- a/scribus/scribusapp.h
++++ b/scribus/scribusapp.h
+@@ -4,6 +4,7 @@ to the COPYING file provided with the program. Following this notice may exist
  a copyright and/or license notice that predates the release of Scribus 1.3.2
  for which a new license (GPL+exception) is in place.
  */
 +// Vibe coded by Codex
- 
- #include <chrono>
- #include <thread>
-@@ -38,8 +39,11 @@
- 	{
- 		found = true;
- 		test->terminate();
--		std::this_thread::sleep_for(std::chrono::milliseconds(5));
--		test->kill();
-+		if (!test->waitForFinished(100))
-+		{
-+			test->kill();
-+			test->waitForFinished(100);
-+		}
- 	}
- 	delete test;
- 	searched = true;
-@@ -190,4 +194,3 @@
- 	delete proc;
+ /***************************************************************************
+ 	begin                : May 2005
+ 	copyright            : (C) 2005 by Craig Bradney
+@@ -92,6 +93,7 @@ class SCRIBUS_API ScribusQApp : public QApplication
+ 		\brief If no argument specified the lang, returns the one in the locales
+ 		*/
+ 		void showUsage();
++		void showFormats();
+ 		/*!
+ 		\author Craig Bradney
+ 		\date Wed Nov 18 2004
+@@ -106,6 +108,7 @@ class SCRIBUS_API ScribusQApp : public QApplication
+ 		bool m_showSplash {true};
+ 		bool m_showFontInfo {false};
+ 		bool m_showProfileInfo {false};
++		bool m_listFormats {false};
+ 		//! \brief If is there user given prefs file...
+ 		QString m_prefsUserDir;
+ 		QList<QString> m_filesToLoad;
+diff --git a/scribus/scribuscore.cpp b/scribus/scribuscore.cpp
+index 2e42dd4..39c59b4 100644
+--- a/scribus/scribuscore.cpp
++++ b/scribus/scribuscore.cpp
+@@ -4,6 +4,7 @@ to the COPYING file provided with the program. Following this notice may exist
+ a copyright and/or license notice that predates the release of Scribus 1.3.2
+ for which a new license (GPL+exception) is in place.
+ */
++// Vibe coded by Codex
+ /***************************************************************************
+                           pageitem.h  -  description
+                              -------------------
+@@ -39,6 +40,7 @@ for which a new license (GPL+exception) is in place.
+ #include "langmgr.h"
+ #include "localemgr.h"
+ #include "pluginmanager.h"
++#include "prefsfile.h"
+ #include "prefsmanager.h"
+ #include "scimagecachemanager.h"
+ #include "scpaths.h"
+@@ -96,6 +98,17 @@ int ScribusCore::init(bool useGUI, const QList<QString>& filesToUse)
+ 	return 0;
  }
  
--
++int ScribusCore::initFormats()
++{
++	CommonStrings::languageChange();
++	LanguageManager::instance()->languageChange();
++	if (!m_prefsManager.prefsFile)
++		m_prefsManager.prefsFile = new PrefsFile();
++	pluginManager = new PluginManager(true);
++	pluginManager->initPlugs();
++	return EXIT_SUCCESS;
++}
++
+ int ScribusCore::startGUI(bool showSplash, bool showFontInfo, bool showProfileInfo, const QString& newGuiLanguage)
+ {
+ 	auto* scribus = new ScribusMainWindow();
+diff --git a/scribus/scribuscore.h b/scribus/scribuscore.h
+index faae8fb..604ba92 100644
+--- a/scribus/scribuscore.h
++++ b/scribus/scribuscore.h
+@@ -4,6 +4,7 @@ to the COPYING file provided with the program. Following this notice may exist
+ a copyright and/or license notice that predates the release of Scribus 1.3.2
+ for which a new license (GPL+exception) is in place.
+ */
++// Vibe coded by Codex
+ /***************************************************************************
+                           scribuscore.h  -  description
+                              -------------------
+@@ -66,6 +67,7 @@ public:
+ 	int runScript() {return 0;}
+ 	*/
+ 	int init(bool useGUI, const QList<QString>& filesToUse);
++	int initFormats();
+ 	int initScribusCore(bool showSplash, bool showFontInfo, bool showProfileInfo, const QString& newGuiLanguage);
+ 	/**
+ 	* @brief Establish preferences: icons, splash, fonts, defaults and readPrefs().

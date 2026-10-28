@@ -9,3 +9,10 @@ SRC_URI="https://sembiance.com/distfiles/dexvert/${CATEGORY}/${PN}/${P}.tar.gz"
 SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror test"
+
+PATCHES=( "${FILESDIR}/libansilove-text.patch" )
+
+src_install() {
+	cmake_src_install
+	dodoc README.md
+}

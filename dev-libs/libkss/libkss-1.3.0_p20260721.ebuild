@@ -20,4 +20,5 @@ src_compile() {
 
 src_install() {
 	dobin "${BUILD_DIR}"/kss2wav
+	dodoc README.md
 }
